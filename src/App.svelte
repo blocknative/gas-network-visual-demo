@@ -14,7 +14,7 @@
 
   const SEPOLIA_CHAIN_ID = 11155111
   const MAINNET_CHAIN_ID = '1'
-  const GAS_ESTIMATION_DELAY = 600000 // 10 minutes in seconds
+  const GAS_ESTIMATION_DELAY = 60000000000 // 10 minutes in seconds
 
   const wallets$ = onboard.state.select('wallets').pipe(share())
 
@@ -24,9 +24,8 @@
   let transactionHash: string | null = null
   let errorMessage: string | null = null
   let isLoading = false
-  let rawEstimation = null
 
-  async function fetchMainnetGasEstimation(chain: string, provider: any) {
+  async function fetchMainnetGasEstimation(chain: string) {
     isLoading = true
     errorMessage = null
     
@@ -35,7 +34,6 @@
       const gasNetContract = new ethers.Contract(GASNET_CONTRACT_ADDRESS, gasnet.abi, rpcProvider)
       
       const [estimation, signature] = await gasNetContract.getEstimation(chain)
-      rawEstimation = estimation
       transactionSignature = signature
       gasEstimation = createPredictionObject(estimation)
     } catch (error) {
@@ -45,7 +43,7 @@
     }
   }
 
-  async function fetchPublishedGasData(chainId: string, provider: any) {
+  async function readPublishedGasData(chainId: string, provider: any) {
     errorMessage = null
 
     try {
@@ -97,7 +95,7 @@
 
   async function handleMainnetGasEstimation(provider: any) {
     const ethersProvider = new ethers.BrowserProvider(provider, 'any')
-    await fetchMainnetGasEstimation(MAINNET_CHAIN_ID, ethersProvider)
+    await fetchMainnetGasEstimation(MAINNET_CHAIN_ID)
     await onboard.setChain({ chainId: SEPOLIA_CHAIN_ID })
     await publishGasEstimation(ethersProvider)
   }
@@ -108,7 +106,7 @@
 </script>
 
 <main>
-  <div class="connected-wallet" data-testid="connected-wallet">
+  <div class="connected-wallet">
     {#if !$wallets$?.length}
       <div class="sign-transaction">
         <button on:click={() => onboard.connectWallet()}>Connect Wallet</button>
@@ -131,14 +129,14 @@
             </div>
 
             {#if isLoading}
-              <div class="spinner-container">
+              <div class="flex flex-col items-center content-center gap-2 my-4 spinner-container">
                 <div class="spinner" />
                 <p>Please Check Connected Browser Wallet for Progress</p>
               </div>
             {/if}
 
             {#if transactionHash}
-              <div class="sign-transaction transaction-hash">
+              <div class="sign-transaction m-3">
                 Confirmed Hash: 
                 <a
                   href="https://sepolia.etherscan.io/tx/{transactionHash}"
@@ -153,7 +151,7 @@
         {/if}
 
         <div class="sign-transaction">
-          <button on:click={() => fetchPublishedGasData(MAINNET_CHAIN_ID, provider)}>
+          <button on:click={() => readPublishedGasData(MAINNET_CHAIN_ID, provider)}>
             Get Mainnet Gas Data from Sepolia - 99 Quantile
           </button>
 
@@ -180,13 +178,13 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 0.5rem;
     margin: 1rem 0;
   }
 
   .spinner {
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     border: 4px solid #f3f3f3;
     border-top: 4px solid #3b82f6;
     border-radius: 50%;
@@ -200,10 +198,6 @@
     border: 1px solid red;
     border-radius: 8px;
     margin-top: 1rem;
-  }
-
-  .transaction-hash {
-    margin: 12px;
   }
 
   @keyframes spin {
