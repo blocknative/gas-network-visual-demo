@@ -1,7 +1,7 @@
-import type { PredictionData } from "./types"
+import type { EstimationData } from "./types"
 
-// Prepare prediction data
-export const createPredictionObject = (pred: PredictionData): PredictionData => {
+// Prepare estimation data
+export const createEstimationObject = (pred: EstimationData): EstimationData => {
   const { Q70, Q80, Q90, Q95, Q99, precision, height, timestamp, chainid } = pred
   return {
     Q70: {

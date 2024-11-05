@@ -1,8 +1,8 @@
 <script lang="ts">
   import { ethers } from 'ethers'
   import { share } from 'rxjs/operators'
-  import { Quantile, type GasEstimate, type PredictionData } from './types'
-  import { createPredictionObject } from './utils'
+  import { Quantile, type GasEstimate, type EstimationData } from './types'
+  import { createEstimationObject } from './utils'
   import { onboard } from './services/web3-onboard'
   import { 
     GASNET_URL, 
@@ -14,11 +14,11 @@
 
   const SEPOLIA_CHAIN_ID = 11155111
   const MAINNET_CHAIN_ID = '1'
-  const GAS_ESTIMATION_DELAY = 60000000000 // 10 minutes in seconds
+  const GAS_ESTIMATION_DELAY = 600000000 // seconds
 
   const wallets$ = onboard.state.select('wallets').pipe(share())
 
-  let gasEstimation: PredictionData | null = null
+  let gasEstimation: EstimationData | null = null
   let publishedGasData: GasEstimate | null = null
   let transactionSignature: string | null = null
   let transactionHash: string | null = null
@@ -35,7 +35,7 @@
       
       const [estimation, signature] = await gasNetContract.getEstimation(chain)
       transactionSignature = signature
-      gasEstimation = createPredictionObject(estimation)
+      gasEstimation = createEstimationObject(estimation)
     } catch (error) {
       console.error(error)
       errorMessage = error as string
@@ -117,7 +117,7 @@
       {#each $wallets$ as { provider }}
         <div class="sign-transaction">
           <button on:click={() => handleMainnetGasEstimation(provider)}>
-            Get Mainnet Gas Predictions and Publish to Sepolia
+            Read Mainnet Gas Estimations and Publish to Sepolia
           </button>
         </div>
 
@@ -152,7 +152,7 @@
 
         <div class="sign-transaction">
           <button on:click={() => readPublishedGasData(MAINNET_CHAIN_ID, provider)}>
-            Get Mainnet Gas Data from Sepolia - 99 Quantile
+            Read Mainnet Gas Data from Sepolia - 99 Quantile
           </button>
 
           {#if publishedGasData}
