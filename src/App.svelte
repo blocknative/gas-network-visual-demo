@@ -11,6 +11,7 @@
   } from './constants'
   import consumer from './abis/consumer.json'
   import gasnet from './abis/gasnet.json'
+  import { slide } from 'svelte/transition';
 
   const SEPOLIA_CHAIN_ID = 11155111
   const MAINNET_CHAIN_ID = '1'
@@ -24,6 +25,7 @@
   let transactionHash: string | null = null
   let errorMessage: string | null = null
   let isLoading = false
+  let isDrawerOpen = true; // Starts open by default
 
   async function fetchMainnetGasEstimation(chain: string) {
     isLoading = true
@@ -123,9 +125,38 @@
 
         {#if gasEstimation}
           <div class="sign-transaction">
-            <div class="sign-transaction">
-              <div class="data-label">Data Pulled From Gas Network</div>
-              <pre>{JSON.stringify(gasEstimation, formatBigInt, 2)}</pre>
+            <div class="drawer-container">
+              <button 
+                class="drawer-button"
+                on:click={() => isDrawerOpen = !isDrawerOpen}
+                aria-expanded={isDrawerOpen}
+              >
+                <div class="drawer-header">
+                  <svg 
+                    class="chevron {isDrawerOpen ? 'rotate' : ''}"
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      stroke-linecap="round" 
+                      stroke-linejoin="round" 
+                      stroke-width="2" 
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                  <span class="data-label">Data Pulled From Gas Network</span>
+                </div>
+              </button>
+              
+              {#if isDrawerOpen}
+                <div 
+                  class="drawer-content"
+                  transition:slide={{ duration: 200 }}
+                >
+                  <pre>{JSON.stringify(gasEstimation, formatBigInt, 2)}</pre>
+                </div>
+              {/if}
             </div>
 
             {#if isLoading}
@@ -276,6 +307,67 @@
     background: #f1f5f9;
     margin: 0;
     padding: 0;
+  }
+
+  button[aria-expanded] {
+    background: none;
+    margin: 0;
+    min-width: 0;
+    width: 100%;
+    color: inherit;
+  }
+
+  button[aria-expanded]:hover {
+    background: #f8fafc;
+  }
+
+  .drawer-container {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+  }
+
+  .drawer-button {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    text-align: left;
+    transition: background-color 0.2s ease;
+  }
+
+  .drawer-button:hover {
+    background-color: #f8fafc;
+  }
+
+  .drawer-header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 1rem;
+  }
+
+  .chevron {
+    width: 20px;
+    height: 20px;
+    color: #64748b;
+    transition: transform 0.2s ease;
+  }
+
+  .chevron.rotate {
+    transform: rotate(180deg);
+  }
+
+  .drawer-content {
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .drawer-content pre {
+    margin: 0;
+    background-color: #f8fafc;
   }
 </style>
 
