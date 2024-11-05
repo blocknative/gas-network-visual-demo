@@ -1,0 +1,45 @@
+{
+  "name": "gas-network-demo",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@sveltejs/adapter-auto": "^3.3.1",
+    "@sveltejs/vite-plugin-svelte": "^4.0.0",
+    "@tsconfig/svelte": "^5.0.4",
+    "@types/node": "^22.9.0",
+    "assert": "^2.0.0",
+    "browserify-zlib": "^0.2.0",
+    "buffer": "^6.0.3",
+    "cross-env": "^7.0.3",
+    "crypto-browserify": "^3.12.0",
+    "css-loader": "^7.1.2",
+    "http": "^0.0.1-security",
+    "https-browserify": "^1.0.0",
+    "mini-css-extract-plugin": "^2.9.2",
+    "os-browserify": "^0.3.0",
+    "path-browserify": "^1.0.1",
+    "process": "^0.11.10",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "svelte": "^3.49.0",
+    "svelte-loader": "^3.2.4",
+    "svelte-preprocess": "^6.0.3",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.6.3",
+    "util": "^0.12.4",
+    "webpack": "^5.96.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "4.7.4"
+  },
+  "dependencies": {
+    "@web3-onboard/core": "2.23.0",
+    "@web3-onboard/injected-wallets": "^2.11.2",
+    "ethers": "^6.13.4"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "cross-env NODE_ENV=production webpack",
+    "dev": "webpack serve",
+    "type-check": "exit 0"
+  },
+  "type": "module"
+}
