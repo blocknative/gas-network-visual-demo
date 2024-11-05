@@ -124,7 +124,7 @@
         {#if gasEstimation}
           <div class="sign-transaction">
             <div class="sign-transaction">
-              <h3>Data Pulled From Gas Network</h3>
+              <div class="data-label">Data Pulled From Gas Network</div>
               <pre>{JSON.stringify(gasEstimation, formatBigInt, 2)}</pre>
             </div>
 
@@ -206,7 +206,6 @@
   }
 
   main {
-    height: 100%;
     max-width: 800px;
     margin: 0 auto;
     padding: 2rem;
@@ -234,7 +233,6 @@
   .connected-wallet {
     padding: 2rem;
     border-radius: 12px;
-    margin: 1rem 0;
     border: 1px solid #e5e7eb;
     background: white;
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
@@ -243,8 +241,13 @@
   .sign-transaction {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.5rem;
     margin: 1rem 0;
+  }
+
+  .data-label {
+    font-weight: 500;
+    font-size: 1.2rem;
   }
 
   pre {
