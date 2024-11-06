@@ -11,7 +11,6 @@
   import {
     GASNET_URL,
     GASNET_CONTRACT_ADDRESS,
-    GASNET_CONTRACT_ADDRESS_SEPOLIA,
     readableChains,
     writableChains,
     quantiles
@@ -63,6 +62,7 @@
     errorMessage = null
 
     try {
+      gasEstimation = undefined
       const { ethers } = await loadEthers()
       const rpcProvider = new ethers.JsonRpcProvider(GASNET_URL)
       const gasNetContract = new ethers.Contract(GASNET_CONTRACT_ADDRESS, gasnet.abi, rpcProvider)
@@ -85,7 +85,7 @@
       const ethersProvider = new ethers.BrowserProvider(provider, 'any')
       const signer = await ethersProvider.getSigner()
       const gasNetContract = new ethers.Contract(
-        GASNET_CONTRACT_ADDRESS_SEPOLIA,
+        writableChains[selectedReadChain].contract,
         consumer.abi,
         signer
       )
@@ -108,6 +108,7 @@
     try {
       const { ethers } = await loadEthers()
       const signer = await provider.getSigner()
+      console.log(writableChains[selectedWriteChain])
       const consumerContract = new ethers.Contract(
         writableChains[selectedWriteChain].contract,
         consumer.abi,
