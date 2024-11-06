@@ -6,8 +6,10 @@ import {
   type QuantileMap
 } from './types'
 
-export const GASNET_URL = 'https://devnet.gas.network'
-export const GASNET_CONTRACT_ADDRESS = '0x69E23e00384F213B8d6e26aeC80BBE30ACD804BA'
+export const gasNetwork = {
+  url: 'https://devnet.gas.network',
+  contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
+}
 
 // You can then create the object that implements this interface:
 export const quantiles: QuantileMap = {
@@ -25,17 +27,23 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
     rpcUrl: 'https://endpoints.omniatech.io/v1/eth/sepolia/public',
     contract: '0xE4859432d9Af6D40C2D923e3F13D66057F4AEcA0'
   },
-  [WritableChainKey.ARBITRUM_SEPOLIA]: {
-    chainId: 421614,
-    display: 'Arb Sepolia',
-    rpcUrl: 'https://arbitrum-sepolia.gateway.tenderly.co',
-    contract: ''
-  },
+  // [WritableChainKey.ARBITRUM_SEPOLIA]: {
+  //   chainId: 421614,
+  //   display: 'Arb Sepolia',
+  //   rpcUrl: 'https://arbitrum-sepolia.gateway.tenderly.co',
+  //   contract: ''
+  // },
   [WritableChainKey.OP_SEPOLIA]: {
     chainId: 11155420,
     display: 'OP Sepolia',
     rpcUrl: 'https://sepolia.optimism.io',
-    contract: ''
+    contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1'
+  },
+  [WritableChainKey.BASE_SEPOLIA]: {
+    chainId: 84532,
+    display: 'Base Sepolia',
+    rpcUrl: 'https://sepolia.base.org',
+    contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1'
   }
 }
 
@@ -55,5 +63,9 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
   [ReadableChainKey.BASE]: {
     chainId: 8453,
     display: 'Base'
+  },
+  [ReadableChainKey.POLYGON]: {
+    chainId: 137,
+    display: 'Polygon'
   }
 }

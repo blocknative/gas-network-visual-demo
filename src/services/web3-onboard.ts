@@ -28,6 +28,18 @@ export async function getOnboard() {
           rpcUrl: 'https://sepolia.drpc.org'
         },
         {
+          id: 11155420,
+          token: 'ETH',
+          label: 'OP Sepolia',
+          rpcUrl: 'https://sepolia.optimism.io'
+        },
+        {
+          id: 84532,
+          token: 'ETH',
+          label: 'Base Sepolia',
+          rpcUrl: 'https://sepolia.base.org'
+        },
+        {
           id: 42161,
           token: 'ARB-ETH',
           label: 'Arbitrum One',
@@ -39,7 +51,7 @@ export async function getOnboard() {
           label: 'Base',
           rpcUrl: 'https://mainnet.base.org'
         },
-    
+
         {
           id: '0x89',
           token: 'MATIC',

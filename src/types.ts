@@ -27,15 +27,17 @@ export interface EstimationData {
 
 export enum WritableChainKey {
   SEPOLIA = 'sepolia',
-  ARBITRUM_SEPOLIA = 'arbitrumSepolia',
-  OP_SEPOLIA = 'opSepolia'
+  // ARBITRUM_SEPOLIA = 'arbitrumSepolia',
+  OP_SEPOLIA = 'opSepolia',
+  BASE_SEPOLIA = 'baseSepolia'
 }
 
 export enum ReadableChainKey {
   MAIN = 'main',
   OPTIMISM = 'op',
   ARBITRUM = 'arb',
-  BASE = 'base'
+  BASE = 'base',
+  POLYGON = 'polygon'
 }
 
 export interface ReadChain {

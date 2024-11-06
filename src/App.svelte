@@ -1,5 +1,9 @@
 <script lang="ts">
+  import { onMount } from 'svelte'
   import { share } from 'rxjs/operators'
+  import type { Observable } from 'rxjs'
+  import { slide } from 'svelte/transition'
+  import type { OnboardAPI, WalletState } from '@web3-onboard/core'
   import {
     type GasEstimate,
     type EstimationData,
@@ -8,19 +12,9 @@
   } from './types'
   import { createEstimationObject } from './utils'
   import { getOnboard } from './services/web3-onboard'
-  import {
-    GASNET_URL,
-    GASNET_CONTRACT_ADDRESS,
-    readableChains,
-    writableChains,
-    quantiles
-  } from './constants'
+  import { readableChains, writableChains, quantiles, gasNetwork } from './constants'
   import consumer from './abis/consumer.json'
   import gasnet from './abis/gasnet.json'
-  import { slide } from 'svelte/transition'
-  import type { OnboardAPI, WalletState } from '@web3-onboard/core'
-  import { onMount } from 'svelte'
-  import type { Observable } from 'rxjs'
 
   const GAS_ESTIMATION_DELAY = 600000 // seconds
 
@@ -30,9 +24,8 @@
   let transactionHash: string | null = null
   let errorMessage: string | null = null
   let isLoading = false
-  let isDrawerOpen = true // Starts open by default
+  let isDrawerOpen = true
   let wallets$: Observable<WalletState[]>
-  let mounted = false
 
   // Update your selected chain variables to use the enums
   let selectedReadChain: ReadableChainKey = ReadableChainKey.MAIN
@@ -41,7 +34,6 @@
 
   let onboard: OnboardAPI
   onMount(async () => {
-    mounted = true
     onboard = await getOnboard()
   })
 
@@ -60,17 +52,17 @@
   async function fetchGasEstimationFromGasNet(chain: string) {
     isLoading = true
     errorMessage = null
+    transactionHash = null
 
     try {
-      gasEstimation = undefined
       const { ethers } = await loadEthers()
-      const rpcProvider = new ethers.JsonRpcProvider(GASNET_URL)
-      const gasNetContract = new ethers.Contract(GASNET_CONTRACT_ADDRESS, gasnet.abi, rpcProvider)
-      console.log(64, chain, typeof chain)
+      const rpcProvider = new ethers.JsonRpcProvider(gasNetwork.url)
+      const gasNetContract = new ethers.Contract(gasNetwork.contract, gasnet.abi, rpcProvider)
       const [estimation, signature] = await gasNetContract.getEstimation(chain)
       transactionSignature = signature
       gasEstimation = createEstimationObject(estimation)
     } catch (error) {
+      gasEstimation = undefined
       console.error(error)
       errorMessage = error as string
       isLoading = false
@@ -79,17 +71,18 @@
 
   async function readPublishedGasData(provider: any) {
     errorMessage = null
+    publishedGasData = null
 
     try {
       const { ethers } = await loadEthers()
       const ethersProvider = new ethers.BrowserProvider(provider, 'any')
       const signer = await ethersProvider.getSigner()
       const gasNetContract = new ethers.Contract(
-        writableChains[selectedReadChain].contract,
+        writableChains[selectedWriteChain].contract,
         consumer.abi,
         signer
       )
-      console.log(quantiles[selectedQuantile])
+
       const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
         await gasNetContract.getGasEstimationQuantile(
           BigInt(readableChains[selectedReadChain].chainId.toString()),
@@ -108,7 +101,6 @@
     try {
       const { ethers } = await loadEthers()
       const signer = await provider.getSigner()
-      console.log(writableChains[selectedWriteChain])
       const consumerContract = new ethers.Contract(
         writableChains[selectedWriteChain].contract,
         consumer.abi,
@@ -131,6 +123,7 @@
     const { ethers } = await loadEthers()
     const ethersProvider = new ethers.BrowserProvider(provider, 'any')
     await fetchGasEstimationFromGasNet(readChainId.toString())
+    console.log(writeChainId)
     await onboard.setChain({ chainId: writeChainId })
     await publishGasEstimation(ethersProvider)
   }
@@ -184,12 +177,6 @@
         </div>
 
         {#if gasEstimation}
-          <!-- <div class="sign-transaction">
-            <button on:click={() => publishGasEstimation(provider)}>
-              Publish to {writableChains[selectedWriteChain].display}
-            </button>
-          </div> -->
-
           <div class="sign-transaction">
             <div class="drawer-container">
               <button
@@ -216,7 +203,7 @@
               </button>
 
               {#if isDrawerOpen}
-                <div class="drawer-content" transition:slide={{ duration: 200 }}>
+                <div class="drawer-content" transition:slide={{ duration: 300 }}>
                   <pre>{JSON.stringify(gasEstimation, formatBigInt, 2)}</pre>
                 </div>
               {/if}
@@ -256,11 +243,11 @@
           <button on:click={() => readPublishedGasData(provider)}>
             Read {readableChains[selectedReadChain].display} Estimations from {writableChains[
               selectedWriteChain
-            ].display} for the 99 Quantile
+            ].display} for the {quantiles[selectedQuantile]} Quantile
           </button>
 
           {#if publishedGasData}
-            <div class="sign-transaction">
+            <div class="sign-transaction" transition:slide={{ duration: 300 }}>
               <pre>{JSON.stringify(publishedGasData, formatBigInt, 2)}</pre>
             </div>
           {/if}
@@ -364,11 +351,9 @@
   pre {
     background: #f8fafc;
     padding: 1.5rem;
-    border-radius: 8px;
     overflow-x: auto;
     white-space: pre-wrap;
     word-wrap: break-word;
-    border: 1px solid #e5e7eb;
     font-size: 0.9rem;
     line-height: 1.5;
     color: #1e293b;
