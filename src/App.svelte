@@ -151,6 +151,7 @@
           <div class="button-group">
             <div class="select-group">
               <label for="read-chain" class="select-label">Estimates For</label>
+              <!-- TODO:On select change clear data -->
               <select id="read-chain" bind:value={selectedReadChain} class="chain-select">
                 {#each Object.entries(readableChains) as [key, chain]}
                   <option value={key}>{chain.display}</option>
