@@ -167,14 +167,6 @@
                 {/each}
               </select>
             </div>
-            <div class="select-group">
-              <label for="quantile-select" class="select-label">Read Quantile</label>
-              <select id="quantile-select" bind:value={selectedQuantile} class="chain-select">
-                {#each Object.entries(quantiles) as [key, value]}
-                  <option value={key}>Q{value}</option>
-                {/each}
-              </select>
-            </div>
           </div>
           <button
             on:click={() =>
@@ -252,6 +244,14 @@
         {/if}
 
         <div class="sign-transaction">
+          <div class="select-group">
+            <label for="quantile-select" class="select-label">Read Quantile</label>
+            <select id="quantile-select" bind:value={selectedQuantile} class="chain-select">
+              {#each Object.entries(quantiles) as [key, value]}
+                <option value={key}>Q{value}</option>
+              {/each}
+            </select>
+          </div>
           <button on:click={() => readPublishedGasData(provider)}>
             Read {readableChains[selectedReadChain].display} Estimations from {writableChains[
               selectedWriteChain

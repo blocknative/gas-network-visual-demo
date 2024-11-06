@@ -44,7 +44,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 
 export const readableChains: Record<ReadableChainKey, ReadChain> = {
   [ReadableChainKey.MAIN]: {
-    chainId: 11155111,
+    chainId: 1,
     display: 'Eth Main'
   },
   [ReadableChainKey.OPTIMISM]: {
