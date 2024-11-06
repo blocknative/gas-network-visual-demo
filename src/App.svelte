@@ -72,8 +72,12 @@
   async function readPublishedGasData(provider: any) {
     errorMessage = null
     publishedGasData = null
-
+    console.log(writableChains[selectedWriteChain].contract)
     try {
+      isLoading = true
+      console.log(isLoading)
+      await onboard.setChain({ chainId: writableChains[selectedWriteChain].chainId })
+
       const { ethers } = await loadEthers()
       const ethersProvider = new ethers.BrowserProvider(provider, 'any')
       const signer = await ethersProvider.getSigner()
@@ -82,7 +86,11 @@
         consumer.abi,
         signer
       )
-
+      console.log(
+        readableChains[selectedReadChain].chainId.toString(),
+        GAS_ESTIMATION_DELAY,
+        quantiles[selectedQuantile]
+      )
       const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
         await gasNetContract.getGasEstimationQuantile(
           BigInt(readableChains[selectedReadChain].chainId.toString()),
@@ -91,9 +99,11 @@
         )
 
       publishedGasData = { gasPrice, maxPriorityFeePerGas, maxFeePerGas }
+      isLoading = false
     } catch (error) {
       console.error('Gas data fetch error:', error)
       errorMessage = error as string
+      isLoading = false
     }
   }
 
