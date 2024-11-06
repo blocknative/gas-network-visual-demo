@@ -1,9 +1,9 @@
 export enum Quantile {
   Q99 = 99,
+  Q95 = 95,
   Q90 = 90,
   Q80 = 80,
-  Q70 = 70,
-  Q50 = 50
+  Q70 = 70
 }
 
 export interface GasEstimate {
