@@ -1,22 +1,29 @@
 <script lang="ts">
   import { share } from 'rxjs/operators'
-  import { Quantile, type GasEstimate, type EstimationData } from './types'
+  import {
+    type GasEstimate,
+    type EstimationData,
+    ReadableChainKey,
+    WritableChainKey
+  } from './types'
   import { createEstimationObject } from './utils'
   import { getOnboard } from './services/web3-onboard'
-  import { 
-    GASNET_URL, 
-    GASNET_CONTRACT_ADDRESS, 
-    GASNET_CONTRACT_ADDRESS_SEPOLIA 
+  import {
+    GASNET_URL,
+    GASNET_CONTRACT_ADDRESS,
+    GASNET_CONTRACT_ADDRESS_SEPOLIA,
+    readableChains,
+    writableChains,
+    quantiles
   } from './constants'
   import consumer from './abis/consumer.json'
   import gasnet from './abis/gasnet.json'
-  import { slide } from 'svelte/transition';
+  import { slide } from 'svelte/transition'
   import type { OnboardAPI, WalletState } from '@web3-onboard/core'
-  import {onMount} from 'svelte'
+  import { onMount } from 'svelte'
+  import type { Observable } from 'rxjs'
 
-
-  const SEPOLIA_CHAIN_ID = 11155111
-  const MAINNET_CHAIN_ID = '1'
+  const GAS_ESTIMATION_DELAY = 600000 // seconds
 
   let gasEstimation: EstimationData | null = null
   let publishedGasData: GasEstimate | null = null
@@ -24,22 +31,26 @@
   let transactionHash: string | null = null
   let errorMessage: string | null = null
   let isLoading = false
-  let isDrawerOpen = true; // Starts open by default
+  let isDrawerOpen = true // Starts open by default
   let wallets$: Observable<WalletState[]>
-	let mounted = false
+  let mounted = false
 
-	let onboard: OnboardAPI
-	onMount(async () => {
-		mounted = true
-		onboard = await getOnboard()
-	})
-	$: if (onboard) {
-		wallets$ = onboard.state.select('wallets').pipe(share())
+  // Update your selected chain variables to use the enums
+  let selectedReadChain: ReadableChainKey = ReadableChainKey.MAIN
+  let selectedWriteChain: WritableChainKey = WritableChainKey.SEPOLIA
+  let selectedQuantile = `Q${quantiles.Q99}`
+
+  let onboard: OnboardAPI
+  onMount(async () => {
+    mounted = true
+    onboard = await getOnboard()
+  })
+
+  $: if (onboard) {
+    wallets$ = onboard.state.select('wallets').pipe(share())
   }
 
-
   let ethersModule: typeof import('ethers')
-  
   async function loadEthers() {
     if (!ethersModule) {
       ethersModule = await import('ethers')
@@ -47,15 +58,15 @@
     return ethersModule
   }
 
-  async function fetchMainnetGasEstimation(chain: string) {
+  async function fetchGasEstimationFromGasNet(chain: string) {
     isLoading = true
     errorMessage = null
-    
+
     try {
       const { ethers } = await loadEthers()
       const rpcProvider = new ethers.JsonRpcProvider(GASNET_URL)
       const gasNetContract = new ethers.Contract(GASNET_CONTRACT_ADDRESS, gasnet.abi, rpcProvider)
-      
+      console.log(64, chain, typeof chain)
       const [estimation, signature] = await gasNetContract.getEstimation(chain)
       transactionSignature = signature
       gasEstimation = createEstimationObject(estimation)
@@ -66,7 +77,7 @@
     }
   }
 
-  async function readPublishedGasData(chainId: string, provider: any) {
+  async function readPublishedGasData(provider: any) {
     errorMessage = null
 
     try {
@@ -74,16 +85,16 @@
       const ethersProvider = new ethers.BrowserProvider(provider, 'any')
       const signer = await ethersProvider.getSigner()
       const gasNetContract = new ethers.Contract(
-        GASNET_CONTRACT_ADDRESS_SEPOLIA, 
-        consumer.abi, 
+        GASNET_CONTRACT_ADDRESS_SEPOLIA,
+        consumer.abi,
         signer
       )
-
-      const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] = 
+      console.log(quantiles[selectedQuantile])
+      const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
         await gasNetContract.getGasEstimationQuantile(
-          BigInt(chainId),
+          BigInt(readableChains[selectedReadChain].chainId.toString()),
           GAS_ESTIMATION_DELAY,
-          Quantile.Q99
+          quantiles[selectedQuantile]
         )
 
       publishedGasData = { gasPrice, maxPriorityFeePerGas, maxFeePerGas }
@@ -98,17 +109,14 @@
       const { ethers } = await loadEthers()
       const signer = await provider.getSigner()
       const consumerContract = new ethers.Contract(
-        GASNET_CONTRACT_ADDRESS_SEPOLIA, 
-        consumer.abi, 
+        writableChains[selectedWriteChain].contract,
+        consumer.abi,
         signer
       )
 
-      const transaction = await consumerContract.setEstimation(
-        gasEstimation, 
-        transactionSignature
-      )
+      const transaction = await consumerContract.setEstimation(gasEstimation, transactionSignature)
       const receipt = await transaction.wait()
-      
+
       isLoading = false
       transactionHash = receipt.hash
     } catch (error) {
@@ -118,11 +126,11 @@
     }
   }
 
-  async function handleMainnetGasEstimation(provider: any) {
+  async function handleGasEstimation(provider: any, readChainId: number, writeChainId: number) {
     const { ethers } = await loadEthers()
     const ethersProvider = new ethers.BrowserProvider(provider, 'any')
-    await fetchMainnetGasEstimation(MAINNET_CHAIN_ID)
-    await onboard.setChain({ chainId: SEPOLIA_CHAIN_ID })
+    await fetchGasEstimationFromGasNet(readChainId.toString())
+    await onboard.setChain({ chainId: writeChainId })
     await publishGasEstimation(ethersProvider)
   }
 
@@ -142,42 +150,80 @@
     {#if $wallets$}
       {#each $wallets$ as { provider }}
         <div class="sign-transaction">
-          <button on:click={() => handleMainnetGasEstimation(provider)}>
-            Read Mainnet Gas Estimations and Publish to Sepolia
+          <div class="button-group">
+            <div class="select-group">
+              <label for="read-chain" class="select-label">Estimates For</label>
+              <select id="read-chain" bind:value={selectedReadChain} class="chain-select">
+                {#each Object.entries(readableChains) as [key, chain]}
+                  <option value={key}>{chain.display}</option>
+                {/each}
+              </select>
+            </div>
+            <div class="select-group">
+              <label for="write-chain" class="select-label">Write To</label>
+              <select id="write-chain" bind:value={selectedWriteChain} class="chain-select">
+                {#each Object.entries(writableChains) as [key, chain]}
+                  <option value={key}>{chain.display}</option>
+                {/each}
+              </select>
+            </div>
+            <div class="select-group">
+              <label for="quantile-select" class="select-label">Read Quantile</label>
+              <select id="quantile-select" bind:value={selectedQuantile} class="chain-select">
+                {#each Object.entries(quantiles) as [key, value]}
+                  <option value={key}>Q{value}</option>
+                {/each}
+              </select>
+            </div>
+          </div>
+          <button
+            on:click={() =>
+              handleGasEstimation(
+                provider,
+                readableChains[selectedReadChain].chainId,
+                writableChains[selectedWriteChain].chainId
+              )}
+          >
+            Read {readableChains[selectedReadChain].display} Estimations and Write to {writableChains[
+              selectedWriteChain
+            ].display}
           </button>
         </div>
 
         {#if gasEstimation}
+          <!-- <div class="sign-transaction">
+            <button on:click={() => publishGasEstimation(provider)}>
+              Publish to {writableChains[selectedWriteChain].display}
+            </button>
+          </div> -->
+
           <div class="sign-transaction">
             <div class="drawer-container">
-              <button 
+              <button
                 class="drawer-button"
-                on:click={() => isDrawerOpen = !isDrawerOpen}
+                on:click={() => (isDrawerOpen = !isDrawerOpen)}
                 aria-expanded={isDrawerOpen}
               >
                 <div class="drawer-header">
-                  <svg 
+                  <svg
                     class="chevron {isDrawerOpen ? 'rotate' : ''}"
-                    fill="none" 
-                    stroke="currentColor" 
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path 
-                      stroke-linecap="round" 
-                      stroke-linejoin="round" 
-                      stroke-width="2" 
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
                       d="M19 9l-7 7-7-7"
                     />
                   </svg>
                   <span class="data-label">Data Pulled From Gas Network</span>
                 </div>
               </button>
-              
+
               {#if isDrawerOpen}
-                <div 
-                  class="drawer-content"
-                  transition:slide={{ duration: 200 }}
-                >
+                <div class="drawer-content" transition:slide={{ duration: 200 }}>
                   <pre>{JSON.stringify(gasEstimation, formatBigInt, 2)}</pre>
                 </div>
               {/if}
@@ -192,7 +238,7 @@
 
             {#if transactionHash}
               <div class="sign-transaction m-3">
-                Confirmed Hash: 
+                Confirmed Hash:
                 <a
                   href="https://sepolia.etherscan.io/tx/{transactionHash}"
                   target="_blank"
@@ -206,8 +252,10 @@
         {/if}
 
         <div class="sign-transaction">
-          <button on:click={() => readPublishedGasData(MAINNET_CHAIN_ID, provider)}>
-            Read Mainnet Gas Data from Sepolia - 99 Quantile
+          <button on:click={() => readPublishedGasData(provider)}>
+            Read {readableChains[selectedReadChain].display} Estimations from {writableChains[
+              selectedWriteChain
+            ].display} for the 99 Quantile
           </button>
 
           {#if publishedGasData}
@@ -256,15 +304,22 @@
   }
 
   @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 
   main {
     max-width: 800px;
     margin: 0 auto;
     padding: 2rem;
-    font-family: system-ui, -apple-system, sans-serif;
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
   }
 
   button {
@@ -393,5 +448,53 @@
     margin: 0;
     background-color: #f8fafc;
   }
-</style>
 
+  .button-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .chain-select {
+    min-width: 140px;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background-color: white;
+    color: #1e293b;
+    font-size: 0.875rem;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+
+  .chain-select:hover {
+    border-color: #3b82f6;
+  }
+
+  .chain-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  }
+
+  .chain-select option {
+    padding: 0.5rem;
+    background-color: white;
+    color: #1e293b;
+  }
+
+  .select-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .select-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 500;
+    margin-left: 0.25rem;
+  }
+</style>

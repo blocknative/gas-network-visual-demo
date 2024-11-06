@@ -18,6 +18,8 @@
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
+    "prettier": "^3.3.2",
+		"prettier-plugin-svelte": "^3.2.6",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
     "svelte": "^3.49.0",
@@ -40,7 +42,8 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack",
     "dev": "webpack serve",
-    "type-check": "exit 0"
+    "type-check": "exit 0",
+    "format": "prettier --write ."
   },
   "type": "module"
 }
