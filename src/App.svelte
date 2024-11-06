@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { ethers } from 'ethers'
   import { share } from 'rxjs/operators'
   import { Quantile, type GasEstimate, type EstimationData } from './types'
   import { createEstimationObject } from './utils'
-  import { onboard } from './services/web3-onboard'
+  import { getOnboard } from './services/web3-onboard'
   import { 
     GASNET_URL, 
     GASNET_CONTRACT_ADDRESS, 
@@ -12,12 +11,12 @@
   import consumer from './abis/consumer.json'
   import gasnet from './abis/gasnet.json'
   import { slide } from 'svelte/transition';
+  import type { OnboardAPI, WalletState } from '@web3-onboard/core'
+  import {onMount} from 'svelte'
+
 
   const SEPOLIA_CHAIN_ID = 11155111
   const MAINNET_CHAIN_ID = '1'
-  const GAS_ESTIMATION_DELAY = 600000000 // seconds
-
-  const wallets$ = onboard.state.select('wallets').pipe(share())
 
   let gasEstimation: EstimationData | null = null
   let publishedGasData: GasEstimate | null = null
@@ -26,12 +25,34 @@
   let errorMessage: string | null = null
   let isLoading = false
   let isDrawerOpen = true; // Starts open by default
+  let wallets$: Observable<WalletState[]>
+	let mounted = false
+
+	let onboard: OnboardAPI
+	onMount(async () => {
+		mounted = true
+		onboard = await getOnboard()
+	})
+	$: if (onboard) {
+		wallets$ = onboard.state.select('wallets').pipe(share())
+  }
+
+
+  let ethersModule: typeof import('ethers')
+  
+  async function loadEthers() {
+    if (!ethersModule) {
+      ethersModule = await import('ethers')
+    }
+    return ethersModule
+  }
 
   async function fetchMainnetGasEstimation(chain: string) {
     isLoading = true
     errorMessage = null
     
     try {
+      const { ethers } = await loadEthers()
       const rpcProvider = new ethers.JsonRpcProvider(GASNET_URL)
       const gasNetContract = new ethers.Contract(GASNET_CONTRACT_ADDRESS, gasnet.abi, rpcProvider)
       
@@ -49,6 +70,7 @@
     errorMessage = null
 
     try {
+      const { ethers } = await loadEthers()
       const ethersProvider = new ethers.BrowserProvider(provider, 'any')
       const signer = await ethersProvider.getSigner()
       const gasNetContract = new ethers.Contract(
@@ -73,6 +95,7 @@
 
   async function publishGasEstimation(provider: any) {
     try {
+      const { ethers } = await loadEthers()
       const signer = await provider.getSigner()
       const consumerContract = new ethers.Contract(
         GASNET_CONTRACT_ADDRESS_SEPOLIA, 
@@ -96,6 +119,7 @@
   }
 
   async function handleMainnetGasEstimation(provider: any) {
+    const { ethers } = await loadEthers()
     const ethersProvider = new ethers.BrowserProvider(provider, 'any')
     await fetchMainnetGasEstimation(MAINNET_CHAIN_ID)
     await onboard.setChain({ chainId: SEPOLIA_CHAIN_ID })
@@ -109,7 +133,7 @@
 
 <main>
   <div class="connected-wallet">
-    {#if !$wallets$?.length}
+    {#if onboard && !$wallets$?.length}
       <div class="sign-transaction">
         <button on:click={() => onboard.connectWallet()}>Connect Wallet</button>
       </div>
