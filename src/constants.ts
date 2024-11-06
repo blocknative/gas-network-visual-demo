@@ -35,7 +35,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
   // },
   [WritableChainKey.OP_SEPOLIA]: {
     chainId: 11155420,
-    display: 'OP Sepolia',
+    display: 'Optimism Sepolia',
     rpcUrl: 'https://sepolia.optimism.io',
     contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1'
   },
