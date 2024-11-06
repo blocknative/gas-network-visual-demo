@@ -56,10 +56,10 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
     chainId: 10,
     display: 'Optimism'
   },
-  [ReadableChainKey.ARBITRUM]: {
-    chainId: 42161,
-    display: 'Arbitrum'
-  },
+  // [ReadableChainKey.ARBITRUM]: {
+  //   chainId: 42161,
+  //   display: 'Arbitrum'
+  // },
   [ReadableChainKey.BASE]: {
     chainId: 8453,
     display: 'Base'
