@@ -23,7 +23,7 @@ export const quantiles: QuantileMap = {
 export const writableChains: Record<WritableChainKey, WriteChain> = {
   [WritableChainKey.SEPOLIA]: {
     chainId: 11155111,
-    display: 'Sepolia',
+    display: 'Ethereum Sepolia',
     rpcUrl: 'https://endpoints.omniatech.io/v1/eth/sepolia/public',
     contract: '0xE4859432d9Af6D40C2D923e3F13D66057F4AEcA0'
   },
@@ -35,7 +35,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
   // },
   [WritableChainKey.OP_SEPOLIA]: {
     chainId: 11155420,
-    display: 'OP Sepolia',
+    display: 'Optimism Sepolia',
     rpcUrl: 'https://sepolia.optimism.io',
     contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1'
   },
@@ -50,7 +50,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 export const readableChains: Record<ReadableChainKey, ReadChain> = {
   [ReadableChainKey.MAIN]: {
     chainId: 1,
-    display: 'Eth Main'
+    display: 'Ethereum'
   },
   [ReadableChainKey.OPTIMISM]: {
     chainId: 10,
