@@ -12,7 +12,7 @@ export interface GasEstimate {
   maxFeePerGas: bigint;
 }
 
-export interface EstimationData {
+export interface PredictionData {
   Q70: GasEstimate;
   Q80: GasEstimate;
   Q90: GasEstimate;
