@@ -72,10 +72,9 @@
   async function readPublishedGasData(provider: any) {
     errorMessage = null
     publishedGasData = null
-    console.log(writableChains[selectedWriteChain].contract)
     try {
-      isLoading = true
-      console.log(isLoading)
+      // TODO: refine spinner for this action
+      // isLoading = true
       await onboard.setChain({ chainId: writableChains[selectedWriteChain].chainId })
 
       const { ethers } = await loadEthers()
@@ -86,11 +85,7 @@
         consumer.abi,
         signer
       )
-      console.log(
-        readableChains[selectedReadChain].chainId.toString(),
-        GAS_ESTIMATION_DELAY,
-        quantiles[selectedQuantile]
-      )
+
       const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
         await gasNetContract.getGasEstimationQuantile(
           BigInt(readableChains[selectedReadChain].chainId.toString()),
@@ -99,7 +94,7 @@
         )
 
       publishedGasData = { gasPrice, maxPriorityFeePerGas, maxFeePerGas }
-      isLoading = false
+      // isLoading = false
     } catch (error) {
       console.error('Gas data fetch error:', error)
       errorMessage = error as string
@@ -133,7 +128,6 @@
     const { ethers } = await loadEthers()
     const ethersProvider = new ethers.BrowserProvider(provider, 'any')
     await fetchGasEstimationFromGasNet(readChainId.toString())
-    console.log(writeChainId)
     await onboard.setChain({ chainId: writeChainId })
     await publishGasEstimation(ethersProvider)
   }
@@ -186,8 +180,8 @@
           </button>
         </div>
 
-        {#if gasEstimation}
-          <div class="sign-transaction">
+        <div class="sign-transaction">
+          {#if gasEstimation}
             <div class="drawer-container">
               <button
                 class="drawer-button"
@@ -218,28 +212,28 @@
                 </div>
               {/if}
             </div>
+          {/if}
 
-            {#if isLoading}
-              <div class="flex flex-col items-center content-center gap-2 my-4 spinner-container">
-                <div class="spinner" />
-                <p>Please Check Connected Browser Wallet for Progress</p>
-              </div>
-            {/if}
+          {#if isLoading}
+            <div class="spinner-container">
+              <div class="spinner" />
+              <p>Please Check Connected Browser Wallet for Progress</p>
+            </div>
+          {/if}
 
-            {#if transactionHash}
-              <div class="sign-transaction m-3">
-                Confirmed Hash:
-                <a
-                  href="https://sepolia.etherscan.io/tx/{transactionHash}"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {transactionHash}
-                </a>
-              </div>
-            {/if}
-          </div>
-        {/if}
+          {#if transactionHash}
+            <div class="sign-transaction m-3">
+              Confirmed Hash:
+              <a
+                href="https://sepolia.etherscan.io/tx/{transactionHash}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {transactionHash}
+              </a>
+            </div>
+          {/if}
+        </div>
 
         <div class="sign-transaction">
           <div class="select-group">
@@ -257,7 +251,7 @@
           </button>
 
           {#if publishedGasData}
-            <div class="sign-transaction" transition:slide={{ duration: 300 }}>
+            <div class="sign-transaction">
               <pre>{JSON.stringify(publishedGasData, formatBigInt, 2)}</pre>
             </div>
           {/if}
