@@ -35,7 +35,7 @@ export enum WritableChainKey {
 export enum ReadableChainKey {
   MAIN = 'main',
   OPTIMISM = 'op',
-  ARBITRUM = 'arb',
+  // ARBITRUM = 'arb',
   BASE = 'base',
   POLYGON = 'polygon'
 }
