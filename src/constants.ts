@@ -1,9 +1,5 @@
-// export const GASNET_URL = 'https://rpc.devnet.gas.network'
-// export const GASNET_URL = 'http://10.0.2.53:8449'
-export const GASNET_URL = 'https://proxy.gas.network/'
-export const GASNET_CONTRACT_ADDRESS = '0xE45A6D223139FcBeC7Bd23EBD87bED55ed4f1Ae1'
+export const GASNET_URL = 'https://devnet.gas.network'
+export const GASNET_CONTRACT_ADDRESS = '0x69E23e00384F213B8d6e26aeC80BBE30ACD804BA'
 
-// export const GASNET_CONTRACT_ADDRESS = '0xE45A6D223139FcBeC7Bd23EBD87bED55ed4f1Ae1'
 export const SEPOLIA_URL = 'https://endpoints.omniatech.io/v1/eth/sepolia/public'
-export const GASNET_CONTRACT_ADDRESS_SEPOLIA = '0x2F510E495d38fe4a5B7F0E414B72FB49f7d58109'
-export const CONSUMER_CHAIN_CONTRACT_ADDRESS='0x170dd6665e3DAB5A7FF483234076041AA2912f11'
+export const GASNET_CONTRACT_ADDRESS_SEPOLIA = '0xe2Ff14fcD951162f146560F7c11Bef28510f8538'
