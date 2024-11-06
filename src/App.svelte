@@ -71,7 +71,6 @@
 
   async function readPublishedGasData(provider: any) {
     errorMessage = null
-    publishedGasData = null
     try {
       // TODO: refine spinner for this action
       // isLoading = true
@@ -96,6 +95,7 @@
       publishedGasData = { gasPrice, maxPriorityFeePerGas, maxFeePerGas }
       // isLoading = false
     } catch (error) {
+      publishedGasData = null
       console.error('Gas data fetch error:', error)
       errorMessage = error as string
       isLoading = false
@@ -151,7 +151,7 @@
           <div class="button-group">
             <div class="select-group">
               <label for="read-chain" class="select-label">Estimates For</label>
-              <!-- TODO:On select change clear data -->
+              <!-- TODO:On select change clear data or atleast collapse -->
               <select id="read-chain" bind:value={selectedReadChain} class="chain-select">
                 {#each Object.entries(readableChains) as [key, chain]}
                   <option value={key}>{chain.display}</option>
