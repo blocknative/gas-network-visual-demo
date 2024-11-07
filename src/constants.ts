@@ -7,7 +7,7 @@ import {
 } from './types'
 
 export const gasNetwork = {
-  url: 'https://devnet.gas.network',
+  url: 'https://proxy.gas.network',
   contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
 }
 
