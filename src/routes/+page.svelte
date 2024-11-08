@@ -276,7 +276,7 @@
 							</div>
 							<div class="flex flex-col gap-1">
 								<label for="timeout-select" class="ml-1 text-xs font-medium text-gray-500"
-									>Timeout</label
+									>Recency</label
 								>
 								<select
 									id="timeout-select"
