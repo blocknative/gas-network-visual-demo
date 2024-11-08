@@ -1,4 +1,4 @@
-import type { EstimationData } from "./types"
+import type { EstimationData } from "./@types/types"
 
 // Prepare estimation data
 export const createEstimationObject = (pred: EstimationData): EstimationData => {

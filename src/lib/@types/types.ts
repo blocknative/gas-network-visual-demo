@@ -1,6 +1,6 @@
-// Or alternatively, if you prefer an interface:
 export interface QuantileMap {
   Q99: 99
+  Q98: 98
   Q95: 95
   Q90: 90
   Q80: 80
@@ -37,7 +37,8 @@ export enum ReadableChainKey {
   OPTIMISM = 'op',
   // ARBITRUM = 'arb',
   BASE = 'base',
-  POLYGON = 'polygon'
+  POLYGON = 'polygon',
+  UNSUPPORTED_CHAIN = 'unsupportedChain'
 }
 
 export interface ReadChain {
