@@ -19,14 +19,6 @@ contract Oracle is EIP712 {
         "Estimation(EstimationValues Q70,EstimationValues Q80,EstimationValues Q90,EstimationValues Q95,EstimationValues Q99,uint8 precision,uint128 height,uint256 timestamp,uint256 chainid)EstimationValues(uint256 gasPrice,uint256 maxPriorityFeePerGas,uint256 maxFeePerGas)"
     );
 
-    enum Quantile {  
-        Q99,  
-        Q95,    
-        Q90,  
-        Q80, 
-        Q70
-    }
-
     struct EstimationValues {
         uint256 gasPrice;
         uint256 maxPriorityFeePerGas;
@@ -65,6 +57,9 @@ contract Oracle is EIP712 {
     }
 
     function setEstimation(Estimation calldata est, bytes calldata signature ) public {
+        Estimation storage prev = estimations[est.chainid];
+        require(est.height >= prev.height, "newer block estimation already exists");
+        require(est.timestamp > prev.timestamp, "newer timestamp estimation already exists");
 
         bytes32 digest = _hashTypedDataV4(keccak256(abi.encode(
             ESTIMATION_TYPEHASH, 
@@ -83,31 +78,32 @@ contract Oracle is EIP712 {
         require(signer == verifier, "invalid signer");
         require(signer != address(0), "ECDSA: invalid signature");
 
-        Estimation memory prev = estimations[est.chainid];
-        require(est.height > prev.height, "estimation already exists");
 
         estimations[est.chainid] = est;
     }
  
-    function getGasEstimationQuantile(uint256 chainId, uint64 delay, Quantile quantile ) 
+    function getGasEstimationQuantile(uint256 chainId, uint64 delay, uint8 quantile ) 
     public view returns ( EstimationValues memory val) {
-        
         Estimation memory e = estimations[chainId];
         require(e.height > 0, "no estimations for network");
-        require(block.timestamp - e.timestamp < delay, "timeout");
-        
-        if (quantile == Quantile.Q99) {
+
+        if ( block.timestamp > e.timestamp ) {
+            require(block.timestamp - e.timestamp < delay, "timeout");
+        } else {
+            require(e.timestamp - block.timestamp < delay, "timeout");
+        }
+                    
+        if (quantile == 99) {
             return e.Q99;
-        } else if (quantile == Quantile.Q95) {
+        } else if (quantile == 95) {
             return e.Q95;
-        } else if (quantile == Quantile.Q90) {
+        } else if (quantile == 90) {
             return e.Q90;
-        } else if (quantile == Quantile.Q80) {
+        } else if (quantile == 80) {
             return e.Q80;
-        } else if (quantile == Quantile.Q70) {
+        } else if (quantile == 70) {
             return e.Q70;
-        }  
+        }
+        revert("quantile not supported");
     }
 }
-
-

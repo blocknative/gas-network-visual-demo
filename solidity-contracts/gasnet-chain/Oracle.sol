@@ -10,7 +10,7 @@ contract Oracle is Ownable {
     constructor() Ownable(msg.sender) {} 
 
     struct SignedEstimation {
-        Estimation e;   
+        Estimation e;
         bytes sig;
     }
 
@@ -33,16 +33,18 @@ contract Oracle is Ownable {
     }
 
     function setEstimation(Estimation calldata e, bytes calldata signature) public onlyOwner {
-        SignedEstimation memory prev = estimations[e.chainid];
-        require(e.height > prev.e.height, "estimation already exists");
-        estimations[e.chainid] = SignedEstimation(e,signature);
+        SignedEstimation storage prev = estimations[e.chainid];
+        require(e.height >= prev.e.height, "newer block estimation already exists");
+        require(e.timestamp > prev.e.timestamp, "newer timestamp estimation already exists");
+
+        prev.e = e;
+        prev.sig = signature;
     }
  
     function getEstimation(uint256 chainid) 
     public view returns ( Estimation memory e, bytes memory signature) {
-        SignedEstimation memory se = estimations[chainid];
+        SignedEstimation storage se = estimations[chainid];
         require(se.e.height > 0, "no estimations for network");
         return (se.e, se.sig);  
     }
 }
-
