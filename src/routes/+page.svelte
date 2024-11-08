@@ -75,7 +75,7 @@
 		try {
 			// TODO: refine spinner for this action
 			// isLoading = true
-      readFromTargetNetErrorMessage = null
+			readFromTargetNetErrorMessage = null
 			await onboard.setChain({ chainId: writableChains[selectedWriteChain].chainId })
 
 			const { ethers } = await loadEthers()
@@ -127,8 +127,8 @@
 	}
 
 	async function handleGasEstimation(provider: any, readChainId: number, writeChainId: number) {
-    publishErrorMessage = null
-    readFromGasNetErrorMessage = null
+		publishErrorMessage = null
+		readFromGasNetErrorMessage = null
 		try {
 			const { ethers } = await loadEthers()
 			const ethersProvider = new ethers.BrowserProvider(provider, 'any')
@@ -294,7 +294,11 @@
 									class="min-w-[140px] cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 								>
 									{#each Object.entries(quantiles) as [key, value]}
-										<option value={key}>Q{value}</option>
+										{#if key !== 'Q98'}
+											<option value={key}>Q{value}</option>
+										{:else}
+											<option value={key}>Q{value} - (unsupported)</option>
+										{/if}
 									{/each}
 								</select>
 							</div>
