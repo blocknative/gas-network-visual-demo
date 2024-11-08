@@ -27,7 +27,9 @@
 	let publishedGasData: GasEstimate | null = null
 	let transactionSignature: string | null = null
 	let transactionHash: string | null = null
-	let errorMessage: string | null = null
+	let publishErrorMessage: string | null = null
+	let readFromGasNetErrorMessage: string | null = null
+	let readFromTargetNetErrorMessage: string | null = null
 	let isLoading = false
 	let isDrawerOpen = true
 	let wallets$: Observable<WalletState[]>
@@ -56,7 +58,7 @@
 
 	async function fetchGasEstimationFromGasNet(chain: string) {
 		isLoading = true
-		errorMessage = null
+		readFromGasNetErrorMessage = null
 		transactionHash = null
 
 		try {
@@ -69,13 +71,13 @@
 		} catch (error) {
 			gasEstimation = null
 			console.error(error)
-			errorMessage = error as string
+			readFromGasNetErrorMessage = error as string
 			isLoading = false
 		}
 	}
 
 	async function readPublishedGasData(provider: any) {
-		errorMessage = null
+		readFromTargetNetErrorMessage = null
 		try {
 			// TODO: refine spinner for this action
 			// isLoading = true
@@ -102,12 +104,13 @@
 		} catch (error) {
 			publishedGasData = null
 			console.error('Gas data fetch error:', error)
-			errorMessage = error as string
+			readFromTargetNetErrorMessage = error as string
 			isLoading = false
 		}
 	}
 
 	async function publishGasEstimation(provider: any) {
+		publishErrorMessage = null
 		try {
 			const { ethers } = await loadEthers()
 			const signer = await provider.getSigner()
@@ -124,17 +127,21 @@
 			transactionHash = receipt.hash
 		} catch (error) {
 			console.error('Publication error:', error)
-			errorMessage = error as string
+			publishErrorMessage = error as string
 			isLoading = false
 		}
 	}
 
 	async function handleGasEstimation(provider: any, readChainId: number, writeChainId: number) {
-		const { ethers } = await loadEthers()
-		const ethersProvider = new ethers.BrowserProvider(provider, 'any')
-		await fetchGasEstimationFromGasNet(readChainId.toString())
-		await onboard.setChain({ chainId: writeChainId })
-		await publishGasEstimation(ethersProvider)
+		try {
+			const { ethers } = await loadEthers()
+			const ethersProvider = new ethers.BrowserProvider(provider, 'any')
+			await fetchGasEstimationFromGasNet(readChainId.toString())
+			await onboard.setChain({ chainId: writeChainId })
+			await publishGasEstimation(ethersProvider)
+		} catch (e) {
+			console.error(e)
+		}
 	}
 
 	function formatBigInt(key: string, value: any) {
@@ -266,6 +273,16 @@
 							</a>
 						</div>
 					{/if}
+					{#if readFromGasNetErrorMessage}
+						<div class="mt-4 overflow-auto rounded-lg border border-red-500 p-4 text-red-500">
+							{readFromGasNetErrorMessage}
+						</div>
+					{/if}
+					{#if publishErrorMessage}
+						<div class="mt-4 overflow-auto rounded-lg border border-red-500 p-4 text-red-500">
+							{publishErrorMessage}
+						</div>
+					{/if}
 
 					<div class="mb-2 flex w-full flex-col items-center justify-between gap-4">
 						<div class="flex flex-col gap-1">
@@ -292,7 +309,6 @@
 						</button>
 
 						{#if publishedGasData}
-							<!-- TODO: fix width and add border to this container -->
 							<div
 								class="my-4 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200"
 							>
@@ -306,9 +322,9 @@
 						{/if}
 					</div>
 
-					{#if errorMessage}
+					{#if readFromTargetNetErrorMessage}
 						<div class="mt-4 overflow-auto rounded-lg border border-red-500 p-4 text-red-500">
-							{errorMessage}
+							{readFromTargetNetErrorMessage}
 						</div>
 					{/if}
 				</div>
