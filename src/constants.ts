@@ -16,6 +16,7 @@ export const GAS_ESTIMATION_DELAY = 600000 // seconds
 // You can then create the object that implements this interface:
 export const quantiles: QuantileMap = {
 	Q99: 99,
+	Q98: 98,
 	Q95: 95,
 	Q90: 90,
 	Q80: 80,
@@ -69,5 +70,9 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 	[ReadableChainKey.POLYGON]: {
 		chainId: 137,
 		display: 'Polygon'
+	},
+	[ReadableChainKey.UNSUPPORTED_CHAIN]: {
+		chainId: 1638,
+		display: 'Unsupported Chain'
 	}
 }

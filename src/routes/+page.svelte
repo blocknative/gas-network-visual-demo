@@ -56,7 +56,7 @@
 		return ethersModule
 	}
 
-	async function fetchGasEstimationFromGasNet(chain: string) {
+	async function fetchGasEstimationFromGasNet(chain: string): Promise<EstimationData | null> {
 		isLoading = true
 		readFromGasNetErrorMessage = null
 		transactionHash = null
@@ -67,12 +67,13 @@
 			const gasNetContract = new ethers.Contract(gasNetwork.contract, gasnet.abi, rpcProvider)
 			const [estimation, signature] = await gasNetContract.getEstimation(chain)
 			transactionSignature = signature
-			gasEstimation = createEstimationObject(estimation)
+			return createEstimationObject(estimation)
 		} catch (error) {
-			gasEstimation = null
+			const revertErrorFromContract = (error as any)?.info?.error?.message
 			console.error(error)
-			readFromGasNetErrorMessage = error as string
+			readFromGasNetErrorMessage = revertErrorFromContract || (error as string)
 			isLoading = false
+			return null
 		}
 	}
 
@@ -98,13 +99,13 @@
 					GAS_ESTIMATION_DELAY,
 					quantiles[selectedQuantile]
 				)
-
 			publishedGasData = { gasPrice, maxPriorityFeePerGas, maxFeePerGas }
 			// isLoading = false
 		} catch (error) {
 			publishedGasData = null
 			console.error('Gas data fetch error:', error)
-			readFromTargetNetErrorMessage = error as string
+			const revertErrorFromContract = (error as any)?.info?.error?.message
+			readFromTargetNetErrorMessage = revertErrorFromContract || (error as string)
 			isLoading = false
 		}
 	}
@@ -136,9 +137,11 @@
 		try {
 			const { ethers } = await loadEthers()
 			const ethersProvider = new ethers.BrowserProvider(provider, 'any')
-			await fetchGasEstimationFromGasNet(readChainId.toString())
-			await onboard.setChain({ chainId: writeChainId })
-			await publishGasEstimation(ethersProvider)
+			gasEstimation = await fetchGasEstimationFromGasNet(readChainId.toString())
+			if (gasEstimation) {
+				await onboard.setChain({ chainId: writeChainId })
+				await publishGasEstimation(ethersProvider)
+			}
 		} catch (e) {
 			console.error(e)
 		}
@@ -274,12 +277,12 @@
 						</div>
 					{/if}
 					{#if readFromGasNetErrorMessage}
-						<div class="mt-4 overflow-auto rounded-lg border border-red-500 p-4 text-red-500">
+						<div class="overflow-auto rounded-lg border border-red-500 p-4 text-red-500">
 							{readFromGasNetErrorMessage}
 						</div>
 					{/if}
 					{#if publishErrorMessage}
-						<div class="mt-4 overflow-auto rounded-lg border border-red-500 p-4 text-red-500">
+						<div class="overflow-auto rounded-lg border border-red-500 p-4 text-red-500">
 							{publishErrorMessage}
 						</div>
 					{/if}
@@ -323,7 +326,7 @@
 					</div>
 
 					{#if readFromTargetNetErrorMessage}
-						<div class="mt-4 overflow-auto rounded-lg border border-red-500 p-4 text-red-500">
+						<div class="overflow-auto rounded-lg border border-red-500 p-4 text-red-500">
 							{readFromTargetNetErrorMessage}
 						</div>
 					{/if}
