@@ -54,7 +54,6 @@
 
 	async function fetchGasEstimationFromGasNet(chain: string): Promise<EstimationData | null> {
 		isLoading = true
-		readFromGasNetErrorMessage = null
 		transactionHash = null
 
 		try {
@@ -74,7 +73,6 @@
 	}
 
 	async function readPublishedGasData(provider: any) {
-		readFromTargetNetErrorMessage = null
 		try {
 			// TODO: refine spinner for this action
 			// isLoading = true
@@ -130,6 +128,8 @@
 	}
 
 	async function handleGasEstimation(provider: any, readChainId: number, writeChainId: number) {
+    readFromTargetNetErrorMessage = null
+    readFromGasNetErrorMessage = null
 		try {
 			const { ethers } = await loadEthers()
 			const ethersProvider = new ethers.BrowserProvider(provider, 'any')
