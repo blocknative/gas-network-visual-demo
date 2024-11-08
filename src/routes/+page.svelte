@@ -76,6 +76,7 @@
 		try {
 			// TODO: refine spinner for this action
 			// isLoading = true
+      readFromTargetNetErrorMessage = null
 			await onboard.setChain({ chainId: writableChains[selectedWriteChain].chainId })
 
 			const { ethers } = await loadEthers()
