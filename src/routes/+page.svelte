@@ -283,6 +283,7 @@
 							</select>
 						</div>
 						<button
+            
 							class="w-full rounded-lg bg-blue-500 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-600"
 							on:click={() => readPublishedGasData(provider)}
 						>
@@ -293,9 +294,9 @@
 
 						{#if publishedGasData}
 							<!-- TODO: fix width and add border to this container -->
-							<div class="my-4 flex flex-col gap-2 w-full">
+							<div class="my-4 flex flex-col gap-2 w-full rounded-lg border border-gray-200 overflow-hidden">
 								<pre
-									class="m-0 overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
+									class="m-0 overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm overflow-scroll">{JSON.stringify(
 										publishedGasData,
 										formatBigInt,
 										2
