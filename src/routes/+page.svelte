@@ -28,6 +28,7 @@
 	let isLoading = false
 	let isDrawerOpen = true
 	let wallets$: Observable<WalletState[]>
+	let readGasDataFromTargetChainTime: string
 
 	// Update your selected chain variables to use the enums
 	let selectedReadChain: ReadableChainKey = ReadableChainKey.MAIN
@@ -87,6 +88,12 @@
 				consumer.abi,
 				signer
 			)
+
+			readGasDataFromTargetChainTime = new Date().toLocaleString(undefined, {
+				timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+				dateStyle: 'medium',
+				timeStyle: 'medium'
+			})
 
 			const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
 				await gasNetContract.getGasEstimationQuantile(
@@ -301,6 +308,7 @@
 						</button>
 
 						{#if publishedGasData}
+							<!-- {readGasDataFromTargetChainTime} -->
 							<div
 								class="my-4 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200"
 							>
