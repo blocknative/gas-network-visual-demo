@@ -1,9 +1,73 @@
-// export const GASNET_URL = 'https://rpc.devnet.gas.network'
-// export const GASNET_URL = 'http://10.0.2.53:8449'
-export const GASNET_URL = 'https://proxy.gas.network/'
-export const GASNET_CONTRACT_ADDRESS = '0xE45A6D223139FcBeC7Bd23EBD87bED55ed4f1Ae1'
+import {
+	type WriteChain,
+	type ReadChain,
+	WritableChainKey,
+	ReadableChainKey,
+	type QuantileMap
+} from '$lib/@types/types'
 
-// export const GASNET_CONTRACT_ADDRESS = '0xE45A6D223139FcBeC7Bd23EBD87bED55ed4f1Ae1'
-export const SEPOLIA_URL = 'https://endpoints.omniatech.io/v1/eth/sepolia/public'
-export const GASNET_CONTRACT_ADDRESS_SEPOLIA = '0x2F510E495d38fe4a5B7F0E414B72FB49f7d58109'
-export const CONSUMER_CHAIN_CONTRACT_ADDRESS='0x170dd6665e3DAB5A7FF483234076041AA2912f11'
+export const gasNetwork = {
+	url: 'https://proxy.gas.network',
+	contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
+}
+
+export const GAS_ESTIMATION_DELAY = 600000 // seconds
+
+// You can then create the object that implements this interface:
+export const quantiles: QuantileMap = {
+	Q99: 99,
+	Q95: 95,
+	Q90: 90,
+	Q80: 80,
+	Q70: 70
+}
+
+export const writableChains: Record<WritableChainKey, WriteChain> = {
+	[WritableChainKey.SEPOLIA]: {
+		chainId: 11155111,
+		display: 'Ethereum Sepolia',
+		rpcUrl: 'https://endpoints.omniatech.io/v1/eth/sepolia/public',
+		contract: '0xE4859432d9Af6D40C2D923e3F13D66057F4AEcA0'
+	},
+	// [WritableChainKey.ARBITRUM_SEPOLIA]: {
+	//   chainId: 421614,
+	//   display: 'Arb Sepolia',
+	//   rpcUrl: 'https://arbitrum-sepolia.gateway.tenderly.co',
+	//   contract: ''
+	// },
+	[WritableChainKey.OP_SEPOLIA]: {
+		chainId: 11155420,
+		display: 'Optimism Sepolia',
+		rpcUrl: 'https://sepolia.optimism.io',
+		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1'
+	},
+	[WritableChainKey.BASE_SEPOLIA]: {
+		chainId: 84532,
+		display: 'Base Sepolia',
+		rpcUrl: 'https://sepolia.base.org',
+		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1'
+	}
+}
+
+export const readableChains: Record<ReadableChainKey, ReadChain> = {
+	[ReadableChainKey.MAIN]: {
+		chainId: 1,
+		display: 'Ethereum'
+	},
+	[ReadableChainKey.OPTIMISM]: {
+		chainId: 10,
+		display: 'Optimism'
+	},
+	// [ReadableChainKey.ARBITRUM]: {
+	//   chainId: 42161,
+	//   display: 'Arbitrum'
+	// },
+	[ReadableChainKey.BASE]: {
+		chainId: 8453,
+		display: 'Base'
+	},
+	[ReadableChainKey.POLYGON]: {
+		chainId: 137,
+		display: 'Polygon'
+	}
+}

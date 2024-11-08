@@ -2,35 +2,12 @@ import { sveltekit } from '@sveltejs/kit/vite'
 import { defineConfig } from 'vite'
 import inject from '@rollup/plugin-inject'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
-import path from 'path'
+// import path from 'path'
 
 export default defineConfig({
 	plugins: [
 		sveltekit(),
-		nodePolyfills(),
-		{
-			name: 'intl-messageformat-resolver',
-			enforce: 'pre',
-
-			transform(code, id) {
-				if (id.includes('intl-messageformat')) {
-					return {
-						code: `
-							import * as IMF from '${path.resolve(__dirname, 'node_modules/intl-messageformat/lib/index.js')}';
-							export const IntlMessageFormat = IMF.default || IMF;
-							export default IntlMessageFormat;
-						`,
-						map: {
-							mappings: '',
-							sources: [],
-							sourcesContent: [],
-							names: [],
-							version: 3
-						}
-					}
-				}
-			}
-		}
+		nodePolyfills()
 	],
 	resolve: {
 		alias: {
@@ -59,9 +36,6 @@ export default defineConfig({
 	},
 	optimizeDeps: {
 		exclude: ['@ethersproject/hash', 'wrtc', 'http'],
-		include: ['Buffer', 'intl-messageformat']
-	},
-	ssr: {
-		noExternal: ['intl-messageformat']
+		include: ['Buffer']
 	}
 })

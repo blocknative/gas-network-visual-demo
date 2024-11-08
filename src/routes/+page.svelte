@@ -1,82 +1,118 @@
 <script lang="ts">
-	import '../app.css'
-	import { ethers } from 'ethers'
+	import { onMount } from 'svelte'
 	import { share } from 'rxjs/operators'
-	import { Quantile, type GasEstimate, type PredictionData } from '../lib/@types/types'
-	import { createPredictionObject } from '../lib/utils'
-	import { onboard } from '../lib/services/web3-onboard'
-	import {
-		GASNET_URL,
-		GASNET_CONTRACT_ADDRESS,
-		GASNET_CONTRACT_ADDRESS_SEPOLIA
-	} from '../constants'
-	import consumer from '../lib/abis/consumer.json'
-	import gasnet from '../lib/abis/gasnet.json'
+	import type { Observable } from 'rxjs'
 	import { slide } from 'svelte/transition'
+	import type { OnboardAPI, WalletState } from '@web3-onboard/core'
+	import {
+		type GasEstimate,
+		type EstimationData,
+		ReadableChainKey,
+		WritableChainKey
+	} from '$lib/@types/types'
+	import { createEstimationObject } from '$lib/utils'
+	import { getOnboard } from '$lib/services/web3-onboard'
+	import {
+		readableChains,
+		writableChains,
+		quantiles,
+		gasNetwork,
+		GAS_ESTIMATION_DELAY
+	} from '../constants'
+	import consumer from '$lib/abis/consumer.json'
+	import gasnet from '$lib/abis/gasnet.json'
+	import type { QuantileMap } from '$lib/@types/types'
 
-	const SEPOLIA_CHAIN_ID = 11155111
-	const MAINNET_CHAIN_ID = '1'
-	const GAS_ESTIMATION_DELAY = 60000000000 // 10 minutes in seconds
-
-	const wallets$ = onboard.state.select('wallets').pipe(share())
-
-	let gasEstimation: PredictionData | null = null
+	let gasEstimation: EstimationData | null = null
 	let publishedGasData: GasEstimate | null = null
 	let transactionSignature: string | null = null
 	let transactionHash: string | null = null
 	let errorMessage: string | null = null
 	let isLoading = false
-	let isDrawerOpen = true // Starts open by default
+	let isDrawerOpen = true
+	let wallets$: Observable<WalletState[]>
 
-	async function fetchMainnetGasEstimation(chain: string) {
+	// Update your selected chain variables to use the enums
+	let selectedReadChain: ReadableChainKey = ReadableChainKey.MAIN
+	let selectedWriteChain: WritableChainKey = WritableChainKey.SEPOLIA
+	let selectedQuantile: keyof QuantileMap = 'Q99'
+
+	let onboard: OnboardAPI
+	onMount(async () => {
+		onboard = await getOnboard()
+	})
+
+	$: if (onboard) {
+		wallets$ = onboard.state.select('wallets').pipe(share())
+	}
+
+	let ethersModule: typeof import('ethers')
+	async function loadEthers() {
+		if (!ethersModule) {
+			ethersModule = await import('ethers')
+		}
+		return ethersModule
+	}
+
+	async function fetchGasEstimationFromGasNet(chain: string) {
 		isLoading = true
 		errorMessage = null
+		transactionHash = null
 
 		try {
-			const rpcProvider = new ethers.JsonRpcProvider(GASNET_URL)
-			const gasNetContract = new ethers.Contract(GASNET_CONTRACT_ADDRESS, gasnet.abi, rpcProvider)
-
+			const { ethers } = await loadEthers()
+			const rpcProvider = new ethers.JsonRpcProvider(gasNetwork.url)
+			const gasNetContract = new ethers.Contract(gasNetwork.contract, gasnet.abi, rpcProvider)
 			const [estimation, signature] = await gasNetContract.getEstimation(chain)
 			transactionSignature = signature
-			gasEstimation = createPredictionObject(estimation)
+			gasEstimation = createEstimationObject(estimation)
 		} catch (error) {
+			gasEstimation = null
 			console.error(error)
 			errorMessage = error as string
 			isLoading = false
 		}
 	}
 
-	async function readPublishedGasData(chainId: string, provider: any) {
+	async function readPublishedGasData(provider: any) {
 		errorMessage = null
-
 		try {
+			// TODO: refine spinner for this action
+			// isLoading = true
+			await onboard.setChain({ chainId: writableChains[selectedWriteChain].chainId })
+
+			const { ethers } = await loadEthers()
 			const ethersProvider = new ethers.BrowserProvider(provider, 'any')
 			const signer = await ethersProvider.getSigner()
 			const gasNetContract = new ethers.Contract(
-				GASNET_CONTRACT_ADDRESS_SEPOLIA,
+				writableChains[selectedWriteChain].contract,
 				consumer.abi,
 				signer
 			)
 
 			const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
 				await gasNetContract.getGasEstimationQuantile(
-					BigInt(chainId),
+					BigInt(readableChains[selectedReadChain].chainId.toString()),
 					GAS_ESTIMATION_DELAY,
-					Quantile.Q99
+					quantiles[selectedQuantile]
 				)
 
 			publishedGasData = { gasPrice, maxPriorityFeePerGas, maxFeePerGas }
+			// isLoading = false
 		} catch (error) {
+			publishedGasData = null
 			console.error('Gas data fetch error:', error)
 			errorMessage = error as string
+			isLoading = false
 		}
 	}
 
 	async function publishGasEstimation(provider: any) {
 		try {
+			const { ethers } = await loadEthers()
 			const signer = await provider.getSigner()
 			const consumerContract = new ethers.Contract(
-				GASNET_CONTRACT_ADDRESS_SEPOLIA,
+				writableChains[selectedWriteChain].contract,
 				consumer.abi,
 				signer
 			)
@@ -93,10 +129,11 @@
 		}
 	}
 
-	async function handleMainnetGasEstimation(provider: any) {
+	async function handleGasEstimation(provider: any, readChainId: number, writeChainId: number) {
+		const { ethers } = await loadEthers()
 		const ethersProvider = new ethers.BrowserProvider(provider, 'any')
-		await fetchMainnetGasEstimation(MAINNET_CHAIN_ID)
-		await onboard.setChain({ chainId: SEPOLIA_CHAIN_ID })
+		await fetchGasEstimationFromGasNet(readChainId.toString())
+		await onboard.setChain({ chainId: writeChainId })
 		await publishGasEstimation(ethersProvider)
 	}
 
@@ -105,35 +142,78 @@
 	}
 </script>
 
-<main class="mx-auto max-w-3xl p-4 font-sans md:p-8">
-	<div class=" flex flex-col gap-5 rounded-xl border border-gray-200 bg-white p-4 shadow-md md:p-8">
-		{#if !$wallets$?.length}
-			<div class="flex flex-col gap-2">
-				<button class="btn" on:click={() => onboard.connectWallet()}>Connect Wallet</button>
+<main class="mx-auto max-w-3xl p-4 font-system sm:p-6">
+	<div class="rounded-xl border border-gray-200 bg-white p-6 shadow-md sm:p-8">
+		{#if onboard && !$wallets$?.length}
+			<div class="my-4 flex flex-col gap-2">
+				<button
+					class="w-full rounded-lg bg-blue-500 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-600"
+					on:click={() => onboard.connectWallet()}
+				>
+					Connect Wallet
+				</button>
 			</div>
 		{/if}
 
 		{#if $wallets$}
 			{#each $wallets$ as { provider }}
-				<div class="flex flex-col gap-2">
-					<button class="btn" on:click={() => handleMainnetGasEstimation(provider)}>
-						Get Mainnet Gas Predictions and Publish to Sepolia
+				<div class="flex flex-col gap-2 sm:gap-4">
+					<div class="mb-2 flex items-center justify-between gap-4">
+						<div class="flex flex-col gap-1">
+							<label for="read-chain" class="ml-1 text-xs font-medium text-gray-500"
+								>Estimates For</label
+							>
+							<select
+								id="read-chain"
+								bind:value={selectedReadChain}
+								class="min-w-[140px] cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+							>
+								{#each Object.entries(readableChains) as [key, chain]}
+									<option value={key}>{chain.display}</option>
+								{/each}
+							</select>
+						</div>
+						<div class="flex flex-col gap-1">
+							<label for="write-chain" class="ml-1 text-xs font-medium text-gray-500"
+								>Write To</label
+							>
+							<select
+								id="write-chain"
+								bind:value={selectedWriteChain}
+								class="min-w-[140px] cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+							>
+								{#each Object.entries(writableChains) as [key, chain]}
+									<option value={key}>{chain.display}</option>
+								{/each}
+							</select>
+						</div>
+					</div>
+					<button
+						class="w-full rounded-lg bg-blue-500 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-600"
+						on:click={() =>
+							handleGasEstimation(
+								provider,
+								readableChains[selectedReadChain].chainId,
+								writableChains[selectedWriteChain].chainId
+							)}
+					>
+						Read {readableChains[selectedReadChain].display} Estimations and Write to {writableChains[
+							selectedWriteChain
+						].display}
 					</button>
-				</div>
 
-				{#if gasEstimation}
-					<div class="flex flex-col gap-4">
-						<div class="border border-gray-200 rounded-lg overflow-hidden bg-white">
+					{#if gasEstimation}
+						<div class="overflow-hidden rounded-lg border border-gray-200 bg-white">
 							<button
-								class="w-full p-4 bg-transparent border-none cursor-pointer text-inherit text-left transition-colors duration-200 hover:bg-slate-50"
+								class="w-full px-6 py-4 text-left transition-colors hover:bg-gray-50"
 								on:click={() => (isDrawerOpen = !isDrawerOpen)}
 								aria-expanded={isDrawerOpen}
 							>
-								<div class="flex items-center w-full gap-4">
+								<div class="flex items-center gap-4">
 									<svg
-										class={`w-5 h-5 text-slate-500 transition-transform duration-200 ${
-											isDrawerOpen ? 'rotate-180' : ''
-										}`}
+										class="h-5 w-5 text-gray-500 transition-transform {isDrawerOpen
+											? 'rotate-180'
+											: ''}"
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"
@@ -145,86 +225,92 @@
 											d="M19 9l-7 7-7-7"
 										/>
 									</svg>
-									<div class="text-lg font-medium">Data Pulled From Gas Network</div>
+									<span class="text-md font-medium sm:text-lg">Data Pulled From Gas Network</span>
 								</div>
 							</button>
 
 							{#if isDrawerOpen}
-								<div class="border-t" transition:slide={{ duration: 200 }}>
+								<div class="border-t border-gray-200" transition:slide={{ duration: 300 }}>
 									<pre
-										class="m-0 bg-slate-50 overflow-x-auto whitespace-pre-wrap break-words p-4 text-sm leading-6 text-gray-800 md:p-6"
-									>{JSON.stringify(gasEstimation, formatBigInt, 2)}</pre>
+										class="m-0 overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
+											gasEstimation,
+											formatBigInt,
+											2
+										)}</pre>
 								</div>
 							{/if}
 						</div>
+					{/if}
 
-						{#if isLoading}
-							<div class="flex flex-col items-center justify-center gap-2 my-2">
-								<div
-									class="spinner h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500"
-								></div>
-								<p class="text-sm text-gray-600">
-									Please Check Connected Browser Wallet for Progress
-								</p>
-							</div>
-						{/if}
+					{#if isLoading}
+						<div class="my-4 flex flex-col items-center gap-2">
+							<div
+								class="h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500"
+							></div>
+							<p class="text-center text-gray-600 sm:text-left">
+								Please Check Connected Browser Wallet for Progress
+							</p>
+						</div>
+					{/if}
 
-						{#if transactionHash}
-							<div>
-								Confirmed Hash:
-								<a
-									href="https://sepolia.etherscan.io/tx/{transactionHash}"
-									target="_blank"
-									rel="noopener noreferrer"
-									class="break-all text-blue-500 hover:underline"
-								>
-									{transactionHash}
-								</a>
+					{#if transactionHash}
+						<div class="my-4 flex flex-col gap-2">
+							<p class="text-gray-600">Confirmed Hash:</p>
+							<a
+								href="https://sepolia.etherscan.io/tx/{transactionHash}"
+								target="_blank"
+								rel="noopener noreferrer"
+								class="overflow-hidden text-ellipsis text-blue-500 hover:underline"
+							>
+								{`https://sepolia.etherscan.io/tx/${transactionHash}`}
+							</a>
+						</div>
+					{/if}
+
+					<div class="mb-2 flex w-full flex-col items-center justify-between gap-4">
+						<div class="flex flex-col gap-1">
+							<label for="quantile-select" class="ml-1 text-xs font-medium text-gray-500"
+								>Read Quantile</label
+							>
+							<select
+								id="quantile-select"
+								bind:value={selectedQuantile}
+								class="min-w-[140px] cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+							>
+								{#each Object.entries(quantiles) as [key, value]}
+									<option value={key}>Q{value}</option>
+								{/each}
+							</select>
+						</div>
+						<button
+							class="w-full rounded-lg bg-blue-500 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-600"
+							on:click={() => readPublishedGasData(provider)}
+						>
+							Read {readableChains[selectedReadChain].display} Estimations from {writableChains[
+								selectedWriteChain
+							].display} for the {quantiles[selectedQuantile]} Quantile
+						</button>
+
+						{#if publishedGasData}
+							<!-- TODO: fix width and add border to this container -->
+							<div class="my-4 flex flex-col gap-2 w-full">
+								<pre
+									class="m-0 overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
+										publishedGasData,
+										formatBigInt,
+										2
+									)}</pre>
 							</div>
 						{/if}
 					</div>
-				{/if}
 
-				<div class="flex flex-col gap-4">
-					<button class="btn" on:click={() => readPublishedGasData(MAINNET_CHAIN_ID, provider)}>
-						Get Mainnet Gas Data from Sepolia - 99 Quantile
-					</button>
-
-					{#if publishedGasData}
-						<div class="flex flex-col gap-2">
-							<pre
-								class="overflow-x-auto whitespace-pre-wrap break-words rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm leading-6 text-gray-800 md:p-6">{JSON.stringify(
-									publishedGasData,
-									formatBigInt,
-									2
-								)}</pre>
+					{#if errorMessage}
+						<div class="mt-4 overflow-auto rounded-lg border border-red-500 p-4 text-red-500">
+							{errorMessage}
 						</div>
 					{/if}
 				</div>
-
-				{#if errorMessage}
-					<div class="overflow-auto rounded-lg border border-red-500 p-4 text-red-500">
-						{errorMessage}
-					</div>
-				{/if}
 			{/each}
 		{/if}
 	</div>
 </main>
-
-<style>
-	@keyframes spin {
-		0% {
-			transform: rotate(0deg);
-		}
-		100% {
-			transform: rotate(360deg);
-		}
-	}
-
-	:global(.btn) {
-		@apply w-auto min-w-[14rem] cursor-pointer rounded-lg bg-blue-500 px-6 py-3 font-medium text-white transition-colors duration-200 hover:bg-blue-600;
-		@apply text-sm md:text-base; /* Smaller text on mobile */
-		@apply max-w-full; /* Ensure button doesn't overflow on mobile */
-	}
-</style>
