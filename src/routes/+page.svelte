@@ -105,7 +105,6 @@
 	}
 
 	async function publishGasEstimation(provider: any) {
-		publishErrorMessage = null
 		try {
 			const { ethers } = await loadEthers()
 			const signer = await provider.getSigner()
@@ -128,7 +127,7 @@
 	}
 
 	async function handleGasEstimation(provider: any, readChainId: number, writeChainId: number) {
-    readFromTargetNetErrorMessage = null
+    publishErrorMessage = null
     readFromGasNetErrorMessage = null
 		try {
 			const { ethers } = await loadEthers()
