@@ -92,7 +92,7 @@
 			readGasDataFromTargetChainTime = new Date().toLocaleString(undefined, {
 				timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 				dateStyle: 'medium',
-				timeStyle: 'medium'
+				timeStyle: 'long'
 			})
 
 			const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
@@ -224,6 +224,15 @@
 									2
 								)}</pre>
 						</Drawer>
+						<p>
+							Data created on GasNet at: {new Date(
+								Number(gasEstimation.timestamp) * 1000
+							).toLocaleString(undefined, {
+								timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+								dateStyle: 'medium',
+								timeStyle: 'long'
+							})}
+						</p>
 					{/if}
 
 					{#if isLoading}
@@ -308,7 +317,9 @@
 						</button>
 
 						{#if publishedGasData}
-							<!-- {readGasDataFromTargetChainTime} -->
+							<div class="w-full text-left">
+								Data read from target chain at: {readGasDataFromTargetChainTime}
+							</div>
 							<div
 								class="my-4 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200"
 							>
