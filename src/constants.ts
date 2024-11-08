@@ -11,8 +11,6 @@ export const gasNetwork = {
 	contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
 }
 
-export const GAS_ESTIMATION_DELAY = 600000 // seconds
-
 // You can then create the object that implements this interface:
 export const quantiles: QuantileMap = {
 	Q99: 99,

@@ -12,13 +12,7 @@
 	} from '$lib/@types/types'
 	import { createEstimationObject } from '$lib/utils'
 	import { getOnboard } from '$lib/services/web3-onboard'
-	import {
-		readableChains,
-		writableChains,
-		quantiles,
-		gasNetwork,
-		GAS_ESTIMATION_DELAY
-	} from '../constants'
+	import { readableChains, writableChains, quantiles, gasNetwork } from '../constants'
 	import consumer from '$lib/abis/consumer.json'
 	import gasnet from '$lib/abis/gasnet.json'
 	import type { QuantileMap } from '$lib/@types/types'
@@ -38,6 +32,8 @@
 	let selectedReadChain: ReadableChainKey = ReadableChainKey.MAIN
 	let selectedWriteChain: WritableChainKey = WritableChainKey.SEPOLIA
 	let selectedQuantile: keyof QuantileMap = 'Q99'
+
+	export const GAS_ESTIMATION_DELAY = 600000 // seconds
 
 	let onboard: OnboardAPI
 	onMount(async () => {
