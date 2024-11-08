@@ -318,7 +318,7 @@
 
 						{#if publishedGasData}
 							<div class="w-full text-left">
-								Data read from {readableChains[selectedReadChain].display} at: {readGasDataFromTargetChainTime}
+								Data read from {writableChains[selectedWriteChain].display} at: {readGasDataFromTargetChainTime}
 							</div>
 							<div
 								class="my-4 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200"
