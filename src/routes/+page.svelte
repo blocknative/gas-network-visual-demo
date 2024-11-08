@@ -32,8 +32,7 @@
 	let selectedReadChain: ReadableChainKey = ReadableChainKey.MAIN
 	let selectedWriteChain: WritableChainKey = WritableChainKey.SEPOLIA
 	let selectedQuantile: keyof QuantileMap = 'Q99'
-
-	export const GAS_ESTIMATION_DELAY = 600000 // seconds
+	let selectedTimeout = 3600
 
 	let onboard: OnboardAPI
 	onMount(async () => {
@@ -91,7 +90,7 @@
 			const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
 				await gasNetContract.getGasEstimationQuantile(
 					BigInt(readableChains[selectedReadChain].chainId.toString()),
-					GAS_ESTIMATION_DELAY,
+					selectedTimeout,
 					quantiles[selectedQuantile]
 				)
 			publishedGasData = { gasPrice, maxPriorityFeePerGas, maxFeePerGas }
@@ -284,19 +283,37 @@
 					{/if}
 
 					<div class="mb-2 flex w-full flex-col items-center justify-between gap-4">
-						<div class="flex flex-col gap-1">
-							<label for="quantile-select" class="ml-1 text-xs font-medium text-gray-500"
-								>Read Quantile</label
-							>
-							<select
-								id="quantile-select"
-								bind:value={selectedQuantile}
-								class="min-w-[140px] cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
-							>
-								{#each Object.entries(quantiles) as [key, value]}
-									<option value={key}>Q{value}</option>
-								{/each}
-							</select>
+						<div class="flex w-full items-start justify-between gap-4">
+							<div class="flex flex-col gap-1">
+								<label for="quantile-select" class="ml-1 text-xs font-medium text-gray-500"
+									>Read Quantile</label
+								>
+								<select
+									id="quantile-select"
+									bind:value={selectedQuantile}
+									class="min-w-[140px] cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+								>
+									{#each Object.entries(quantiles) as [key, value]}
+										<option value={key}>Q{value}</option>
+									{/each}
+								</select>
+							</div>
+							<div class="flex flex-col gap-1">
+								<label for="timeout-select" class="ml-1 text-xs font-medium text-gray-500"
+									>Timeout</label
+								>
+								<select
+									id="timeout-select"
+									bind:value={selectedTimeout}
+									class="min-w-[140px] cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+								>
+									<option value={10}>10 Sec</option>
+									<option value={30}>30 Sec</option>
+									<option value={60}>1 Min</option>
+									<option value={3600}>1 Hr</option>
+									<option value={86400}>1 Day</option>
+								</select>
+							</div>
 						</div>
 						<button
 							class="w-full rounded-lg bg-blue-500 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-600"
