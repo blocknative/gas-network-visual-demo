@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte'
 	import { share } from 'rxjs/operators'
 	import type { Observable } from 'rxjs'
-	import { slide } from 'svelte/transition'
 	import type { OnboardAPI, WalletState } from '@web3-onboard/core'
 	import {
 		type GasEstimate,
@@ -53,7 +52,9 @@
 		return ethersModule
 	}
 
-	async function fetchGasEstimationFromGasNet(chain: string): Promise<EstimationData | null> {
+	async function fetchGasEstimationFromGasNet(
+		chain: string
+	): Promise<{ estimationData: EstimationData; signature: string } | null> {
 		isLoading = true
 		transactionHash = null
 
@@ -63,7 +64,7 @@
 			const gasNetContract = new ethers.Contract(gasNetwork.contract, gasnet.abi, rpcProvider)
 			const [estimation, signature] = await gasNetContract.getEstimation(chain)
 			transactionSignature = signature
-			return createEstimationObject(estimation)
+			return { estimationData: createEstimationObject(estimation), signature }
 		} catch (error) {
 			const revertErrorFromContract = (error as any)?.info?.error?.message
 			console.error(error)
@@ -75,8 +76,6 @@
 
 	async function readPublishedGasData(provider: any) {
 		try {
-			// TODO: refine spinner for this action
-			// isLoading = true
 			readFromTargetNetErrorMessage = null
 			await onboard.setChain({ chainId: writableChains[selectedWriteChain].chainId })
 
@@ -102,7 +101,6 @@
 					quantiles[selectedQuantile]
 				)
 			publishedGasData = { gasPrice, maxPriorityFeePerGas, maxFeePerGas }
-			// isLoading = false
 		} catch (error) {
 			publishedGasData = null
 			console.error('Gas data fetch error:', error)
@@ -115,7 +113,9 @@
 	async function publishGasEstimation(provider: any) {
 		try {
 			const { ethers } = await loadEthers()
-			const signer = await provider.getSigner()
+      const ethersProvider = new ethers.BrowserProvider(provider, 'any')
+
+			const signer = await ethersProvider.getSigner()
 			const consumerContract = new ethers.Contract(
 				writableChains[selectedWriteChain].contract,
 				consumer.abi,
@@ -128,8 +128,10 @@
 			isLoading = false
 			transactionHash = receipt.hash
 		} catch (error) {
+			const revertErrorFromGasNetContract = (error as any)?.info?.error?.message
+
 			console.error('Publication error:', error)
-			publishErrorMessage = error as string
+			publishErrorMessage = revertErrorFromGasNetContract || (error as string)
 			isLoading = false
 		}
 	}
@@ -138,13 +140,19 @@
 		publishErrorMessage = null
 		readFromGasNetErrorMessage = null
 		try {
-			const { ethers } = await loadEthers()
-			const ethersProvider = new ethers.BrowserProvider(provider, 'any')
-			gasEstimation = await fetchGasEstimationFromGasNet(readChainId.toString())
-			if (gasEstimation) {
-				await onboard.setChain({ chainId: writeChainId })
-				await publishGasEstimation(ethersProvider)
+			const gasNetData = await fetchGasEstimationFromGasNet(readChainId.toString())
+			if (gasNetData) {
+				const { estimationData, signature } = gasNetData
+				if (estimationData && signature) {
+					gasEstimation = estimationData
+					await onboard.setChain({ chainId: writeChainId })
+					await publishGasEstimation(provider)
+					return
+				}
 			}
+			throw new Error(
+				`Failed to fetch gas estimation: ${gasNetData?.estimationData} or signature: ${gasNetData?.signature} from GasNet`
+			)
 		} catch (e) {
 			console.error(e)
 		}
