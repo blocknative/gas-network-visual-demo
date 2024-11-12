@@ -82,6 +82,7 @@
 			const { ethers } = await loadEthers()
 			const ethersProvider = new ethers.BrowserProvider(provider, 'any')
 			const signer = await ethersProvider.getSigner()
+
 			const gasNetContract = new ethers.Contract(
 				writableChains[selectedWriteChain].contract,
 				consumer.abi,
@@ -96,9 +97,9 @@
 
 			const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
 				await gasNetContract.getGasEstimationQuantile(
-					BigInt(readableChains[selectedReadChain].chainId.toString()),
-					selectedTimeout,
-					quantiles[selectedQuantile]
+					BigInt(readableChains[selectedReadChain].chainId),
+					BigInt(selectedTimeout),
+					Number(quantiles[selectedQuantile])
 				)
 			publishedGasData = { gasPrice, maxPriorityFeePerGas, maxFeePerGas }
 		} catch (error) {
@@ -113,7 +114,7 @@
 	async function publishGasEstimation(provider: any) {
 		try {
 			const { ethers } = await loadEthers()
-      const ethersProvider = new ethers.BrowserProvider(provider, 'any')
+			const ethersProvider = new ethers.BrowserProvider(provider, 'any')
 
 			const signer = await ethersProvider.getSigner()
 			const consumerContract = new ethers.Contract(
@@ -312,6 +313,7 @@
 									<option value={60}>1 Min</option>
 									<option value={3600}>1 Hr</option>
 									<option value={86400}>1 Day</option>
+									<option value={604800}>1 Week</option>
 								</select>
 							</div>
 						</div>
