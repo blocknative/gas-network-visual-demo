@@ -173,7 +173,7 @@
 		{#if onboard && !$wallets$?.length}
 			<div class="my-4 flex flex-col gap-2">
 				<button
-					class="bg-brandAction text-brandBackground hover:bg-brandAction w-full rounded-lg px-6 py-3 font-medium text-white transition-colors"
+					class="bg-brandAction text-brandBackground hover:bg-brandAction/80 w-full rounded-lg px-6 py-3 font-medium text-white transition-colors"
 					on:click={() => onboard.connectWallet()}
 				>
 					Connect Wallet
@@ -215,7 +215,7 @@
 						</div>
 					</div>
 					<button
-						class="bg-brandAction text-brandBackground hover:bg-brandAction w-full rounded-lg px-6 py-3 font-medium text-white transition-colors"
+						class="bg-brandAction text-brandBackground hover:bg-brandAction/80 w-full rounded-lg px-6 py-3 font-medium text-white transition-colors"
 						on:click={() =>
 							handleGasEstimation(
 								provider,
@@ -323,7 +323,7 @@
 							</div>
 						</div>
 						<button
-							class="bg-brandAction text-brandBackground hover:bg-brandAction w-full rounded-lg px-6 py-3 font-medium text-white transition-colors"
+							class="bg-brandAction text-brandBackground hover:bg-brandAction/80 w-full rounded-lg px-6 py-3 font-medium text-white transition-colors"
 							on:click={() => readPublishedGasData(provider)}
 						>
 							Read {readableChains[selectedReadChain].display} Estimations from {writableChains[
