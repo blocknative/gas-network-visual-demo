@@ -164,12 +164,16 @@
 	}
 </script>
 
-<main class="mx-auto max-w-3xl p-4 font-system sm:p-6">
-	<div class="rounded-xl border border-gray-200 bg-white p-6 shadow-md sm:p-8">
+<main
+	class="bg-brandBackground text-brandBackground h-full min-h-[100vh] w-full p-4 font-sans sm:p-6"
+>
+	<div
+		class="border-brandAction/50 bg-brandForeground mx-auto max-w-3xl rounded-xl border p-6 shadow-md sm:p-8"
+	>
 		{#if onboard && !$wallets$?.length}
 			<div class="my-4 flex flex-col gap-2">
 				<button
-					class="w-full rounded-lg bg-blue-500 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-600"
+					class="bg-brandAction text-brandBackground hover:bg-brandAction w-full rounded-lg px-6 py-3 font-medium text-white transition-colors"
 					on:click={() => onboard.connectWallet()}
 				>
 					Connect Wallet
@@ -182,7 +186,7 @@
 				<div class="flex flex-col gap-2 sm:gap-4">
 					<div class="mb-2 flex items-center justify-between gap-4">
 						<div class="flex flex-col gap-1">
-							<label for="read-chain" class="ml-1 text-xs font-medium text-gray-500"
+							<label for="read-chain" class="text-brandBackground/80 ml-1 text-xs font-medium"
 								>Estimates For</label
 							>
 							<select
@@ -196,7 +200,7 @@
 							</select>
 						</div>
 						<div class="flex flex-col gap-1">
-							<label for="write-chain" class="ml-1 text-xs font-medium text-gray-500"
+							<label for="write-chain" class="text-brandBackground/80 ml-1 text-xs font-medium"
 								>Write To</label
 							>
 							<select
@@ -211,7 +215,7 @@
 						</div>
 					</div>
 					<button
-						class="w-full rounded-lg bg-blue-500 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-600"
+						class="bg-brandAction text-brandBackground hover:bg-brandAction w-full rounded-lg px-6 py-3 font-medium text-white transition-colors"
 						on:click={() =>
 							handleGasEstimation(
 								provider,
@@ -247,9 +251,9 @@
 					{#if isLoading}
 						<div class="my-4 flex flex-col items-center gap-2">
 							<div
-								class="h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500"
+								class="border-t-brandBackground border-brandBackground/20 h-12 w-12 animate-spin rounded-full border-4"
 							></div>
-							<p class="text-center text-gray-600 sm:text-left">
+							<p class="text-center sm:text-left">
 								Please Check Connected Browser Wallet for Progress
 							</p>
 						</div>
@@ -282,8 +286,9 @@
 					<div class="mb-2 flex w-full flex-col items-center justify-between gap-4">
 						<div class="flex w-full items-start justify-between gap-4">
 							<div class="flex flex-col gap-1">
-								<label for="quantile-select" class="ml-1 text-xs font-medium text-gray-500"
-									>Read Quantile</label
+								<label
+									for="quantile-select"
+									class="text-brandBackground/80 ml-1 text-xs font-medium">Read Quantile</label
 								>
 								<select
 									id="quantile-select"
@@ -300,7 +305,7 @@
 								</select>
 							</div>
 							<div class="flex flex-col gap-1">
-								<label for="timeout-select" class="ml-1 text-xs font-medium text-gray-500"
+								<label for="timeout-select" class="text-brandBackground/80 ml-1 text-xs font-medium"
 									>Recency</label
 								>
 								<select
@@ -318,7 +323,7 @@
 							</div>
 						</div>
 						<button
-							class="w-full rounded-lg bg-blue-500 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-600"
+							class="bg-brandAction text-brandBackground hover:bg-brandAction w-full rounded-lg px-6 py-3 font-medium text-white transition-colors"
 							on:click={() => readPublishedGasData(provider)}
 						>
 							Read {readableChains[selectedReadChain].display} Estimations from {writableChains[
