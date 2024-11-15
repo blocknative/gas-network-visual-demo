@@ -105,7 +105,7 @@
 		} catch (error) {
 			publishedGasData = null
 			console.error('Gas data fetch error:', error)
-			const revertErrorFromContract = (error as any)?.info?.error?.message
+			const revertErrorFromContract = (error as any)?.info?.error?.message || (error as any)?.reason
 			readFromTargetNetErrorMessage = revertErrorFromContract || (error as string)
 			isLoading = false
 		}
