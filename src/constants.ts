@@ -49,25 +49,45 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 }
 
 export const readableChains: Record<ReadableChainKey, ReadChain> = {
+	[ReadableChainKey.ARBITRUM]: {
+		chainId: 42161,
+		display: 'Arbitrum'
+	  },
+	[ReadableChainKey.BASE]: {
+		  chainId: 8453,
+		  display: 'Base'
+	  },
+	[ReadableChainKey.BLAST]: {
+		  chainId: 81457,
+		  display: 'Blast'
+	  },
 	[ReadableChainKey.MAIN]: {
 		chainId: 1,
 		display: 'Ethereum'
+	},
+	[ReadableChainKey.FANTOM]: {
+		chainId: 250,
+		display: 'Fantom'
+	},
+	[ReadableChainKey.LINEA]: {
+		chainId: 59144,
+		display: 'Linea'
 	},
 	[ReadableChainKey.OPTIMISM]: {
 		chainId: 10,
 		display: 'Optimism'
 	},
-	// [ReadableChainKey.ARBITRUM]: {
-	//   chainId: 42161,
-	//   display: 'Arbitrum'
-	// },
-	[ReadableChainKey.BASE]: {
-		chainId: 8453,
-		display: 'Base'
-	},
 	[ReadableChainKey.POLYGON]: {
 		chainId: 137,
 		display: 'Polygon'
+	},
+	[ReadableChainKey.SEI]: {
+		chainId: 1329,
+		display: 'SEI'
+	},
+	[ReadableChainKey.ZKSYNC]: {
+		chainId: 324,
+		display: 'zkSync'
 	},
 	[ReadableChainKey.UNSUPPORTED_CHAIN]: {
 		chainId: 1638,
