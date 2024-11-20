@@ -33,11 +33,16 @@ export enum WritableChainKey {
 }
 
 export enum ReadableChainKey {
-  MAIN = 'main',
-  OPTIMISM = 'op',
-  // ARBITRUM = 'arb',
+  ARBITRUM = 'arb',
   BASE = 'base',
+  BLAST = 'blast',
+  MAIN = 'main',
+  FANTOM = 'fantom',
+  LINEA = 'linea',
+  OPTIMISM = 'op',
   POLYGON = 'polygon',
+  SEI = 'sei',
+  ZKSYNC = 'zksync',
   UNSUPPORTED_CHAIN = 'unsupportedChain'
 }
 
