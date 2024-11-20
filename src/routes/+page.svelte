@@ -358,3 +358,13 @@
 		{/if}
 	</div>
 </main>
+
+<style>
+	:root {
+		--w3o-background-color: hsl(323 100% 6% / 1);
+		--w3o-text-color: #fce9cf;
+		--w3o-border-color: hsl(35 88% 15% / 1);
+		--w3o-action-color: #fb8d5b;
+		--w3o-border-radius: 1rem;
+	}
+</style>

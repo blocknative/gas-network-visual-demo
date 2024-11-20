@@ -1,4 +1,4 @@
-import blocknativeIcon from './blocknative-icon'
+import gasNetIcon from '$lib/svg/gas-network-icon.svg?raw'
 import type { OnboardAPI } from '@web3-onboard/core'
 
 const infura_key = '80633e48116943128cbab25e402764ab'
@@ -81,9 +81,9 @@ export async function getOnboard() {
 				autoConnectAllPreviousWallet: true
 			},
 			appMetadata: {
-				name: 'Blocknative',
-				icon: blocknativeIcon,
-				description: 'Demo app for Onboard V2',
+				name: 'Gas Network Demo',
+				icon: gasNetIcon,
+				description: 'Bringing web3 gas markets onchain',
 				recommendedInjectedWallets: [
 					{ name: 'MetaMask', url: 'https://metamask.io' },
 					{ name: 'Coinbase', url: 'https://wallet.coinbase.com/' }
@@ -92,9 +92,9 @@ export async function getOnboard() {
 					version: '1.0.0',
 					termsUrl: 'https://www.blocknative.com/terms-conditions',
 					privacyUrl: 'https://www.blocknative.com/privacy-policy'
-				},
-				gettingStartedGuide: 'https://blocknative.com',
-				explore: 'https://blocknative.com'
+				}
+				// gettingStartedGuide: 'https://blocknative.com',
+				// explore: 'https://blocknative.com'
 			}
 		})
 	}
