@@ -173,7 +173,7 @@
 		<h1 class="mb-8 text-center text-3xl">Gas Network Demo</h1>
 
 		{#if onboard && !$wallets$?.length}
-			<div class="my-4 flex flex-col gap-2">
+			<div class="flex flex-col gap-2">
 				<button
 					class="bg-brandAction text-brandBackground hover:bg-brandAction/80 w-full rounded-lg px-6 py-3 font-medium transition-colors"
 					on:click={() => onboard.connectWallet()}
@@ -363,10 +363,10 @@
 
 <style>
 	:root {
-		--w3o-background-color: hsl(323 100% 6% / 1);
-		--w3o-text-color: #fce9cf;
-		--w3o-border-color: hsl(35 88% 15% / 1);
-		--w3o-action-color: #fb8d5b;
+		--w3o-background-color: #fce9cf;
+		--w3o-text-color: #280019;
+		--w3o-border-color: hsl(35 88% 70% / 1);
+		--w3o-action-color: #fb3d00;
 		--w3o-border-radius: 1rem;
 	}
 </style>
