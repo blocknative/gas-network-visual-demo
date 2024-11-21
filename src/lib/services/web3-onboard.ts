@@ -93,8 +93,6 @@ export async function getOnboard() {
 					termsUrl: 'https://www.blocknative.com/terms-conditions',
 					privacyUrl: 'https://www.blocknative.com/privacy-policy'
 				}
-				// gettingStartedGuide: 'https://blocknative.com',
-				// explore: 'https://blocknative.com'
 			}
 		})
 	}
