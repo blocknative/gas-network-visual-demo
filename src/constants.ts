@@ -7,8 +7,8 @@ import {
 } from '$lib/@types/types'
 
 export const gasNetwork = {
-	url: 'https://proxy.gas.network',
-	contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
+	url: 'https://http-rpc.devnet.gas.network',
+	contract: '0x3aC9B46A1f78b19F75c0505e812a8dcdD1eD0cb7'
 }
 
 // You can then create the object that implements this interface:
