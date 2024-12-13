@@ -52,15 +52,15 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 	[ReadableChainKey.ARBITRUM]: {
 		chainId: 42161,
 		display: 'Arbitrum'
-	  },
+	},
 	[ReadableChainKey.BASE]: {
-		  chainId: 8453,
-		  display: 'Base'
-	  },
+		chainId: 8453,
+		display: 'Base'
+	},
 	[ReadableChainKey.BLAST]: {
-		  chainId: 81457,
-		  display: 'Blast'
-	  },
+		chainId: 81457,
+		display: 'Blast'
+	},
 	[ReadableChainKey.MAIN]: {
 		chainId: 1,
 		display: 'Ethereum'
@@ -89,10 +89,6 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 		chainId: 324,
 		display: 'zkSync'
 	},
-	[ReadableChainKey.UNSUPPORTED_CHAIN]: {
-		chainId: 1638,
-		display: 'Unsupported Chain'
-	},
 	[ReadableChainKey.GNOSIS]: {
 		chainId: 100,
 		display: 'Gnosis'
@@ -113,4 +109,11 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 		chainId: 7000,
 		display: 'ZetaChain'
 	},
+
+  // Add new chains above this
+  // Unsupported chain for error testing
+	[ReadableChainKey.UNSUPPORTED_CHAIN]: {
+		chainId: 1638,
+		display: 'Unsupported Chain'
+	}
 }
