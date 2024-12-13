@@ -92,5 +92,25 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 	[ReadableChainKey.UNSUPPORTED_CHAIN]: {
 		chainId: 1638,
 		display: 'Unsupported Chain'
-	}
+	},
+	[ReadableChainKey.GNOSIS]: {
+		chainId: 100,
+		display: 'Gnosis'
+	},
+	[ReadableChainKey.IMMUTABLE]: {
+		chainId: 204,
+		display: 'Immutable zkEVM'
+	},
+	[ReadableChainKey.OPBNB]: {
+		chainId: 13371,
+		display: 'opBNB'
+	},
+	[ReadableChainKey.SCROLL]: {
+		chainId: 534352,
+		display: 'Scroll'
+	},
+	[ReadableChainKey.ZETACHAIN]: {
+		chainId: 7000,
+		display: 'ZetaChain'
+	},
 }
