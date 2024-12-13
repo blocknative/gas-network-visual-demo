@@ -14,7 +14,7 @@
 	import { readableChains, writableChains, quantiles, gasNetwork } from '../constants'
 	import consumer from '$lib/abis/consumer.json'
 	import gasnet from '$lib/abis/gasnet.json'
-	import type { QuantileMap } from '$lib/@types/types'
+	import type { QuantileMap, ReadChain } from '$lib/@types/types'
 	import Drawer from '$lib/components/Drawer.svelte'
 
 	let gasEstimation: EstimationData | null = null
@@ -162,20 +162,28 @@
 	function formatBigInt(key: string, value: any) {
 		return typeof value === 'bigint' ? value.toString() : value
 	}
+
+	function orderChainsAlphabetically() {
+		return Object.entries(readableChains).sort((a, b) => {
+			if (a[0] === 'unsupportedChain') return 1
+			if (b[0] === 'unsupportedChain') return -1
+			return a[1].display.localeCompare(b[1].display)
+		})
+	}
 </script>
 
 <main
-	class="bg-brandBackground text-brandBackground h-full min-h-[100vh] w-full p-4 font-sans sm:p-6"
+	class="h-full min-h-[100vh] w-full bg-brandBackground p-4 font-sans text-brandBackground sm:p-6"
 >
 	<div
-		class="border-brandAction/50 bg-brandForeground mx-auto max-w-3xl rounded-xl border p-6 shadow-md sm:p-8"
+		class="mx-auto max-w-3xl rounded-xl border border-brandAction/50 bg-brandForeground p-6 shadow-md sm:p-8"
 	>
 		<h1 class="mb-8 text-center text-3xl">Gas Network Demo</h1>
 
 		{#if onboard && !$wallets$?.length}
 			<div class="flex flex-col gap-2">
 				<button
-					class="bg-brandAction text-brandBackground hover:bg-brandAction/80 w-full rounded-lg px-6 py-3 font-medium transition-colors"
+					class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/80"
 					on:click={() => onboard.connectWallet()}
 				>
 					Connect Wallet
@@ -188,7 +196,7 @@
 				<div class="flex flex-col gap-2 sm:gap-4">
 					<div class="flex items-center justify-between gap-5">
 						<div class="flex w-full flex-col gap-1">
-							<label for="read-chain" class="text-brandBackground/80 ml-1 text-xs font-medium"
+							<label for="read-chain" class="ml-1 text-xs font-medium text-brandBackground/80"
 								>Estimates For</label
 							>
 							<select
@@ -196,13 +204,13 @@
 								bind:value={selectedReadChain}
 								class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 							>
-								{#each Object.entries(readableChains) as [key, chain]}
+								{#each orderChainsAlphabetically() as [key, chain]}
 									<option value={key}>{chain.display}</option>
 								{/each}
 							</select>
 						</div>
 						<div class="flex w-full flex-col gap-1">
-							<label for="write-chain" class="text-brandBackground/80 ml-1 text-xs font-medium"
+							<label for="write-chain" class="ml-1 text-xs font-medium text-brandBackground/80"
 								>Write To</label
 							>
 							<select
@@ -217,7 +225,7 @@
 						</div>
 					</div>
 					<button
-						class="bg-brandAction text-brandBackground hover:bg-brandAction/80 w-full rounded-lg px-6 py-3 font-medium transition-colors"
+						class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/80"
 						on:click={() =>
 							handleGasEstimation(
 								provider,
@@ -253,7 +261,7 @@
 					{#if isLoading}
 						<div class="my-4 flex flex-col items-center gap-2">
 							<div
-								class="border-t-brandBackground border-brandBackground/20 h-12 w-12 animate-spin rounded-full border-4"
+								class="h-12 w-12 animate-spin rounded-full border-4 border-brandBackground/20 border-t-brandBackground"
 							></div>
 							<p class="text-center sm:text-left">
 								Please Check Connected Browser Wallet for Progress
@@ -290,7 +298,7 @@
 							<div class="flex w-full flex-col gap-1">
 								<label
 									for="quantile-select"
-									class="text-brandBackground/80 ml-1 text-xs font-medium">Read Quantile</label
+									class="ml-1 text-xs font-medium text-brandBackground/80">Read Quantile</label
 								>
 								<select
 									id="quantile-select"
@@ -307,7 +315,7 @@
 								</select>
 							</div>
 							<div class="flex w-full flex-col gap-1">
-								<label for="timeout-select" class="text-brandBackground/80 ml-1 text-xs font-medium"
+								<label for="timeout-select" class="ml-1 text-xs font-medium text-brandBackground/80"
 									>Recency</label
 								>
 								<select
@@ -325,7 +333,7 @@
 							</div>
 						</div>
 						<button
-							class="bg-brandAction text-brandBackground hover:bg-brandAction/80 w-full rounded-lg px-6 py-3 font-medium transition-colors"
+							class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/80"
 							on:click={() => readPublishedGasData(provider)}
 						>
 							Read {readableChains[selectedReadChain].display} Estimations from {writableChains[
