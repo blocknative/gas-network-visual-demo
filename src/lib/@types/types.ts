@@ -43,8 +43,14 @@ export enum ReadableChainKey {
   POLYGON = 'polygon',
   SEI = 'sei',
   ZKSYNC = 'zksync',
-  UNSUPPORTED_CHAIN = 'unsupportedChain'
+  UNSUPPORTED_CHAIN = 'unsupportedChain',
+  GNOSIS = 'gnosis',
+  IMMUTABLE = 'immutablezkenv',
+  OPBNB = 'opbnb',
+  SCROLL = 'scroll',
+  ZETACHAIN = 'zetachain'
 }
+ 
 
 export interface ReadChain {
   chainId: number
