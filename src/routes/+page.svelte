@@ -170,10 +170,12 @@
 	<div
 		class="border-brandAction/50 bg-brandForeground mx-auto max-w-3xl rounded-xl border p-6 shadow-md sm:p-8"
 	>
+		<h1 class="mb-8 text-center text-3xl">Gas Network Demo</h1>
+
 		{#if onboard && !$wallets$?.length}
-			<div class="my-4 flex flex-col gap-2">
+			<div class="flex flex-col gap-2">
 				<button
-					class="bg-brandAction text-brandBackground hover:bg-brandAction/80 w-full rounded-lg px-6 py-3 font-medium text-white transition-colors"
+					class="bg-brandAction text-brandBackground hover:bg-brandAction/80 w-full rounded-lg px-6 py-3 font-medium transition-colors"
 					on:click={() => onboard.connectWallet()}
 				>
 					Connect Wallet
@@ -184,29 +186,29 @@
 		{#if $wallets$}
 			{#each $wallets$ as { provider }}
 				<div class="flex flex-col gap-2 sm:gap-4">
-					<div class="mb-2 flex items-center justify-between gap-4">
-						<div class="flex flex-col gap-1">
+					<div class="flex items-center justify-between gap-5">
+						<div class="flex w-full flex-col gap-1">
 							<label for="read-chain" class="text-brandBackground/80 ml-1 text-xs font-medium"
 								>Estimates For</label
 							>
 							<select
 								id="read-chain"
 								bind:value={selectedReadChain}
-								class="min-w-[140px] cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+								class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 							>
 								{#each Object.entries(readableChains) as [key, chain]}
 									<option value={key}>{chain.display}</option>
 								{/each}
 							</select>
 						</div>
-						<div class="flex flex-col gap-1">
+						<div class="flex w-full flex-col gap-1">
 							<label for="write-chain" class="text-brandBackground/80 ml-1 text-xs font-medium"
 								>Write To</label
 							>
 							<select
 								id="write-chain"
 								bind:value={selectedWriteChain}
-								class="min-w-[140px] cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+								class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 							>
 								{#each Object.entries(writableChains) as [key, chain]}
 									<option value={key}>{chain.display}</option>
@@ -215,7 +217,7 @@
 						</div>
 					</div>
 					<button
-						class="bg-brandAction text-brandBackground hover:bg-brandAction/80 w-full rounded-lg px-6 py-3 font-medium text-white transition-colors"
+						class="bg-brandAction text-brandBackground hover:bg-brandAction/80 w-full rounded-lg px-6 py-3 font-medium transition-colors"
 						on:click={() =>
 							handleGasEstimation(
 								provider,
@@ -283,9 +285,9 @@
 						</div>
 					{/if}
 
-					<div class="mb-2 flex w-full flex-col items-center justify-between gap-4">
-						<div class="flex w-full items-start justify-between gap-4">
-							<div class="flex flex-col gap-1">
+					<div class="flex w-full flex-col items-center justify-between gap-4">
+						<div class="flex w-full items-start justify-between gap-5">
+							<div class="flex w-full flex-col gap-1">
 								<label
 									for="quantile-select"
 									class="text-brandBackground/80 ml-1 text-xs font-medium">Read Quantile</label
@@ -293,7 +295,7 @@
 								<select
 									id="quantile-select"
 									bind:value={selectedQuantile}
-									class="min-w-[140px] cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+									class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 								>
 									{#each Object.entries(quantiles) as [key, value]}
 										{#if key !== 'Q98'}
@@ -304,14 +306,14 @@
 									{/each}
 								</select>
 							</div>
-							<div class="flex flex-col gap-1">
+							<div class="flex w-full flex-col gap-1">
 								<label for="timeout-select" class="text-brandBackground/80 ml-1 text-xs font-medium"
 									>Recency</label
 								>
 								<select
 									id="timeout-select"
 									bind:value={selectedTimeout}
-									class="min-w-[140px] cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+									class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 								>
 									<option value={10}>10 Sec</option>
 									<option value={30}>30 Sec</option>
@@ -323,7 +325,7 @@
 							</div>
 						</div>
 						<button
-							class="bg-brandAction text-brandBackground hover:bg-brandAction/80 w-full rounded-lg px-6 py-3 font-medium text-white transition-colors"
+							class="bg-brandAction text-brandBackground hover:bg-brandAction/80 w-full rounded-lg px-6 py-3 font-medium transition-colors"
 							on:click={() => readPublishedGasData(provider)}
 						>
 							Read {readableChains[selectedReadChain].display} Estimations from {writableChains[
@@ -358,3 +360,13 @@
 		{/if}
 	</div>
 </main>
+
+<style>
+	:root {
+		--w3o-background-color: #fce9cf;
+		--w3o-text-color: #280019;
+		--w3o-border-color: hsl(35 88% 70% / 1);
+		--w3o-action-color: #fb3d00;
+		--w3o-border-radius: 1rem;
+	}
+</style>
