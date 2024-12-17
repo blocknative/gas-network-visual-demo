@@ -61,6 +61,14 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 		chainId: 81457,
 		display: 'Blast'
 	},
+	[ReadableChainKey.CHILIZ]: {
+		chainId: 88888,
+		display: 'Chiliz'
+	},
+	[ReadableChainKey.CRONOS]: {
+		chainId: 25,
+		display: 'Cronos'
+	},
 	[ReadableChainKey.MAIN]: {
 		chainId: 1,
 		display: 'Ethereum'
@@ -73,6 +81,14 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 		chainId: 59144,
 		display: 'Linea'
 	},
+	[ReadableChainKey.LISK]: {
+		chainId: 1135,
+		display: 'Lisk'
+	},
+	[ReadableChainKey.MOONBEAM]: {
+		chainId: 1284,
+		display: 'Moonbeam'
+	},
 	[ReadableChainKey.OPTIMISM]: {
 		chainId: 10,
 		display: 'Optimism'
@@ -80,6 +96,10 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 	[ReadableChainKey.POLYGON]: {
 		chainId: 137,
 		display: 'Polygon'
+	},
+	[ReadableChainKey.RONIN]: {
+		chainId: 2020,
+		display: 'Ronin'
 	},
 	[ReadableChainKey.SEI]: {
 		chainId: 1329,
