@@ -53,6 +53,10 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 		chainId: 42161,
 		display: 'Arbitrum'
 	},
+	[ReadableChainKey.AVALANCHE]: {
+		chainId: 43114,
+		display: 'Avalanche'
+	},
 	[ReadableChainKey.BASE]: {
 		chainId: 8453,
 		display: 'Base'
@@ -84,6 +88,10 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 	[ReadableChainKey.LISK]: {
 		chainId: 1135,
 		display: 'Lisk'
+	},
+	[ReadableChainKey.MANTLE]: {
+		chainId: 5000,
+		display: 'Mantle'
 	},
 	[ReadableChainKey.MOONBEAM]: {
 		chainId: 1284,

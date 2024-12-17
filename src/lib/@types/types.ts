@@ -34,6 +34,7 @@ export enum WritableChainKey {
 
 export enum ReadableChainKey {
   ARBITRUM = 'arb',
+  AVALANCHE = 'avalanche',
   BASE = 'base',
   BLAST = 'blast',
   CHILIZ = 'chiliz',
@@ -42,6 +43,7 @@ export enum ReadableChainKey {
   FANTOM = 'fantom',
   LINEA = 'linea',
   LISK = 'lisk',
+  MANTLE = 'mantle',
   MOONBEAM = 'moonbeam',
   OPTIMISM = 'op',
   POLYGON = 'polygon',
