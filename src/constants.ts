@@ -8,7 +8,7 @@ import {
 
 export const gasNetwork = {
 	url: 'https://http-rpc.devnet.gas.network',
-	contract: '0x3aC9B46A1f78b19F75c0505e812a8dcdD1eD0cb7'
+	contract: '0xC2F61FAfA65D874725e485f4B52B9B495559F381'
 }
 
 // You can then create the object that implements this interface:
