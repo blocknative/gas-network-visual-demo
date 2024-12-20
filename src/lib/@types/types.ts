@@ -25,11 +25,27 @@ export interface EstimationData {
   chainid: bigint
 }
 
+
+export interface VPayload { 
+  typ: number,
+  value: string,
+}
+
+export interface PayloadValues {
+  height: bigint
+  timestamp: bigint
+  systemid: number
+  chainid: bigint
+  payloads: Array<VPayload>
+}
+
+
 export enum WritableChainKey {
   SEPOLIA = 'sepolia',
   // ARBITRUM_SEPOLIA = 'arbitrumSepolia',
   OP_SEPOLIA = 'opSepolia',
-  BASE_SEPOLIA = 'baseSepolia'
+  BASE_SEPOLIA = 'baseSepolia',
+  DEVNET = 'devnet'
 }
 
 export enum ReadableChainKey {
@@ -48,10 +64,9 @@ export enum ReadableChainKey {
   IMMUTABLE = 'immutablezkenv',
   OPBNB = 'opbnb',
   SCROLL = 'scroll',
-  ZETACHAIN = 'zetachain'
+  ZETACHAIN = 'zetachain',
+  CHILIZ = 'chiliz'
 }
- 
-
 export interface ReadChain {
   chainId: number
   display: string

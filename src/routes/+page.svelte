@@ -7,7 +7,9 @@
 		type GasEstimate,
 		type EstimationData,
 		ReadableChainKey,
-		WritableChainKey
+		WritableChainKey,
+		type PayloadValues,
+		type VPayload,
 	} from '$lib/@types/types'
 	import { createEstimationObject } from '$lib/utils'
 	import { getOnboard } from '$lib/services/web3-onboard'
@@ -16,6 +18,12 @@
 	import gasnet from '$lib/abis/gasnet.json'
 	import type { QuantileMap } from '$lib/@types/types'
 	import Drawer from '$lib/components/Drawer.svelte'
+
+
+
+
+	let pValues: PayloadValues | null = null
+	let pRaw: string | null = null
 
 	let gasEstimation: EstimationData | null = null
 	let publishedGasData: GasEstimate | null = null
@@ -54,7 +62,7 @@
 
 	async function fetchGasEstimationFromGasNet(
 		chain: string
-	): Promise<{ estimationData: EstimationData; signature: string } | null> {
+	): Promise<{ paramsPayload: PayloadValues ,raw: string } | null> {
 		isLoading = true
 		transactionHash = null
 
@@ -62,9 +70,10 @@
 			const { ethers } = await loadEthers()
 			const rpcProvider = new ethers.JsonRpcProvider(gasNetwork.url)
 			const gasNetContract = new ethers.Contract(gasNetwork.contract, gasnet.abi, rpcProvider)
-			const [estimation, signature] = await gasNetContract.getEstimation(chain)
-			transactionSignature = signature
-			return { estimationData: createEstimationObject(estimation), signature }
+			const payload = await gasNetContract.getValues(2,chain) 
+
+			
+			return { paramsPayload: parsePayload(payload), raw: payload }
 		} catch (error) {
 			const revertErrorFromContract = (error as any)?.info?.error?.message
 			console.error(error)
@@ -115,7 +124,6 @@
 		try {
 			const { ethers } = await loadEthers()
 			const ethersProvider = new ethers.BrowserProvider(provider, 'any')
-
 			const signer = await ethersProvider.getSigner()
 			const consumerContract = new ethers.Contract(
 				writableChains[selectedWriteChain].contract,
@@ -123,7 +131,8 @@
 				signer
 			)
 
-			const transaction = await consumerContract.setEstimation(gasEstimation, transactionSignature)
+		//	const transaction = await consumerContract.setEstimation(gasEstimation, transactionSignature)
+		const transaction = await consumerContract.storeValues(pRaw)
 			const receipt = await transaction.wait()
 
 			isLoading = false
@@ -137,22 +146,60 @@
 		}
 	}
 
+
+
+	function parsePayload(payload: string): PayloadValues {
+
+		let pV = {} as PayloadValues;
+		const buf = Buffer.from(payload.replace("0x",""), 'hex');
+		let version = buf.readUint8(0x1f)
+		pV.height = buf.readBigUInt64BE(0x17);
+		pV.chainid =  buf.readBigUInt64BE(0xF);
+		pV.systemid = buf.readUint8(0xE)
+
+		let timeBuff = Buffer.alloc(8);
+		buf.copy(timeBuff, 2, 0x8,0xE);
+		pV.timestamp = timeBuff.readBigUInt64BE(0);
+		let pLen = buf.readUint16BE(0x6);
+
+				
+		pV.payloads = new Array();
+		let value = Buffer.alloc(0x20);
+		let pos = 0;
+
+		for (let i = 0; i < pLen; i++) { 
+			pos += 0x20; // also, skip header 
+			buf.copy(value, 2, pos+0x2);  
+			pV.payloads.push({
+  				typ: buf.readUint16BE(pos),
+ 				value: "0x"+value.toString('hex') // value.readBigUInt64BE(0),
+			} as VPayload);
+	
+		}
+  
+		// ... and signature 
+		return pV;
+	}
+
 	async function handleGasEstimation(provider: any, readChainId: number, writeChainId: number) {
 		publishErrorMessage = null
 		readFromGasNetErrorMessage = null
 		try {
 			const gasNetData = await fetchGasEstimationFromGasNet(readChainId.toString())
+			
 			if (gasNetData) {
-				const { estimationData, signature } = gasNetData
-				if (estimationData && signature) {
-					gasEstimation = estimationData
-					await onboard.setChain({ chainId: writeChainId })
+				const { paramsPayload, raw } = gasNetData 
+				if (paramsPayload) {
+					pValues = paramsPayload;
+					pRaw = raw;
+
+			//		await onboard.setChain({ chainId: writeChainId })
 					await publishGasEstimation(provider)
 					return
 				}
 			}
 			throw new Error(
-				`Failed to fetch gas estimation: ${gasNetData?.estimationData} or signature: ${gasNetData?.signature} from GasNet`
+				`Failed to fetch gas estimation: ${gasNetData?.paramsPayload} from GasNet`
 			)
 		} catch (e) {
 			console.error(e)
@@ -228,18 +275,18 @@
 						].display}
 					</button>
 
-					{#if gasEstimation}
+					{#if pValues}
 						<Drawer {isDrawerOpen}>
 							<pre
 								class="m-0 overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
-									gasEstimation,
+									pValues,
 									formatBigInt,
 									2
 								)}</pre>
 						</Drawer>
 						<p>
 							Data created on GasNet at: {new Date(
-								Number(gasEstimation.timestamp) * 1000
+								Number(pValues.timestamp) 
 							).toLocaleString(undefined, {
 								timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 								dateStyle: 'medium',
@@ -344,6 +391,7 @@
 										formatBigInt,
 										2
 									)}</pre>
+								<pre class="m-0 overflow-scroll overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{pRaw}</pre>
 							</div>
 						{/if}
 					</div>

@@ -7,7 +7,21 @@ import {
 } from '$lib/@types/types'
 
 export const gasNetwork = {
-	url: 'https://proxy.gas.network',
+//	url: 'https://proxy.gas.network',
+//	contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
+
+	// url: 'https://http-rpc.devnet.gas.network',
+	// contract: '0x3aC9B46A1f78b19F75c0505e812a8dcdD1eD0cb7'
+	// contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
+
+	//url: 'https://http-rpc.devnet.bnc-tooling.com',
+	//contract: '0x75F68Cda7D257fF6A253d4d12757b733d9A7dA3E', //'0x50D090B45AB70a88eE15F702939FA2ab4CFCA5e7'
+	
+
+//	url: 'http://0.0.0.0:8545',
+	//contract: '0xC2F61FAfA65D874725e485f4B52B9B495559F381'
+
+	url: 'http://pretender-min.prod',
 	contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
 }
 
@@ -22,6 +36,14 @@ export const quantiles: QuantileMap = {
 }
 
 export const writableChains: Record<WritableChainKey, WriteChain> = {
+
+
+	[WritableChainKey.DEVNET]: {
+		chainId: 19735516467,
+		display: 'Devnet',
+		rpcUrl: 'https://http-rpc.devnet.gas.network',
+		contract: '0x3277023a8577dDc27d65efBC2536d550F3011818'
+	},	
 	[WritableChainKey.SEPOLIA]: {
 		chainId: 11155111,
 		display: 'Ethereum Sepolia',
@@ -113,4 +135,11 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 		chainId: 7000,
 		display: 'ZetaChain'
 	},
+	[ReadableChainKey.CHILIZ]: {
+		chainId: 88888,
+		display: 'Chiliz'
+	},
+
+
+	
 }
