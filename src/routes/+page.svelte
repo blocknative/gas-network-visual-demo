@@ -140,6 +140,7 @@
 	async function handleGasEstimation(provider: any, readChainId: number, writeChainId: number) {
 		publishErrorMessage = null
 		readFromGasNetErrorMessage = null
+    gasEstimation = null
 		try {
 			const gasNetData = await fetchGasEstimationFromGasNet(readChainId.toString())
 			if (gasNetData) {

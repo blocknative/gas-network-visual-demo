@@ -49,6 +49,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 }
 
 export const readableChains: Record<ReadableChainKey, ReadChain> = {
+  // Supported chains are sorted in the component handler
 	[ReadableChainKey.ARBITRUM]: {
 		chainId: 42161,
 		display: 'Arbitrum'
