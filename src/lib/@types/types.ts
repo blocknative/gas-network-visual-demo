@@ -55,7 +55,9 @@ export enum ReadableChainKey {
   IMMUTABLE = 'immutablezkenv',
   OPBNB = 'opbnb',
   SCROLL = 'scroll',
-  ZETACHAIN = 'zetachain'
+  ZETACHAIN = 'zetachain',
+  POLYGONZKEVM = 'polygonzkevm',
+  WORLDCHAIN = 'worldchain'
 }
  
 
