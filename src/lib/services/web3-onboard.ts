@@ -75,6 +75,12 @@ export async function getOnboard() {
 					token: 'OETH',
 					label: 'OP Mainnet',
 					rpcUrl: 'https://mainnet.optimism.io'
+				},
+				{
+					id: 59141,
+					token: 'LineaETH',
+					label: 'Linea Sepolia',
+					rpcUrl: 'https://rpc.sepolia.linea.build'
 				}
 			],
 			connect: {
