@@ -138,6 +138,14 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 		chainId: 7000,
 		display: 'ZetaChain'
 	},
+	[ReadableChainKey.POLYGONZKEVM]: {
+		chainId: 1101,
+		display: 'Polygon zkEVM'
+	},
+	[ReadableChainKey.WORLDCHAIN]: {
+		chainId: 480,
+		display: 'World Chain'
+	},
 
   // Add new chains above this
   // Unsupported chain for error testing
