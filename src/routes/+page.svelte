@@ -5,13 +5,11 @@
 	import type { OnboardAPI, WalletState } from '@web3-onboard/core'
 	import {
 		type GasEstimate,
-		type EstimationData,
 		ReadableChainKey,
 		WritableChainKey,
 		type PayloadValues,
-		type VPayload,
+		type VPayload
 	} from '$lib/@types/types'
-	import { createEstimationObject } from '$lib/utils'
 	import { getOnboard } from '$lib/services/web3-onboard'
 	import { readableChains, writableChains, quantiles, gasNetwork } from '../constants'
 	import consumer from '$lib/abis/consumer.json'
@@ -19,15 +17,10 @@
 	import type { QuantileMap } from '$lib/@types/types'
 	import Drawer from '$lib/components/Drawer.svelte'
 
-
-
-
 	let pValues: PayloadValues | null = null
 	let pRaw: string | null = null
 
-	let gasEstimation: EstimationData | null = null
 	let publishedGasData: GasEstimate | null = null
-	let transactionSignature: string | null = null
 	let transactionHash: string | null = null
 	let publishErrorMessage: string | null = null
 	let readFromGasNetErrorMessage: string | null = null
@@ -62,7 +55,7 @@
 
 	async function fetchGasEstimationFromGasNet(
 		chain: string
-	): Promise<{ paramsPayload: PayloadValues ,raw: string } | null> {
+	): Promise<{ paramsPayload: PayloadValues; rawReadChainData: string } | null> {
 		isLoading = true
 		transactionHash = null
 
@@ -70,10 +63,9 @@
 			const { ethers } = await loadEthers()
 			const rpcProvider = new ethers.JsonRpcProvider(gasNetwork.url)
 			const gasNetContract = new ethers.Contract(gasNetwork.contract, gasnet.abi, rpcProvider)
-			const payload = await gasNetContract.getValues(2,chain) 
+			const payload = await gasNetContract.getValues(2, chain)
 
-			
-			return { paramsPayload: parsePayload(payload), raw: payload }
+			return { paramsPayload: parsePayload(payload), rawReadChainData: payload }
 		} catch (error) {
 			const revertErrorFromContract = (error as any)?.info?.error?.message
 			console.error(error)
@@ -131,8 +123,7 @@
 				signer
 			)
 
-		//	const transaction = await consumerContract.setEstimation(gasEstimation, transactionSignature)
-		const transaction = await consumerContract.storeValues(pRaw)
+			const transaction = await consumerContract.storeValues(pRaw)
 			const receipt = await transaction.wait()
 
 			isLoading = false
@@ -146,39 +137,33 @@
 		}
 	}
 
-
-
 	function parsePayload(payload: string): PayloadValues {
+		let pV = {} as PayloadValues
+		const buf = Buffer.from(payload.replace('0x', ''), 'hex')
+		pV.height = buf.readBigUInt64BE(0x17)
+		pV.chainid = buf.readBigUInt64BE(0xf)
+		pV.systemid = buf.readUint8(0xe)
 
-		let pV = {} as PayloadValues;
-		const buf = Buffer.from(payload.replace("0x",""), 'hex');
-		let version = buf.readUint8(0x1f)
-		pV.height = buf.readBigUInt64BE(0x17);
-		pV.chainid =  buf.readBigUInt64BE(0xF);
-		pV.systemid = buf.readUint8(0xE)
+		let timeBuff = Buffer.alloc(8)
+		buf.copy(timeBuff, 2, 0x8, 0xe)
+		pV.timestamp = timeBuff.readBigUInt64BE(0)
+		let pLen = buf.readUint16BE(0x6)
 
-		let timeBuff = Buffer.alloc(8);
-		buf.copy(timeBuff, 2, 0x8,0xE);
-		pV.timestamp = timeBuff.readBigUInt64BE(0);
-		let pLen = buf.readUint16BE(0x6);
+		pV.payloads = new Array()
+		let value = Buffer.alloc(0x20)
+		let pos = 0
 
-				
-		pV.payloads = new Array();
-		let value = Buffer.alloc(0x20);
-		let pos = 0;
-
-		for (let i = 0; i < pLen; i++) { 
-			pos += 0x20; // also, skip header 
-			buf.copy(value, 2, pos+0x2);  
+		for (let i = 0; i < pLen; i++) {
+			pos += 0x20 // also, skip header
+			buf.copy(value, 2, pos + 0x2)
 			pV.payloads.push({
-  				typ: buf.readUint16BE(pos),
- 				value: "0x"+value.toString('hex') // value.readBigUInt64BE(0),
-			} as VPayload);
-	
+				typ: buf.readUint16BE(pos),
+				value: '0x' + value.toString('hex') // value.readBigUInt64BE(0),
+			} as VPayload)
 		}
-  
-		// ... and signature 
-		return pV;
+
+		// ... and signature
+		return pV
 	}
 
 	async function handleGasEstimation(provider: any, readChainId: number, writeChainId: number) {
@@ -186,21 +171,19 @@
 		readFromGasNetErrorMessage = null
 		try {
 			const gasNetData = await fetchGasEstimationFromGasNet(readChainId.toString())
-			
-			if (gasNetData) {
-				const { paramsPayload, raw } = gasNetData 
-				if (paramsPayload) {
-					pValues = paramsPayload;
-					pRaw = raw;
 
-			//		await onboard.setChain({ chainId: writeChainId })
+			if (gasNetData) {
+				const { paramsPayload, rawReadChainData } = gasNetData
+				if (paramsPayload) {
+					pValues = paramsPayload
+					pRaw = rawReadChainData
+
+					await onboard.setChain({ chainId: writeChainId })
 					await publishGasEstimation(provider)
 					return
 				}
 			}
-			throw new Error(
-				`Failed to fetch gas estimation: ${gasNetData?.paramsPayload} from GasNet`
-			)
+			throw new Error(`Failed to fetch gas estimation: ${gasNetData?.paramsPayload} from GasNet`)
 		} catch (e) {
 			console.error(e)
 		}
@@ -212,15 +195,15 @@
 </script>
 
 <main
-	class="bg-brandBackground text-brandBackground h-full min-h-[100vh] w-full p-4 font-sans sm:p-6"
+	class="h-full min-h-[100vh] w-full bg-brandBackground p-4 font-sans text-brandBackground sm:p-6"
 >
 	<div
-		class="border-brandAction/50 bg-brandForeground mx-auto max-w-3xl rounded-xl border p-6 shadow-md sm:p-8"
+		class="mx-auto max-w-3xl rounded-xl border border-brandAction/50 bg-brandForeground p-6 shadow-md sm:p-8"
 	>
 		{#if onboard && !$wallets$?.length}
 			<div class="my-4 flex flex-col gap-2">
 				<button
-					class="bg-brandAction text-brandBackground hover:bg-brandAction/80 w-full rounded-lg px-6 py-3 font-medium text-white transition-colors"
+					class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground text-white transition-colors hover:bg-brandAction/80"
 					on:click={() => onboard.connectWallet()}
 				>
 					Connect Wallet
@@ -233,7 +216,7 @@
 				<div class="flex flex-col gap-2 sm:gap-4">
 					<div class="mb-2 flex items-center justify-between gap-4">
 						<div class="flex flex-col gap-1">
-							<label for="read-chain" class="text-brandBackground/80 ml-1 text-xs font-medium"
+							<label for="read-chain" class="ml-1 text-xs font-medium text-brandBackground/80"
 								>Estimates For</label
 							>
 							<select
@@ -247,7 +230,7 @@
 							</select>
 						</div>
 						<div class="flex flex-col gap-1">
-							<label for="write-chain" class="text-brandBackground/80 ml-1 text-xs font-medium"
+							<label for="write-chain" class="ml-1 text-xs font-medium text-brandBackground/80"
 								>Write To</label
 							>
 							<select
@@ -262,7 +245,7 @@
 						</div>
 					</div>
 					<button
-						class="bg-brandAction text-brandBackground hover:bg-brandAction/80 w-full rounded-lg px-6 py-3 font-medium text-white transition-colors"
+						class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground text-white transition-colors hover:bg-brandAction/80"
 						on:click={() =>
 							handleGasEstimation(
 								provider,
@@ -285,20 +268,21 @@
 								)}</pre>
 						</Drawer>
 						<p>
-							Data created on GasNet at: {new Date(
-								Number(pValues.timestamp) 
-							).toLocaleString(undefined, {
-								timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-								dateStyle: 'medium',
-								timeStyle: 'long'
-							})}
+							Data created on GasNet at: {new Date(Number(pValues.timestamp)).toLocaleString(
+								undefined,
+								{
+									timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+									dateStyle: 'medium',
+									timeStyle: 'long'
+								}
+							)}
 						</p>
 					{/if}
 
 					{#if isLoading}
 						<div class="my-4 flex flex-col items-center gap-2">
 							<div
-								class="border-t-brandBackground border-brandBackground/20 h-12 w-12 animate-spin rounded-full border-4"
+								class="h-12 w-12 animate-spin rounded-full border-4 border-brandBackground/20 border-t-brandBackground"
 							></div>
 							<p class="text-center sm:text-left">
 								Please Check Connected Browser Wallet for Progress
@@ -335,7 +319,7 @@
 							<div class="flex flex-col gap-1">
 								<label
 									for="quantile-select"
-									class="text-brandBackground/80 ml-1 text-xs font-medium">Read Quantile</label
+									class="ml-1 text-xs font-medium text-brandBackground/80">Read Quantile</label
 								>
 								<select
 									id="quantile-select"
@@ -352,7 +336,7 @@
 								</select>
 							</div>
 							<div class="flex flex-col gap-1">
-								<label for="timeout-select" class="text-brandBackground/80 ml-1 text-xs font-medium"
+								<label for="timeout-select" class="ml-1 text-xs font-medium text-brandBackground/80"
 									>Recency</label
 								>
 								<select
@@ -370,7 +354,7 @@
 							</div>
 						</div>
 						<button
-							class="bg-brandAction text-brandBackground hover:bg-brandAction/80 w-full rounded-lg px-6 py-3 font-medium text-white transition-colors"
+							class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground text-white transition-colors hover:bg-brandAction/80"
 							on:click={() => readPublishedGasData(provider)}
 						>
 							Read {readableChains[selectedReadChain].display} Estimations from {writableChains[
@@ -391,7 +375,8 @@
 										formatBigInt,
 										2
 									)}</pre>
-								<pre class="m-0 overflow-scroll overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{pRaw}</pre>
+								<pre
+									class="m-0 overflow-scroll overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{pRaw}</pre>
 							</div>
 						{/if}
 					</div>
