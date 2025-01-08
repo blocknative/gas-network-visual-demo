@@ -45,6 +45,12 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 		display: 'Base Sepolia',
 		rpcUrl: 'https://sepolia.base.org',
 		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1'
+	},
+	[WritableChainKey.LINEA_SEPOLIA]: {
+		chainId: 59141,
+		display: 'Linea Sepolia',
+		rpcUrl: 'https://linea-sepolia-rpc.publicnode.com',
+		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1'
 	}
 }
 

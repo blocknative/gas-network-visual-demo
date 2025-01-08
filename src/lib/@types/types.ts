@@ -29,7 +29,8 @@ export enum WritableChainKey {
   SEPOLIA = 'sepolia',
   // ARBITRUM_SEPOLIA = 'arbitrumSepolia',
   OP_SEPOLIA = 'opSepolia',
-  BASE_SEPOLIA = 'baseSepolia'
+  BASE_SEPOLIA = 'baseSepolia',
+  LINEA_SEPOLIA = 'lineaSepolia'
 }
 
 export enum ReadableChainKey {
