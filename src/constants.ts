@@ -38,14 +38,14 @@ export const quantiles: QuantileMap = {
 
 //Add block observers to each one of the writable chains
 export const writableChains: Record<WritableChainKey, WriteChain> = {
-	[WritableChainKey.DEVNET]: {
-		chainId: 19735516467,
-		display: 'Gas Devnet',
-		rpcUrl: 'https://http-rpc.devnet.gas.network',
-		contract: '0x3277023a8577dDc27d65efBC2536d550F3011818',
-    blockExplorerUrl: 'https://explorer.devnet.gas.network',
-    v2Supported: true
-	},
+	// [WritableChainKey.DEVNET]: {
+	// 	chainId: 19735516467,
+	// 	display: 'Gas Devnet',
+	// 	rpcUrl: 'https://http-rpc.devnet.gas.network',
+	// 	contract: '0x3277023a8577dDc27d65efBC2536d550F3011818',
+  //   blockExplorerUrl: 'https://explorer.devnet.gas.network',
+  //   v2Supported: true
+	// },
 	[WritableChainKey.SEPOLIA]: {
 		chainId: 11155111,
 		display: 'Ethereum Sepolia',

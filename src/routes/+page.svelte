@@ -24,7 +24,11 @@
 	let pValues: PayloadValues | undefined
 	let pRaw: string | null = null
 
-	let publishedGasData: [string] | null = null
+	let publishedGasData: {
+		gasPrice: string
+		maxPriorityFeePerGas: string
+		maxFeePerGas: string
+	} | null = null
 	let v2PublishedGasData: GasEstimate | null = null
 	let gasEstimation: EstimationData | null = null
 	let transactionSignature: string | null = null
@@ -112,11 +116,11 @@
 				timeStyle: 'long'
 			})
 
-			// TODO: if v2 contract
 			if (v2Supported) {
-				const v2ValuesList = await gasNetContract.get(2, 1, 2)
+				console.log(selectedTimeout)
+				const v2ValuesList = await gasNetContract.getInTime(2, 1, 2, selectedTimeout)
 
-				console.log('new data from gasNetContract.get', v2ValuesList)
+				console.log('new data from gasNetContract.getInTime', v2ValuesList)
 				v2PublishedGasData = v2ValuesList
 			} else {
 				// if v1 contract
@@ -126,7 +130,11 @@
 						BigInt(selectedTimeout),
 						Number(quantiles[selectedQuantile])
 					)
-				publishedGasData = { gasPrice, maxPriorityFeePerGas, maxFeePerGas }
+				publishedGasData = {
+					gasPrice: gasPrice,
+					maxPriorityFeePerGas: maxPriorityFeePerGas,
+					maxFeePerGas: maxFeePerGas
+				}
 			}
 		} catch (error) {
 			publishedGasData = null
@@ -279,7 +287,8 @@
 		{#if $wallets$}
 			{#each $wallets$ as { provider }}
 				<div class="flex flex-col gap-2 sm:gap-4">
-					<div class="mb-4 flex items-center gap-2">
+					<!-- V2 contract toggle -->
+					<!-- <div class="mb-4 flex items-center gap-2">
 						<span class="text-sm font-medium text-brandBackground/80">Contract Version</span>
 						<label class="relative inline-flex cursor-pointer items-center">
 							<input type="checkbox" bind:checked={v2Contract} class="peer sr-only" />
@@ -290,7 +299,8 @@
 								{v2Contract ? 'V2' : 'V1'}
 							</span>
 						</label>
-					</div>
+					</div> -->
+
 					<div class="flex items-center justify-between gap-5">
 						<div class="flex w-full flex-col gap-1">
 							<label for="read-chain" class="ml-1 text-xs font-medium text-brandBackground/80"
@@ -416,8 +426,8 @@
 					{/if}
 
 					<div class="flex w-full flex-col items-center justify-between gap-4">
-						{#if !v2Contract}
-							<div class="flex w-full items-start justify-between gap-5">
+						<div class="flex w-full items-start justify-between gap-5">
+							{#if !v2Contract}
 								<div class="flex w-full flex-col gap-1">
 									<label
 										for="quantile-select"
@@ -437,26 +447,25 @@
 										{/each}
 									</select>
 								</div>
-								<div class="flex w-full flex-col gap-1">
-									<label
-										for="timeout-select"
-										class="ml-1 text-xs font-medium text-brandBackground/80">Recency</label
-									>
-									<select
-										id="timeout-select"
-										bind:value={selectedTimeout}
-										class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
-									>
-										<option value={10}>10 Sec</option>
-										<option value={30}>30 Sec</option>
-										<option value={60}>1 Min</option>
-										<option value={3600}>1 Hr</option>
-										<option value={86400}>1 Day</option>
-										<option value={604800}>1 Week</option>
-									</select>
-								</div>
+							{/if}
+							<div class="flex w-full flex-col gap-1">
+								<label for="timeout-select" class="ml-1 text-xs font-medium text-brandBackground/80"
+									>Recency</label
+								>
+								<select
+									id="timeout-select"
+									bind:value={selectedTimeout}
+									class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+								>
+									<option value={10}>10 Sec</option>
+									<option value={30}>30 Sec</option>
+									<option value={60}>1 Min</option>
+									<option value={3600}>1 Hr</option>
+									<option value={86400}>1 Day</option>
+									<option value={604800}>1 Week</option>
+								</select>
 							</div>
-						{/if}
+						</div>
 						<button
 							class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/80"
 							on:click={() => readPublishedGasData(provider)}
