@@ -16,11 +16,14 @@ export const gasNetwork = {
 	//	url: 'http://0.0.0.0:8545',
 	//contract: '0xC2F61FAfA65D874725e485f4B52B9B495559F381'
 
+	url: 'https://http-rpc.devnet.gas.network',
+	contract: '0xC2F61FAfA65D874725e485f4B52B9B495559F381',
+  v2Contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
+}
+
+export const gasNetworkV2 = {
 	url: 'http://pretender-min.prod',
 	contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
-
-	// url: 'https://http-rpc.devnet.gas.network',
-	// contract: '0xC2F61FAfA65D874725e485f4B52B9B495559F381'
 }
 
 // You can then create the object that implements this interface:
@@ -40,7 +43,8 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 		display: 'Gas Devnet',
 		rpcUrl: 'https://http-rpc.devnet.gas.network',
 		contract: '0x3277023a8577dDc27d65efBC2536d550F3011818',
-    blockExplorerUrl: 'https://explorer.devnet.gas.network'
+    blockExplorerUrl: 'https://explorer.devnet.gas.network',
+    v2Supported: true
 	},
 	[WritableChainKey.SEPOLIA]: {
 		chainId: 11155111,
@@ -107,7 +111,8 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 	},
 	[ReadableChainKey.MAIN]: {
 		chainId: 1,
-		display: 'Ethereum'
+		display: 'Ethereum',
+    v2Supported: true
 	},
 	[ReadableChainKey.FANTOM]: {
 		chainId: 250,

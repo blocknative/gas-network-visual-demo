@@ -77,6 +77,7 @@ export enum ReadableChainKey {
 export interface ReadChain {
 	chainId: number
 	display: string
+  v2Supported?: boolean
 }
 
 export interface WriteChain {
@@ -85,4 +86,5 @@ export interface WriteChain {
 	rpcUrl: string
 	contract: string
 	blockExplorerUrl: string
+  v2Supported?: boolean
 }
