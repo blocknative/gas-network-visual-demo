@@ -275,7 +275,7 @@
 		{#if $wallets$}
 			{#each $wallets$ as { provider }}
 				<div class="flex flex-col gap-2 sm:gap-4">
-					<div class="flex items-center justify-between gap-2 mb-4">
+					<div class="flex items-center gap-2 mb-4">
 						<span class="text-sm font-medium text-brandBackground/80">Contract Version</span>
 						<label class="relative inline-flex items-center cursor-pointer">
 							<input 
