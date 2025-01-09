@@ -24,7 +24,8 @@
 	let pValues: PayloadValues | undefined
 	let pRaw: string | null = null
 
-	let publishedGasData: GasEstimate | null = null
+	let publishedGasData: [string] | null = null
+	let v2PublishedGasData: GasEstimate | null = null
 	let gasEstimation: EstimationData | null = null
 	let transactionSignature: string | null = null
 	let transactionHash: string | null = null
@@ -52,7 +53,7 @@
 		wallets$ = onboard.state.select('wallets').pipe(share())
 	}
 
-  $: if (v2Contract) selectedWriteChain = WritableChainKey.DEVNET
+	$: if (v2Contract) selectedWriteChain = WritableChainKey.DEVNET
 
 	let ethersModule: typeof import('ethers')
 	async function loadEthers() {
@@ -67,7 +68,7 @@
 		transactionHash = null
 		try {
 			const { ethers } = await loadEthers()
-			
+
 			if (v2Contract) {
 				const rpcProvider = new ethers.JsonRpcProvider(gasNetworkV2.url)
 				const gasNetContract = new ethers.Contract(gasNetworkV2.contract, gasnetV2.abi, rpcProvider)
@@ -97,10 +98,11 @@
 			const { ethers } = await loadEthers()
 			const ethersProvider = new ethers.BrowserProvider(provider, 'any')
 			const signer = await ethersProvider.getSigner()
+			const { contract, v2Supported } = writableChains[selectedWriteChain]
 
 			const gasNetContract = new ethers.Contract(
-				writableChains[selectedWriteChain].contract,
-				// TODO: if v2 contract
+				contract,
+				// TODO - MAYBE: if v2 contract
 				// consumerV2.abi,
 				// else
 				consumer.abi,
@@ -114,22 +116,24 @@
 			})
 
 			// TODO: if v2 contract
-			// const [gasPrice, maxPriorityFeePerGas] = await gasNetContract.get(2, 1, 2)
+			if (v2Supported) {
+				const v2ValuesList = await gasNetContract.get(2, 1, 2)
 
-			// console.log('new data from gasNetContract.get', gasPrice, maxPriorityFeePerGas)
-			// publishedGasData = { gasPrice, maxPriorityFeePerGas, maxFeePerGas: 0n }
-
-			// if v1 contract
-
-			const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
-				await gasNetContract.getGasEstimationQuantile(
-					BigInt(readableChains[selectedReadChain].chainId),
-					BigInt(selectedTimeout),
-					Number(quantiles[selectedQuantile])
-				)
-			publishedGasData = { gasPrice, maxPriorityFeePerGas, maxFeePerGas }
+				console.log('new data from gasNetContract.get', v2ValuesList)
+				v2PublishedGasData = v2ValuesList
+			} else {
+				// if v1 contract
+				const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
+					await gasNetContract.getGasEstimationQuantile(
+						BigInt(readableChains[selectedReadChain].chainId),
+						BigInt(selectedTimeout),
+						Number(quantiles[selectedQuantile])
+					)
+				publishedGasData = { gasPrice, maxPriorityFeePerGas, maxFeePerGas }
+			}
 		} catch (error) {
 			publishedGasData = null
+			v2PublishedGasData = null
 			console.error('Gas data fetch error:', error)
 			const revertErrorFromContract = (error as any)?.info?.error?.message || (error as any)?.reason
 			readFromTargetNetErrorMessage = revertErrorFromContract || (error as string)
@@ -237,14 +241,17 @@
 	}
 
 	function orderAndFilterChainsAlphabetically() {
-    const rChains = v2Contract ? Object.entries(writableChains).filter(chain => chain[1].v2Supported) : Object.entries(writableChains)
+		const rChains = v2Contract
+			? Object.entries(writableChains).filter((chain) => chain[1].v2Supported)
+			: Object.entries(writableChains)
 		return rChains.sort((a, b) => {
-
 			return a[1].display.localeCompare(b[1].display)
 		})
 	}
 	function orderAndFilterReadableChainsAlphabetically() {
-    const rChains = v2Contract ? Object.entries(readableChains).filter(chain => chain[1].v2Supported) : Object.entries(readableChains)
+		const rChains = v2Contract
+			? Object.entries(readableChains).filter((chain) => chain[1].v2Supported)
+			: Object.entries(readableChains)
 		return rChains.sort((a, b) => {
 			if (a[0] === 'unsupportedChain') return 1
 			if (b[0] === 'unsupportedChain') return -1
@@ -275,15 +282,13 @@
 		{#if $wallets$}
 			{#each $wallets$ as { provider }}
 				<div class="flex flex-col gap-2 sm:gap-4">
-					<div class="flex items-center gap-2 mb-4">
+					<div class="mb-4 flex items-center gap-2">
 						<span class="text-sm font-medium text-brandBackground/80">Contract Version</span>
-						<label class="relative inline-flex items-center cursor-pointer">
-							<input 
-								type="checkbox" 
-								bind:checked={v2Contract}
-								class="sr-only peer"
-							>
-							<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brandAction/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brandAction"></div>
+						<label class="relative inline-flex cursor-pointer items-center">
+							<input type="checkbox" bind:checked={v2Contract} class="peer sr-only" />
+							<div
+								class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-brandAction peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brandAction/20 rtl:peer-checked:after:-translate-x-full"
+							></div>
 							<span class="ms-3 text-sm font-medium text-brandBackground/80">
 								{v2Contract ? 'V2' : 'V1'}
 							</span>
@@ -409,44 +414,47 @@
 					{/if}
 
 					<div class="flex w-full flex-col items-center justify-between gap-4">
-						<div class="flex w-full items-start justify-between gap-5">
-							<div class="flex w-full flex-col gap-1">
-								<label
-									for="quantile-select"
-									class="ml-1 text-xs font-medium text-brandBackground/80">Read Quantile</label
-								>
-								<select
-									id="quantile-select"
-									bind:value={selectedQuantile}
-									class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
-								>
-									{#each Object.entries(quantiles) as [key, value]}
-										{#if key !== 'Q98'}
-											<option value={key}>Q{value}</option>
-										{:else}
-											<option value={key}>Q{value} - (unsupported)</option>
-										{/if}
-									{/each}
-								</select>
+						{#if !v2Contract}
+							<div class="flex w-full items-start justify-between gap-5">
+								<div class="flex w-full flex-col gap-1">
+									<label
+										for="quantile-select"
+										class="ml-1 text-xs font-medium text-brandBackground/80">Read Quantile</label
+									>
+									<select
+										id="quantile-select"
+										bind:value={selectedQuantile}
+										class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+									>
+										{#each Object.entries(quantiles) as [key, value]}
+											{#if key !== 'Q98'}
+												<option value={key}>Q{value}</option>
+											{:else}
+												<option value={key}>Q{value} - (unsupported)</option>
+											{/if}
+										{/each}
+									</select>
+								</div>
+								<div class="flex w-full flex-col gap-1">
+									<label
+										for="timeout-select"
+										class="ml-1 text-xs font-medium text-brandBackground/80">Recency</label
+									>
+									<select
+										id="timeout-select"
+										bind:value={selectedTimeout}
+										class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+									>
+										<option value={10}>10 Sec</option>
+										<option value={30}>30 Sec</option>
+										<option value={60}>1 Min</option>
+										<option value={3600}>1 Hr</option>
+										<option value={86400}>1 Day</option>
+										<option value={604800}>1 Week</option>
+									</select>
+								</div>
 							</div>
-							<div class="flex w-full flex-col gap-1">
-								<label for="timeout-select" class="ml-1 text-xs font-medium text-brandBackground/80"
-									>Recency</label
-								>
-								<select
-									id="timeout-select"
-									bind:value={selectedTimeout}
-									class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
-								>
-									<option value={10}>10 Sec</option>
-									<option value={30}>30 Sec</option>
-									<option value={60}>1 Min</option>
-									<option value={3600}>1 Hr</option>
-									<option value={86400}>1 Day</option>
-									<option value={604800}>1 Week</option>
-								</select>
-							</div>
-						</div>
+						{/if}
 						<button
 							class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/80"
 							on:click={() => readPublishedGasData(provider)}
@@ -466,6 +474,21 @@
 								<pre
 									class="m-0 overflow-scroll overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
 										publishedGasData,
+										formatBigInt,
+										2
+									)}</pre>
+							</div>
+						{/if}
+						{#if v2PublishedGasData}
+							<div class="w-full text-left">
+								Data read from {writableChains[selectedWriteChain].display} at: {readGasDataFromTargetChainTime}
+							</div>
+							<div
+								class="my-4 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200"
+							>
+								<pre
+									class="m-0 overflow-scroll overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
+										v2PublishedGasData,
 										formatBigInt,
 										2
 									)}</pre>

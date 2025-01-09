@@ -79,7 +79,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 		display: 'Linea Sepolia',
 		rpcUrl: 'https://linea-sepolia-rpc.publicnode.com',
 		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
-    blockExplorerUrl: 'https://sepolia.lineascan.io'
+    blockExplorerUrl: 'https://sepolia.lineascan.build'
 	}
 }
 
