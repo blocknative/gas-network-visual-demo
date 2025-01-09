@@ -102,10 +102,7 @@
 
 			const gasNetContract = new ethers.Contract(
 				contract,
-				// TODO - MAYBE: if v2 contract
-				// consumerV2.abi,
-				// else
-				consumer.abi,
+				v2Contract ? consumerV2.abi : consumer.abi,
 				signer
 			)
 
@@ -347,6 +344,11 @@
 									2
 								)}</pre>
 						</Drawer>
+						{#if pRaw}
+							Raw Data:
+							<pre
+								class="m-0 overflow-scroll overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{pRaw}</pre>
+						{/if}
 						<p>
 							Data created on GasNet at: {new Date(Number(pValues.timestamp)).toLocaleString(
 								undefined,
@@ -486,14 +488,13 @@
 							<div
 								class="my-4 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200"
 							>
+								Typ 2 data:
 								<pre
 									class="m-0 overflow-scroll overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
 										v2PublishedGasData,
 										formatBigInt,
 										2
 									)}</pre>
-								<pre
-									class="m-0 overflow-scroll overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{pRaw}</pre>
 							</div>
 						{/if}
 					</div>
