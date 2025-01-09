@@ -41,7 +41,7 @@
 	let selectedWriteChain: WritableChainKey = WritableChainKey.SEPOLIA
 	let selectedQuantile: keyof QuantileMap = 'Q99'
 	let selectedTimeout = 3600
-  let v2Contract = false
+	let v2Contract = false
 
 	let onboard: OnboardAPI
 	onMount(async () => {
@@ -52,6 +52,8 @@
 		wallets$ = onboard.state.select('wallets').pipe(share())
 	}
 
+  $: if (v2Contract) selectedWriteChain = WritableChainKey.DEVNET
+
 	let ethersModule: typeof import('ethers')
 	async function loadEthers() {
 		if (!ethersModule) {
@@ -60,43 +62,24 @@
 		return ethersModule
 	}
 
-	async function fetchGasEstimationFromGasNetV2(
-		chain: string
-	): Promise<{ paramsPayload: PayloadValues; rawReadChainData: string } | null> {
-		isLoading = true
-		transactionHash = null
-
-		try {
-			const { ethers } = await loadEthers()
-			const rpcProvider = new ethers.JsonRpcProvider(gasNetworkV2.url)
-			const gasNetContract = new ethers.Contract(gasNetworkV2.contract, gasnetV2.abi, rpcProvider)
-			const payload = await gasNetContract.getValues(2, chain)
-
-			return { paramsPayload: parsePayload(payload), rawReadChainData: payload }
-		} catch (error) {
-			const revertErrorFromContract = (error as any)?.info?.error?.message
-			console.error(error)
-			readFromGasNetErrorMessage = revertErrorFromContract || (error as string)
-			isLoading = false
-			return null
-		}
-	}
-
-	async function fetchGasEstimationFromGasNet(
-		chain: string
-	): Promise<{ estimationData: EstimationData; signature: string } | null> {
+	async function fetchGasEstimationFromGasNet(chain: string) {
 		isLoading = true
 		transactionHash = null
 		try {
 			const { ethers } = await loadEthers()
-			const rpcProvider = new ethers.JsonRpcProvider(gasNetwork.url)
-			// TODO: if v2
-			// const gasNetContract = new ethers.Contract(gasNetworkV2.contract, gasnetV2.abi, rpcProvider)
-			// else
-			const gasNetContract = new ethers.Contract(gasNetwork.contract, gasnet.abi, rpcProvider)
-			const [estimation, signature] = await gasNetContract.getEstimation(chain)
-			transactionSignature = signature
-			return { estimationData: createEstimationObject(estimation), signature }
+			
+			if (v2Contract) {
+				const rpcProvider = new ethers.JsonRpcProvider(gasNetworkV2.url)
+				const gasNetContract = new ethers.Contract(gasNetworkV2.contract, gasnetV2.abi, rpcProvider)
+				const payload = await gasNetContract.getValues(2, chain)
+				return { paramsPayload: parsePayload(payload), rawReadChainData: payload }
+			} else {
+				const rpcProvider = new ethers.JsonRpcProvider(gasNetwork.url)
+				const gasNetContract = new ethers.Contract(gasNetwork.contract, gasnet.abi, rpcProvider)
+				const [estimation, signature] = await gasNetContract.getEstimation(chain)
+				transactionSignature = signature
+				return { estimationData: createEstimationObject(estimation), signature }
+			}
 		} catch (error) {
 			const revertErrorFromContract = (error as any)?.info?.error?.message
 			console.error(error)
@@ -161,25 +144,22 @@
 			const signer = await ethersProvider.getSigner()
 			const consumerContract = new ethers.Contract(
 				writableChains[selectedWriteChain].contract,
-				// TODO: if v2 contract
-				// consumerV2.abi,
-				// else
-				consumer.abi,
+				v2Contract ? consumerV2.abi : consumer.abi,
 				signer
 			)
 
-			// TODO: if v2 contract
-			// const transaction = await consumerContract.storeValues(pRaw)
+			let transaction
+			if (v2Contract) {
+				transaction = await consumerContract.storeValues(pRaw)
+			} else {
+				transaction = await consumerContract.setEstimation(gasEstimation, transactionSignature)
+			}
 
-			// if v1 contract
-			const transaction = await consumerContract.setEstimation(gasEstimation, transactionSignature)
 			const receipt = await transaction.wait()
-
 			isLoading = false
 			transactionHash = receipt.hash
 		} catch (error) {
 			const revertErrorFromGasNetContract = (error as any)?.info?.error?.message
-
 			console.error('Publication error:', error)
 			publishErrorMessage = revertErrorFromGasNetContract || (error as string)
 			isLoading = false
@@ -222,34 +202,30 @@
 		try {
 			const gasNetData = await fetchGasEstimationFromGasNet(readChainId.toString())
 			if (gasNetData) {
-				//   if(contractVersion === 'v2') {
-				// 	const { paramsPayload, rawReadChainData } = gasNetData
-				// 	if (paramsPayload) {
-				// 		pValues = paramsPayload
-				// 		pRaw = rawReadChainData
-
-				// 		await onboard.setChain({ chainId: writeChainId })
-				// 		await publishGasEstimation(provider)
-				// 		return
-				// 	}
-				// } else {
-				// TODO:  if contract v1
-				const { estimationData, signature } = gasNetData
-				if (estimationData && signature) {
-					gasEstimation = estimationData
-					await onboard.setChain({ chainId: writeChainId })
-					await publishGasEstimation(provider)
-					return
+				if (v2Contract) {
+					const { paramsPayload, rawReadChainData } = gasNetData as any
+					if (paramsPayload) {
+						pValues = paramsPayload
+						pRaw = rawReadChainData
+						await onboard.setChain({ chainId: writeChainId })
+						await publishGasEstimation(provider)
+						return
+					}
+				} else {
+					const { estimationData, signature } = gasNetData as any
+					if (estimationData && signature) {
+						gasEstimation = estimationData
+						await onboard.setChain({ chainId: writeChainId })
+						await publishGasEstimation(provider)
+						return
+					}
 				}
 			}
-			// }
 
-			// TODO: v2 Contract
-			// throw new Error(`Failed to fetch gas estimation: ${gasNetData?.paramsPayload} from GasNet`)
-
-			// v1 Contract
 			throw new Error(
-				`Failed to fetch gas estimation: ${gasNetData?.estimationData} or signature: ${gasNetData?.signature} from GasNet`
+				v2Contract
+					? `Failed to fetch gas estimation: ${gasNetData?.paramsPayload} from GasNet`
+					: `Failed to fetch gas estimation: ${gasNetData?.estimationData} or signature: ${gasNetData?.signature} from GasNet`
 			)
 		} catch (e) {
 			console.error(e)
@@ -260,8 +236,16 @@
 		return typeof value === 'bigint' ? value.toString() : value
 	}
 
-	function orderChainsAlphabetically() {
-		return Object.entries(readableChains).sort((a, b) => {
+	function orderAndFilterChainsAlphabetically() {
+    const rChains = v2Contract ? Object.entries(writableChains).filter(chain => chain[1].v2Supported) : Object.entries(writableChains)
+		return rChains.sort((a, b) => {
+
+			return a[1].display.localeCompare(b[1].display)
+		})
+	}
+	function orderAndFilterReadableChainsAlphabetically() {
+    const rChains = v2Contract ? Object.entries(readableChains).filter(chain => chain[1].v2Supported) : Object.entries(readableChains)
+		return rChains.sort((a, b) => {
 			if (a[0] === 'unsupportedChain') return 1
 			if (b[0] === 'unsupportedChain') return -1
 			return a[1].display.localeCompare(b[1].display)
@@ -291,6 +275,20 @@
 		{#if $wallets$}
 			{#each $wallets$ as { provider }}
 				<div class="flex flex-col gap-2 sm:gap-4">
+					<div class="flex items-center justify-between gap-2 mb-4">
+						<span class="text-sm font-medium text-brandBackground/80">Contract Version</span>
+						<label class="relative inline-flex items-center cursor-pointer">
+							<input 
+								type="checkbox" 
+								bind:checked={v2Contract}
+								class="sr-only peer"
+							>
+							<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brandAction/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brandAction"></div>
+							<span class="ms-3 text-sm font-medium text-brandBackground/80">
+								{v2Contract ? 'V2' : 'V1'}
+							</span>
+						</label>
+					</div>
 					<div class="flex items-center justify-between gap-5">
 						<div class="flex w-full flex-col gap-1">
 							<label for="read-chain" class="ml-1 text-xs font-medium text-brandBackground/80"
@@ -301,7 +299,7 @@
 								bind:value={selectedReadChain}
 								class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 							>
-								{#each orderChainsAlphabetically() as [key, chain]}
+								{#each orderAndFilterReadableChainsAlphabetically() as [key, chain]}
 									<option value={key}>{chain.display}</option>
 								{/each}
 							</select>
@@ -315,7 +313,7 @@
 								bind:value={selectedWriteChain}
 								class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 							>
-								{#each Object.entries(writableChains) as [key, chain]}
+								{#each orderAndFilterChainsAlphabetically() as [key, chain]}
 									<option value={key}>{chain.display}</option>
 								{/each}
 							</select>
