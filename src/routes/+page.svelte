@@ -12,15 +12,19 @@
 	} from '$lib/@types/types'
 	import { getOnboard } from '$lib/services/web3-onboard'
 	import { readableChains, writableChains, quantiles, gasNetwork } from '../constants'
-	import consumer from '$lib/abis/consumer.json'
+	import consumer from '$lib/abis/consumerV2.json'
 	import gasnet from '$lib/abis/gasnet.json'
-	import type { QuantileMap } from '$lib/@types/types'
+	import type { EstimationData, QuantileMap } from '$lib/@types/types'
 	import Drawer from '$lib/components/Drawer.svelte'
+	import { createEstimationObject } from '$lib/utils'
+	import { Contract } from 'ethers'
 
 	let pValues: PayloadValues | null = null
 	let pRaw: string | null = null
 
 	let publishedGasData: GasEstimate | null = null
+  let gasEstimation: EstimationData | null = null
+  let transactionSignature: string | null = null
 	let transactionHash: string | null = null
 	let publishErrorMessage: string | null = null
 	let readFromGasNetErrorMessage: string | null = null
@@ -53,7 +57,7 @@
 		return ethersModule
 	}
 
-	async function fetchGasEstimationFromGasNet(
+	async function fetchGasEstimationFromGasNetV2(
 		chain: string
 	): Promise<{ paramsPayload: PayloadValues; rawReadChainData: string } | null> {
 		isLoading = true
@@ -66,6 +70,27 @@
 			const payload = await gasNetContract.getValues(2, chain)
 
 			return { paramsPayload: parsePayload(payload), rawReadChainData: payload }
+		} catch (error) {
+			const revertErrorFromContract = (error as any)?.info?.error?.message
+			console.error(error)
+			readFromGasNetErrorMessage = revertErrorFromContract || (error as string)
+			isLoading = false
+			return null
+		}
+	}
+
+  async function fetchGasEstimationFromGasNet(
+		chain: string
+	): Promise<{ estimationData: EstimationData; signature: string } | null> {
+		isLoading = true
+		transactionHash = null
+		try {
+			const { ethers } = await loadEthers()
+			const rpcProvider = new ethers.JsonRpcProvider(gasNetwork.url)
+			const gasNetContract = new ethers.Contract(gasNetwork.contract, gasnet.abi, rpcProvider)
+			const [estimation, signature] = await gasNetContract.getEstimation(chain)
+			transactionSignature = signature
+			return { estimationData: createEstimationObject(estimation), signature }
 		} catch (error) {
 			const revertErrorFromContract = (error as any)?.info?.error?.message
 			console.error(error)
@@ -96,17 +121,22 @@
 				timeStyle: 'long'
 			})
 
-			const [gasPrice, maxPriorityFeePerGas] = await gasNetContract.get(2, 1, 2)
+      // TODO: if v2 contract
+			// const [gasPrice, maxPriorityFeePerGas] = await gasNetContract.get(2, 1, 2)
 
-			console.log('new data from gasNetContract.get', gasPrice, maxPriorityFeePerGas)
+			// console.log('new data from gasNetContract.get', gasPrice, maxPriorityFeePerGas)
+			// publishedGasData = { gasPrice, maxPriorityFeePerGas, maxFeePerGas: 0n }
 
-			// const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
-			// 	await gasNetContract.getGasEstimationQuantile(
-			// 		BigInt(readableChains[selectedReadChain].chainId),
-			// 		BigInt(selectedTimeout),
-			// 		Number(quantiles[selectedQuantile])
-			// 	)
-			publishedGasData = { gasPrice, maxPriorityFeePerGas, maxFeePerGas: 0n }
+      // if v1 contract
+
+      const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
+				await gasNetContract.getGasEstimationQuantile(
+					BigInt(readableChains[selectedReadChain].chainId),
+					BigInt(selectedTimeout),
+					Number(quantiles[selectedQuantile])
+				)
+			publishedGasData = { gasPrice, maxPriorityFeePerGas, maxFeePerGas }
+
 		} catch (error) {
 			publishedGasData = null
 			console.error('Gas data fetch error:', error)
@@ -127,7 +157,11 @@
 				signer
 			)
 
-			const transaction = await consumerContract.storeValues(pRaw)
+      // TODO: if v2 contract
+			// const transaction = await consumerContract.storeValues(pRaw)
+
+      // if v1 contract
+      const transaction = await consumerContract.setEstimation(gasEstimation, transactionSignature)
 			const receipt = await transaction.wait()
 
 			isLoading = false
@@ -173,21 +207,40 @@
 	async function handleGasEstimation(provider: any, readChainId: number, writeChainId: number) {
 		publishErrorMessage = null
 		readFromGasNetErrorMessage = null
+    gasEstimation = null
 		try {
 			const gasNetData = await fetchGasEstimationFromGasNet(readChainId.toString())
 
 			if (gasNetData) {
-				const { paramsPayload, rawReadChainData } = gasNetData
-				if (paramsPayload) {
-					pValues = paramsPayload
-					pRaw = rawReadChainData
+      //   if(contractVersion === 'v2') {
+			// 	const { paramsPayload, rawReadChainData } = gasNetData
+			// 	if (paramsPayload) {
+			// 		pValues = paramsPayload
+			// 		pRaw = rawReadChainData
 
+			// 		await onboard.setChain({ chainId: writeChainId })
+			// 		await publishGasEstimation(provider)
+			// 		return
+			// 	}
+      // } else {
+        // TODO:  if contract v1
+        const { estimationData, signature } = gasNetData
+				if (estimationData && signature) {
+					gasEstimation = estimationData
 					await onboard.setChain({ chainId: writeChainId })
 					await publishGasEstimation(provider)
 					return
 				}
-			}
-			throw new Error(`Failed to fetch gas estimation: ${gasNetData?.paramsPayload} from GasNet`)
+      }
+			// }
+
+      // TODO: v2 Contract
+			// throw new Error(`Failed to fetch gas estimation: ${gasNetData?.paramsPayload} from GasNet`)
+
+      // v1 Contract
+      throw new Error(
+				`Failed to fetch gas estimation: ${gasNetData?.estimationData} or signature: ${gasNetData?.signature} from GasNet`
+			)
 		} catch (e) {
 			console.error(e)
 		}
@@ -195,6 +248,14 @@
 
 	function formatBigInt(key: string, value: any) {
 		return typeof value === 'bigint' ? value.toString() : value
+	}
+
+	function orderChainsAlphabetically() {
+		return Object.entries(readableChains).sort((a, b) => {
+			if (a[0] === 'unsupportedChain') return 1
+			if (b[0] === 'unsupportedChain') return -1
+			return a[1].display.localeCompare(b[1].display)
+		})
 	}
 </script>
 
@@ -204,10 +265,12 @@
 	<div
 		class="mx-auto max-w-3xl rounded-xl border border-brandAction/50 bg-brandForeground p-6 shadow-md sm:p-8"
 	>
+		<h1 class="mb-8 text-center text-3xl">Gas Network Demo</h1>
+
 		{#if onboard && !$wallets$?.length}
-			<div class="my-4 flex flex-col gap-2">
+			<div class="flex flex-col gap-2">
 				<button
-					class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground text-white transition-colors hover:bg-brandAction/80"
+					class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/80"
 					on:click={() => onboard.connectWallet()}
 				>
 					Connect Wallet
@@ -218,29 +281,29 @@
 		{#if $wallets$}
 			{#each $wallets$ as { provider }}
 				<div class="flex flex-col gap-2 sm:gap-4">
-					<div class="mb-2 flex items-center justify-between gap-4">
-						<div class="flex flex-col gap-1">
+					<div class="flex items-center justify-between gap-5">
+						<div class="flex w-full flex-col gap-1">
 							<label for="read-chain" class="ml-1 text-xs font-medium text-brandBackground/80"
 								>Estimates For</label
 							>
 							<select
 								id="read-chain"
 								bind:value={selectedReadChain}
-								class="min-w-[140px] cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+								class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 							>
-								{#each Object.entries(readableChains) as [key, chain]}
+								{#each orderChainsAlphabetically() as [key, chain]}
 									<option value={key}>{chain.display}</option>
 								{/each}
 							</select>
 						</div>
-						<div class="flex flex-col gap-1">
+						<div class="flex w-full flex-col gap-1">
 							<label for="write-chain" class="ml-1 text-xs font-medium text-brandBackground/80"
 								>Write To</label
 							>
 							<select
 								id="write-chain"
 								bind:value={selectedWriteChain}
-								class="min-w-[140px] cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+								class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 							>
 								{#each Object.entries(writableChains) as [key, chain]}
 									<option value={key}>{chain.display}</option>
@@ -249,7 +312,7 @@
 						</div>
 					</div>
 					<button
-						class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground text-white transition-colors hover:bg-brandAction/80"
+						class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/80"
 						on:click={() =>
 							handleGasEstimation(
 								provider,
@@ -280,6 +343,25 @@
 									timeStyle: 'long'
 								}
 							)}
+						</p>
+					{/if}
+					{#if gasEstimation}
+						<Drawer {isDrawerOpen}>
+							<pre
+								class="m-0 overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
+									gasEstimation,
+									formatBigInt,
+									2
+								)}</pre>
+						</Drawer>
+						<p>
+              Data created on GasNet at: {new Date(
+								Number(gasEstimation.timestamp) * 1000
+							).toLocaleString(undefined, {
+								timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+								dateStyle: 'medium',
+								timeStyle: 'long'
+							})}
 						</p>
 					{/if}
 
@@ -318,9 +400,9 @@
 						</div>
 					{/if}
 
-					<div class="mb-2 flex w-full flex-col items-center justify-between gap-4">
-						<div class="flex w-full items-start justify-between gap-4">
-							<div class="flex flex-col gap-1">
+					<div class="flex w-full flex-col items-center justify-between gap-4">
+						<div class="flex w-full items-start justify-between gap-5">
+							<div class="flex w-full flex-col gap-1">
 								<label
 									for="quantile-select"
 									class="ml-1 text-xs font-medium text-brandBackground/80">Read Quantile</label
@@ -328,7 +410,7 @@
 								<select
 									id="quantile-select"
 									bind:value={selectedQuantile}
-									class="min-w-[140px] cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+									class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 								>
 									{#each Object.entries(quantiles) as [key, value]}
 										{#if key !== 'Q98'}
@@ -339,14 +421,14 @@
 									{/each}
 								</select>
 							</div>
-							<div class="flex flex-col gap-1">
+							<div class="flex w-full flex-col gap-1">
 								<label for="timeout-select" class="ml-1 text-xs font-medium text-brandBackground/80"
 									>Recency</label
 								>
 								<select
 									id="timeout-select"
 									bind:value={selectedTimeout}
-									class="min-w-[140px] cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+									class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 								>
 									<option value={10}>10 Sec</option>
 									<option value={30}>30 Sec</option>
@@ -358,7 +440,7 @@
 							</div>
 						</div>
 						<button
-							class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground text-white transition-colors hover:bg-brandAction/80"
+							class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/80"
 							on:click={() => readPublishedGasData(provider)}
 						>
 							Read {readableChains[selectedReadChain].display} Estimations from {writableChains[
@@ -395,3 +477,13 @@
 		{/if}
 	</div>
 </main>
+
+<style>
+	:root {
+		--w3o-background-color: #fce9cf;
+		--w3o-text-color: #280019;
+		--w3o-border-color: hsl(35 88% 70% / 1);
+		--w3o-action-color: #fb3d00;
+		--w3o-border-radius: 1rem;
+	}
+</style>

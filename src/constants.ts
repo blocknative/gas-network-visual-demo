@@ -10,10 +10,6 @@ export const gasNetwork = {
 	//	url: 'https://proxy.gas.network',
 	//	contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
 
-	// url: 'https://http-rpc.devnet.gas.network',
-	// contract: '0x3aC9B46A1f78b19F75c0505e812a8dcdD1eD0cb7'
-	// contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
-
 	//url: 'https://http-rpc.devnet.bnc-tooling.com',
 	//contract: '0x75F68Cda7D257fF6A253d4d12757b733d9A7dA3E', //'0x50D090B45AB70a88eE15F702939FA2ab4CFCA5e7'
 
@@ -22,6 +18,9 @@ export const gasNetwork = {
 
 	url: 'http://pretender-min.prod',
 	contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
+
+	// url: 'https://http-rpc.devnet.gas.network',
+	// contract: '0xC2F61FAfA65D874725e485f4B52B9B495559F381'
 }
 
 // You can then create the object that implements this interface:
@@ -70,13 +69,25 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 		rpcUrl: 'https://sepolia.base.org',
 		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
     blockExplorerUrl: 'https://sepolia.basescan.org'
+	},
+	[WritableChainKey.LINEA_SEPOLIA]: {
+		chainId: 59141,
+		display: 'Linea Sepolia',
+		rpcUrl: 'https://linea-sepolia-rpc.publicnode.com',
+		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
+    blockExplorerUrl: 'https://sepolia.lineascan.io'
 	}
 }
 
 export const readableChains: Record<ReadableChainKey, ReadChain> = {
+  // Supported chains are sorted in the component handler
 	[ReadableChainKey.ARBITRUM]: {
 		chainId: 42161,
 		display: 'Arbitrum'
+	},
+	[ReadableChainKey.AVALANCHE]: {
+		chainId: 43114,
+		display: 'Avalanche'
 	},
 	[ReadableChainKey.BASE]: {
 		chainId: 8453,
@@ -85,6 +96,14 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 	[ReadableChainKey.BLAST]: {
 		chainId: 81457,
 		display: 'Blast'
+	},
+	[ReadableChainKey.CHILIZ]: {
+		chainId: 88888,
+		display: 'Chiliz'
+	},
+	[ReadableChainKey.CRONOS]: {
+		chainId: 25,
+		display: 'Cronos'
 	},
 	[ReadableChainKey.MAIN]: {
 		chainId: 1,
@@ -98,6 +117,18 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 		chainId: 59144,
 		display: 'Linea'
 	},
+	[ReadableChainKey.LISK]: {
+		chainId: 1135,
+		display: 'Lisk'
+	},
+	[ReadableChainKey.MANTLE]: {
+		chainId: 5000,
+		display: 'Mantle'
+	},
+	[ReadableChainKey.MOONBEAM]: {
+		chainId: 1284,
+		display: 'Moonbeam'
+	},
 	[ReadableChainKey.OPTIMISM]: {
 		chainId: 10,
 		display: 'Optimism'
@@ -106,6 +137,10 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 		chainId: 137,
 		display: 'Polygon'
 	},
+	[ReadableChainKey.RONIN]: {
+		chainId: 2020,
+		display: 'Ronin'
+	},
 	[ReadableChainKey.SEI]: {
 		chainId: 1329,
 		display: 'SEI'
@@ -113,10 +148,6 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 	[ReadableChainKey.ZKSYNC]: {
 		chainId: 324,
 		display: 'zkSync'
-	},
-	[ReadableChainKey.UNSUPPORTED_CHAIN]: {
-		chainId: 1638,
-		display: 'Unsupported Chain'
 	},
 	[ReadableChainKey.GNOSIS]: {
 		chainId: 100,
@@ -138,8 +169,19 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 		chainId: 7000,
 		display: 'ZetaChain'
 	},
-	[ReadableChainKey.CHILIZ]: {
-		chainId: 88888,
-		display: 'Chiliz'
+	[ReadableChainKey.POLYGONZKEVM]: {
+		chainId: 1101,
+		display: 'Polygon zkEVM'
+	},
+	[ReadableChainKey.WORLDCHAIN]: {
+		chainId: 480,
+		display: 'World Chain'
+	},
+
+  // Add new chains above this
+  // Unsupported chain for error testing
+	[ReadableChainKey.UNSUPPORTED_CHAIN]: {
+		chainId: 1638,
+		display: 'Unsupported Chain'
 	}
 }
