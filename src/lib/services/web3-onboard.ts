@@ -75,6 +75,12 @@ export async function getOnboard() {
 					token: 'OETH',
 					label: 'OP Mainnet',
 					rpcUrl: 'https://mainnet.optimism.io'
+				},
+				{
+					id: 19735516467,
+					token: 'GAS',
+					label: 'Gas Devnet',
+					rpcUrl: 'https://http-rpc.devnet.gas.network'
 				}
 			],
 			connect: {

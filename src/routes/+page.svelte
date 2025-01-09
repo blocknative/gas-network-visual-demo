@@ -96,13 +96,17 @@
 				timeStyle: 'long'
 			})
 
-			const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
-				await gasNetContract.getGasEstimationQuantile(
-					BigInt(readableChains[selectedReadChain].chainId),
-					BigInt(selectedTimeout),
-					Number(quantiles[selectedQuantile])
-				)
-			publishedGasData = { gasPrice, maxPriorityFeePerGas, maxFeePerGas }
+			const [gasPrice, maxPriorityFeePerGas] = await gasNetContract.get(2, 1, 2)
+
+			console.log('new data from gasNetContract.get', gasPrice, maxPriorityFeePerGas)
+
+			// const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
+			// 	await gasNetContract.getGasEstimationQuantile(
+			// 		BigInt(readableChains[selectedReadChain].chainId),
+			// 		BigInt(selectedTimeout),
+			// 		Number(quantiles[selectedQuantile])
+			// 	)
+			publishedGasData = { gasPrice, maxPriorityFeePerGas, maxFeePerGas: 0n }
 		} catch (error) {
 			publishedGasData = null
 			console.error('Gas data fetch error:', error)
@@ -294,12 +298,12 @@
 						<div class="my-4 flex flex-col gap-2">
 							<p class="text-gray-600">Confirmed Hash:</p>
 							<a
-								href="https://sepolia.etherscan.io/tx/{transactionHash}"
+								href={`${writableChains[selectedWriteChain].blockExplorerUrl}/tx/${transactionHash}`}
 								target="_blank"
 								rel="noopener noreferrer"
 								class="overflow-hidden text-ellipsis text-blue-500 hover:underline"
 							>
-								{`https://sepolia.etherscan.io/tx/${transactionHash}`}
+								{`${writableChains[selectedWriteChain].blockExplorerUrl}/tx/${transactionHash}`}
 							</a>
 						</div>
 					{/if}

@@ -34,36 +34,42 @@ export const quantiles: QuantileMap = {
 	Q70: 70
 }
 
+//Add block observers to each one of the writable chains
 export const writableChains: Record<WritableChainKey, WriteChain> = {
 	[WritableChainKey.DEVNET]: {
 		chainId: 19735516467,
-		display: 'Devnet',
+		display: 'Gas Devnet',
 		rpcUrl: 'https://http-rpc.devnet.gas.network',
-		contract: '0x3277023a8577dDc27d65efBC2536d550F3011818'
+		contract: '0x3277023a8577dDc27d65efBC2536d550F3011818',
+    blockExplorerUrl: 'https://explorer.devnet.gas.network'
 	},
 	[WritableChainKey.SEPOLIA]: {
 		chainId: 11155111,
 		display: 'Ethereum Sepolia',
 		rpcUrl: 'https://endpoints.omniatech.io/v1/eth/sepolia/public',
-		contract: '0xE4859432d9Af6D40C2D923e3F13D66057F4AEcA0'
+		contract: '0xE4859432d9Af6D40C2D923e3F13D66057F4AEcA0',
+    blockExplorerUrl: 'https://sepolia.etherscan.io'
 	},
 	// [WritableChainKey.ARBITRUM_SEPOLIA]: {
 	//   chainId: 421614,
 	//   display: 'Arb Sepolia',
 	//   rpcUrl: 'https://arbitrum-sepolia.gateway.tenderly.co',
-	//   contract: ''
+	//   contract: '',
+  // blockExplorerUrl: 'https://sepolia.arbiscan.io'
 	// },
 	[WritableChainKey.OP_SEPOLIA]: {
 		chainId: 11155420,
 		display: 'Optimism Sepolia',
 		rpcUrl: 'https://sepolia.optimism.io',
-		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1'
+		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
+    blockExplorerUrl: 'https://sepolia-optimism.etherscan.io'
 	},
 	[WritableChainKey.BASE_SEPOLIA]: {
 		chainId: 84532,
 		display: 'Base Sepolia',
 		rpcUrl: 'https://sepolia.base.org',
-		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1'
+		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
+    blockExplorerUrl: 'https://sepolia.basescan.org'
 	}
 }
 
