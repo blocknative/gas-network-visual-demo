@@ -46,7 +46,7 @@
 	let selectedWriteChain: WritableChainKey = WritableChainKey.SEPOLIA
 	let selectedQuantile: keyof QuantileMap = 'Q99'
 	let selectedTimeout = 3600
-	let v2Contract = false
+	let v2ContractEnabled = false
 
 	let onboard: OnboardAPI
 	onMount(async () => {
@@ -57,7 +57,7 @@
 		wallets$ = onboard.state.select('wallets').pipe(share())
 	}
 
-	$: if (v2Contract) selectedWriteChain = WritableChainKey.LINEA_SEPOLIA
+	$: if (v2ContractEnabled) selectedWriteChain = WritableChainKey.LINEA_SEPOLIA
 
 	let ethersModule: typeof import('ethers')
 	async function loadEthers() {
@@ -73,7 +73,7 @@
 		try {
 			const { ethers } = await loadEthers()
 
-			if (v2Contract) {
+			if (v2ContractEnabled) {
 				const rpcProvider = new ethers.JsonRpcProvider(gasNetworkV2.url)
 				const gasNetContract = new ethers.Contract(gasNetworkV2.contract, gasnetV2.abi, rpcProvider)
 				const payload = await gasNetContract.getValues(2, chain)
@@ -102,11 +102,14 @@
 			const { ethers } = await loadEthers()
 			const ethersProvider = new ethers.BrowserProvider(provider, 'any')
 			const signer = await ethersProvider.getSigner()
-			const { contract, v2Supported } = writableChains[selectedWriteChain]
+			const contractAddress =
+				v2ContractEnabled && writableChains[selectedWriteChain].v2Contract
+					? writableChains[selectedWriteChain].v2Contract!
+					: writableChains[selectedWriteChain].contract!
 
 			const gasNetContract = new ethers.Contract(
-				contract,
-				v2Contract ? consumerV2.abi : consumer.abi,
+				contractAddress,
+				v2ContractEnabled ? consumerV2.abi : consumer.abi,
 				signer
 			)
 
@@ -116,7 +119,7 @@
 				timeStyle: 'long'
 			})
 
-			if (v2Supported) {
+			if (v2ContractEnabled) {
 				console.log(selectedTimeout)
 				const v2ValuesList = await gasNetContract.getInTime(2, 1, 2, selectedTimeout)
 
@@ -151,14 +154,19 @@
 			const { ethers } = await loadEthers()
 			const ethersProvider = new ethers.BrowserProvider(provider, 'any')
 			const signer = await ethersProvider.getSigner()
+			const contractAddress =
+				v2ContractEnabled && writableChains[selectedWriteChain].v2Contract
+					? writableChains[selectedWriteChain].v2Contract!
+					: writableChains[selectedWriteChain].contract!
+
 			const consumerContract = new ethers.Contract(
-				writableChains[selectedWriteChain].contract,
-				v2Contract ? consumerV2.abi : consumer.abi,
+				contractAddress,
+				v2ContractEnabled ? consumerV2.abi : consumer.abi,
 				signer
 			)
 
 			let transaction
-			if (v2Contract) {
+			if (v2ContractEnabled) {
 				transaction = await consumerContract.storeValues(pRaw)
 			} else {
 				transaction = await consumerContract.setEstimation(gasEstimation, transactionSignature)
@@ -211,7 +219,7 @@
 		try {
 			const gasNetData = await fetchGasEstimationFromGasNet(readChainId.toString())
 			if (gasNetData) {
-				if (v2Contract) {
+				if (v2ContractEnabled) {
 					const { paramsPayload, rawReadChainData } = gasNetData as any
 					if (paramsPayload) {
 						pValues = paramsPayload
@@ -232,7 +240,7 @@
 			}
 
 			throw new Error(
-				v2Contract
+				v2ContractEnabled
 					? `Failed to fetch gas estimation: ${gasNetData?.paramsPayload} from GasNet`
 					: `Failed to fetch gas estimation: ${gasNetData?.estimationData} or signature: ${gasNetData?.signature} from GasNet`
 			)
@@ -246,15 +254,16 @@
 	}
 
 	function orderAndFilterChainsAlphabetically() {
-		const rChains = v2Contract
-			? Object.entries(writableChains).filter((chain) => chain[1].v2Supported)
+		const rChains = v2ContractEnabled
+			? Object.entries(writableChains).filter((chain) => chain[1].v2Contract)
 			: Object.entries(writableChains)
 		return rChains.sort((a, b) => {
 			return a[1].display.localeCompare(b[1].display)
 		})
 	}
+
 	function orderAndFilterReadableChainsAlphabetically() {
-		const rChains = v2Contract
+		const rChains = v2ContractEnabled
 			? Object.entries(readableChains).filter((chain) => chain[1].v2Supported)
 			: Object.entries(readableChains)
 		return rChains.sort((a, b) => {
@@ -291,12 +300,12 @@
 					<div class="mb-4 flex items-center gap-2">
 						<span class="text-sm font-medium text-brandBackground/80">Contract Version</span>
 						<label class="relative inline-flex cursor-pointer items-center">
-							<input type="checkbox" bind:checked={v2Contract} class="peer sr-only" />
+							<input type="checkbox" bind:checked={v2ContractEnabled} class="peer sr-only" />
 							<div
 								class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-brandAction peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brandAction/20 rtl:peer-checked:after:-translate-x-full"
 							></div>
 							<span class="ms-3 text-sm font-medium text-brandBackground/80">
-								{v2Contract ? 'V2' : 'V1'}
+								{v2ContractEnabled ? 'V2' : 'V1'}
 							</span>
 						</label>
 					</div>
@@ -427,7 +436,7 @@
 
 					<div class="flex w-full flex-col items-center justify-between gap-4">
 						<div class="flex w-full items-start justify-between gap-5">
-							{#if !v2Contract}
+							{#if !v2ContractEnabled}
 								<div class="flex w-full flex-col gap-1">
 									<label
 										for="quantile-select"
@@ -473,7 +482,8 @@
 							Read {readableChains[selectedReadChain].display} Estimations from {writableChains[
 								selectedWriteChain
 							].display}
-							{#if !v2Contract}<span>for the {quantiles[selectedQuantile]} Quantile</span>{/if}
+							{#if !v2ContractEnabled}<span>for the {quantiles[selectedQuantile]} Quantile</span
+								>{/if}
 						</button>
 
 						{#if publishedGasData}

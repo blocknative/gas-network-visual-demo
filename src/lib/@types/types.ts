@@ -80,11 +80,13 @@ export interface ReadChain {
   v2Supported?: boolean
 }
 
-export interface WriteChain {
-	chainId: number
-	display: string
-	rpcUrl: string
-	contract: string
-	blockExplorerUrl: string
-  v2Supported?: boolean
-}
+export type WriteChain = {
+  chainId: number
+  display: string
+  rpcUrl: string
+  blockExplorerUrl: string
+} & (
+  | { contract: string; v2Contract?: string }
+  | { contract?: string; v2Contract: string }
+  | { contract: string; v2Contract: string }
+)

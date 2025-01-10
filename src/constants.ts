@@ -18,7 +18,7 @@ export const gasNetwork = {
 
 	url: 'https://http-rpc.devnet.gas.network',
 	contract: '0xC2F61FAfA65D874725e485f4B52B9B495559F381',
-  v2Contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
+	v2Contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
 }
 
 export const gasNetworkV2 = {
@@ -42,49 +42,49 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 		chainId: 19735516467,
 		display: 'Gas Devnet',
 		rpcUrl: 'https://http-rpc.devnet.gas.network',
-		contract: '0x3277023a8577dDc27d65efBC2536d550F3011818',
-    blockExplorerUrl: 'https://explorer.devnet.gas.network',
-    v2Supported: true
+		v2Contract: '0x3277023a8577dDc27d65efBC2536d550F3011818',
+		blockExplorerUrl: 'https://explorer.devnet.gas.network'
 	},
 	[WritableChainKey.SEPOLIA]: {
 		chainId: 11155111,
 		display: 'Ethereum Sepolia',
 		rpcUrl: 'https://endpoints.omniatech.io/v1/eth/sepolia/public',
 		contract: '0xE4859432d9Af6D40C2D923e3F13D66057F4AEcA0',
-    blockExplorerUrl: 'https://sepolia.etherscan.io'
+		blockExplorerUrl: 'https://sepolia.etherscan.io'
 	},
 	// [WritableChainKey.ARBITRUM_SEPOLIA]: {
 	//   chainId: 421614,
 	//   display: 'Arb Sepolia',
 	//   rpcUrl: 'https://arbitrum-sepolia.gateway.tenderly.co',
 	//   contract: '',
-  // blockExplorerUrl: 'https://sepolia.arbiscan.io'
+	// blockExplorerUrl: 'https://sepolia.arbiscan.io'
 	// },
 	[WritableChainKey.OP_SEPOLIA]: {
 		chainId: 11155420,
 		display: 'Optimism Sepolia',
 		rpcUrl: 'https://sepolia.optimism.io',
 		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
-    blockExplorerUrl: 'https://sepolia-optimism.etherscan.io'
+		blockExplorerUrl: 'https://sepolia-optimism.etherscan.io'
 	},
 	[WritableChainKey.BASE_SEPOLIA]: {
 		chainId: 84532,
 		display: 'Base Sepolia',
 		rpcUrl: 'https://sepolia.base.org',
 		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
-    blockExplorerUrl: 'https://sepolia.basescan.org'
+		blockExplorerUrl: 'https://sepolia.basescan.org'
 	},
 	[WritableChainKey.LINEA_SEPOLIA]: {
 		chainId: 59141,
 		display: 'Linea Sepolia',
 		rpcUrl: 'https://linea-sepolia-rpc.publicnode.com',
-		contract: '0xd87f5ea40c592dffae5b87922e1cda2bb44cb67f', //'0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
-    blockExplorerUrl: 'https://sepolia.lineascan.build'
+		v2Contract: '0xd87f5ea40c592dffae5b87922e1cda2bb44cb67f',
+		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
+		blockExplorerUrl: 'https://sepolia.lineascan.build'
 	}
 }
 
 export const readableChains: Record<ReadableChainKey, ReadChain> = {
-  // Supported chains are sorted in the component handler
+	// Supported chains are sorted in the component handler
 	[ReadableChainKey.ARBITRUM]: {
 		chainId: 42161,
 		display: 'Arbitrum'
@@ -112,7 +112,7 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 	[ReadableChainKey.MAIN]: {
 		chainId: 1,
 		display: 'Ethereum',
-    v2Supported: true
+		v2Supported: true
 	},
 	[ReadableChainKey.FANTOM]: {
 		chainId: 250,
@@ -183,10 +183,233 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 		display: 'World Chain'
 	},
 
-  // Add new chains above this
-  // Unsupported chain for error testing
+	// Add new chains above this
+	// Unsupported chain for error testing
 	[ReadableChainKey.UNSUPPORTED_CHAIN]: {
 		chainId: 1638,
 		display: 'Unsupported Chain'
+	}
+}
+
+export const v2ContractSchema = {
+	'1': {},
+	'2': {
+		'1': {
+			'100': {
+				name: 'slot',
+				type: 'number',
+				description: "Block's slot"
+			},
+			'101': {
+				name: 'epoch',
+				type: 'number',
+				description: "Block's epoch"
+			},
+			'102': {
+				name: 'tx_count',
+				type: 'number',
+				description: 'Transaction Count'
+			},
+			'103': {
+				name: 'miner',
+				type: 'address',
+				description: 'Miner'
+			},
+			'104': {
+				name: 'fee_recipient',
+				type: 'address',
+				description: 'Fee Recipient'
+			},
+			'105': {
+				name: 'gas_used',
+				type: 'number',
+				description: 'Gas Used'
+			},
+			'106': {
+				name: 'gas_limit',
+				type: 'number',
+				description: 'Gas Limit'
+			},
+			'107': {
+				name: 'base_fee_per_gas',
+				type: 'number',
+				description: 'Base Fee Per Gas'
+			},
+			'108': {
+				name: 'block_blob_size',
+				type: 'number',
+				description: 'Block Blob Size'
+			},
+			'109': {
+				name: 'block_blob_gas_price',
+				type: 'number',
+				description: 'Block Blob Gas Price'
+			},
+			'110': {
+				name: 'block_blob_gas_used',
+				type: 'number',
+				description: 'Block Blob Gas Used'
+			},
+			'111': {
+				name: 'block_blob_gas_limit',
+				type: 'number',
+				description: 'Block Blob Gas Limit'
+			},
+			'112': {
+				name: 'blob_base_fee_per_gas',
+				type: 'number',
+				description: 'Blob Base Fee Per Gas'
+			},
+			'200': {
+				name: 'pred_base_fee_per_gas_p99',
+				type: 'number',
+				description: 'Gas Price Prediction - p99'
+			},
+			'201': {
+				name: 'pred_base_fee_per_gas_p95',
+				type: 'number',
+				description: 'Gas Price Prediction - p95'
+			},
+			'202': {
+				name: 'pred_base_fee_per_gas_p90',
+				type: 'number',
+				description: 'Gas Price Prediction - p90'
+			},
+			'203': {
+				name: 'pred_base_fee_per_gas_p80',
+				type: 'number',
+				description: 'Gas Price Prediction - p80'
+			},
+			'204': {
+				name: 'pred_base_fee_per_gas_p70',
+				type: 'number',
+				description: 'Gas Price Prediction - p70'
+			},
+			'205': {
+				name: 'pred_base_fee_per_gas_p50',
+				type: 'number',
+				description: 'Gas Price Prediction - p50'
+			},
+			'300': {
+				name: 'pred_tx_count_p99',
+				type: 'number',
+				description: 'Transaction Count Prediction - p99'
+			},
+			'301': {
+				name: 'pred_tx_count_p95',
+				type: 'number',
+				description: 'Transaction Count Prediction - p95'
+			},
+			'302': {
+				name: 'pred_tx_count_p90',
+				type: 'number',
+				description: 'Transaction Count Prediction - p90'
+			},
+			'303': {
+				name: 'pred_tx_count_p80',
+				type: 'number',
+				description: 'Transaction Count Prediction - p80'
+			},
+			'304': {
+				name: 'pred_tx_count_p70',
+				type: 'number',
+				description: 'Transaction Count Prediction - p70'
+			},
+			'305': {
+				name: 'pred_tx_count_p50',
+				type: 'number',
+				description: 'Transaction Count Prediction - p50'
+			},
+			'310': {
+				name: 'pred_base_fee_per_gas_p99',
+				type: 'number',
+				description: 'Base Fee Per Gas Prediction - p99'
+			},
+			'311': {
+				name: 'pred_base_fee_per_gas_p95',
+				type: 'number',
+				description: 'Base Fee Per Gas Prediction - p95'
+			},
+			'312': {
+				name: 'pred_base_fee_per_gas_p90',
+				type: 'number',
+				description: 'Base Fee Per Gas Prediction - p90'
+			},
+			'313': {
+				name: 'pred_base_fee_per_gas_p80',
+				type: 'number',
+				description: 'Base Fee Per Gas Prediction - p80'
+			},
+			'314': {
+				name: 'pred_base_fee_per_gas_p70',
+				type: 'number',
+				description: 'Base Fee Per Gas Prediction - p70'
+			},
+			'315': {
+				name: 'pred_base_fee_per_gas_p50',
+				type: 'number',
+				description: 'Base Fee Per Gas Prediction - p50'
+			},
+			'320': {
+				name: 'pred_max_priority_fee_per_gas_p99',
+				type: 'number',
+				description: 'Max Priority Fee Per Gas Prediction - p99'
+			},
+			'321': {
+				name: 'pred_max_priority_fee_per_gas_p95',
+				type: 'number',
+				description: 'Max Priority Fee Per Gas Prediction - p95'
+			},
+			'322': {
+				name: 'pred_max_priority_fee_per_gas_p90',
+				type: 'number',
+				description: 'Max Priority Fee Per Gas Prediction - p90'
+			},
+			'323': {
+				name: 'pred_max_priority_fee_per_gas_p80',
+				type: 'number',
+				description: 'Max Priority Fee Per Gas Prediction - p80'
+			},
+			'324': {
+				name: 'pred_max_priority_fee_per_gas_p70',
+				type: 'number',
+				description: 'Max Priority Fee Per Gas Prediction - p70'
+			},
+			'325': {
+				name: 'pred_max_priority_fee_per_gas_p50',
+				type: 'number',
+				description: 'Max Priority Fee Per Gas Prediction - p50'
+			},
+			'330': {
+				name: 'pred_max_fee_per_gas_p99',
+				type: 'number',
+				description: 'Max Fee Per Gas Prediction - p99'
+			},
+			'331': {
+				name: 'pred_max_fee_per_gas_p95',
+				type: 'number',
+				description: 'Max Fee Per Gas Prediction - p95'
+			},
+			'332': {
+				name: 'pred_max_fee_per_gas_p90',
+				type: 'number',
+				description: 'Max Fee Per Gas Prediction - p90'
+			},
+			'333': {
+				name: 'pred_max_fee_per_gas_p80',
+				type: 'number',
+				description: 'Max Fee Per Gas Prediction - p80'
+			},
+			'334': {
+				name: 'pred_max_fee_per_gas_p70',
+				type: 'number',
+				description: 'Max Fee Per Gas Prediction - p70'
+			},
+			'335': {
+				name: 'pred_max_fee_per_gas_p50',
+				type: 'number',
+				description: 'Max Fee Per Gas Prediction - p50'
+			}
+		}
 	}
 }
