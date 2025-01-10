@@ -288,7 +288,7 @@
 			{#each $wallets$ as { provider }}
 				<div class="flex flex-col gap-2 sm:gap-4">
 					<!-- V2 contract toggle -->
-					<!-- <div class="mb-4 flex items-center gap-2">
+					<div class="mb-4 flex items-center gap-2">
 						<span class="text-sm font-medium text-brandBackground/80">Contract Version</span>
 						<label class="relative inline-flex cursor-pointer items-center">
 							<input type="checkbox" bind:checked={v2Contract} class="peer sr-only" />
@@ -299,7 +299,7 @@
 								{v2Contract ? 'V2' : 'V1'}
 							</span>
 						</label>
-					</div> -->
+					</div>
 
 					<div class="flex items-center justify-between gap-5">
 						<div class="flex w-full flex-col gap-1">

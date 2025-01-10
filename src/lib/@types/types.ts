@@ -44,7 +44,7 @@ export enum WritableChainKey {
 	OP_SEPOLIA = 'opSepolia',
 	BASE_SEPOLIA = 'baseSepolia',
 	LINEA_SEPOLIA = 'lineaSepolia',
-	// DEVNET = 'devnet'
+	DEVNET = 'devnet'
 }
 
 export enum ReadableChainKey {
