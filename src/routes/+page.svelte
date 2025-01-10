@@ -46,7 +46,7 @@
 	let selectedWriteChain: WritableChainKey = WritableChainKey.SEPOLIA
 	let selectedQuantile: keyof QuantileMap = 'Q99'
 	let selectedTimeout = 3600
-	let v2Contract = false
+	let v2Contract = true
 
 	let onboard: OnboardAPI
 	onMount(async () => {
@@ -57,7 +57,7 @@
 		wallets$ = onboard.state.select('wallets').pipe(share())
 	}
 
-	$: if (v2Contract) selectedWriteChain = WritableChainKey.DEVNET
+	$: if (v2Contract) selectedWriteChain = WritableChainKey.LINEA_SEPOLIA
 
 	let ethersModule: typeof import('ethers')
 	async function loadEthers() {
