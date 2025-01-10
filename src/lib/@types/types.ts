@@ -77,6 +77,7 @@ export enum ReadableChainKey {
 export interface ReadChain {
 	chainId: number
 	display: string
+  arch: 'evm' | 'btc' | 'unsupported'
   v2Supported?: boolean
 }
 

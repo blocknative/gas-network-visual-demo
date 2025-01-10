@@ -11,7 +11,16 @@
 		type VPayload
 	} from '$lib/@types/types'
 	import { getOnboard } from '$lib/services/web3-onboard'
-	import { readableChains, writableChains, quantiles, gasNetwork, gasNetworkV2 } from '../constants'
+	import {
+		readableChains,
+		writableChains,
+		quantiles,
+		gasNetwork,
+		gasNetworkV2,
+		archSchemaMap,
+		v2ContractSchema,
+		defaultV2ContractDisplayValues
+	} from '../constants'
 	import consumerV2 from '$lib/abis/consumerV2.json'
 	import gasnetV2 from '$lib/abis/gasnetV2.json'
 	import consumer from '$lib/abis/consumer.json'
@@ -21,15 +30,16 @@
 	import { createEstimationObject } from '$lib/utils'
 	import { Contract } from 'ethers'
 
-	let pValues: PayloadValues | undefined
-	let pRaw: string | null = null
+	let v2ContractValues: PayloadValues | undefined
+	let v2ContractRawRes: string | null = null
 
 	let publishedGasData: {
 		gasPrice: string
 		maxPriorityFeePerGas: string
 		maxFeePerGas: string
 	} | null = null
-	let v2PublishedGasData: GasEstimate | null = null
+	let v2PublishedGasData: Record<string, number> | null = null
+	const readRawData = {} as Record<number, [string, number, number]>
 	let gasEstimation: EstimationData | null = null
 	let transactionSignature: string | null = null
 	let transactionHash: string | null = null
@@ -120,13 +130,34 @@
 			})
 
 			if (v2ContractEnabled) {
-				console.log(selectedTimeout)
-				const v2ValuesList = await gasNetContract.getInTime(2, 1, 2, selectedTimeout)
+				const arch = archSchemaMap[readableChains[selectedReadChain].arch]
+				const chainId = readableChains[selectedReadChain].chainId
+				const v2ValuesObject = await defaultV2ContractDisplayValues.reduce(
+					async (accPromise, typ) => {
+						const acc = await accPromise
+						const [value, height, timestamp] = await gasNetContract.getInTime(
+							arch,
+							chainId,
+							typ,
+							selectedTimeout
+						)
+						console.log('getInTime for typ:', typ, ' res: ', [value, height, timestamp])
+						const resDataMap = v2ContractSchema[arch.toString()][chainId.toString()][typ.toString()]
+						readRawData[typ] = [value, height, timestamp]
+						return {
+							...acc,
+							// Added for validation
+							[resDataMap.description + ' - TYPE:' + typ]: value
+						}
+					},
+					Promise.resolve({})
+				)
 
-				console.log('new data from gasNetContract.getInTime', v2ValuesList)
-				v2PublishedGasData = v2ValuesList
+				if (v2ValuesObject) {
+					console.log('v2ValuesObject', v2ValuesObject)
+					v2PublishedGasData = v2ValuesObject
+				}
 			} else {
-				// if v1 contract
 				const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
 					await gasNetContract.getGasEstimationQuantile(
 						BigInt(readableChains[selectedReadChain].chainId),
@@ -167,7 +198,7 @@
 
 			let transaction
 			if (v2ContractEnabled) {
-				transaction = await consumerContract.storeValues(pRaw)
+				transaction = await consumerContract.storeValues(v2ContractRawRes)
 			} else {
 				transaction = await consumerContract.setEstimation(gasEstimation, transactionSignature)
 			}
@@ -222,8 +253,8 @@
 				if (v2ContractEnabled) {
 					const { paramsPayload, rawReadChainData } = gasNetData as any
 					if (paramsPayload) {
-						pValues = paramsPayload
-						pRaw = rawReadChainData
+						v2ContractValues = paramsPayload
+						v2ContractRawRes = rawReadChainData
 						await onboard.setChain({ chainId: writeChainId })
 						await publishGasEstimation(provider)
 						return
@@ -354,29 +385,28 @@
 						].display}
 					</button>
 
-					{#if pValues}
+					{#if v2ContractValues}
 						<Drawer {isDrawerOpen}>
 							<pre
 								class="m-0 overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
-									pValues,
+									v2ContractValues,
 									formatBigInt,
 									2
 								)}</pre>
 						</Drawer>
-						{#if pRaw}
+						{#if v2ContractRawRes}
 							Raw Data:
 							<pre
-								class="m-0 overflow-scroll overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{pRaw}</pre>
+								class="m-0 overflow-scroll overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{v2ContractRawRes}</pre>
 						{/if}
 						<p>
-							Data created on GasNet at: {new Date(Number(pValues.timestamp)).toLocaleString(
-								undefined,
-								{
-									timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-									dateStyle: 'medium',
-									timeStyle: 'long'
-								}
-							)}
+							Data created on GasNet at: {new Date(
+								Number(v2ContractValues.timestamp)
+							).toLocaleString(undefined, {
+								timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+								dateStyle: 'medium',
+								timeStyle: 'long'
+							})}
 						</p>
 					{/if}
 					{#if gasEstimation}
@@ -508,7 +538,18 @@
 							<div
 								class="my-4 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200"
 							>
-								Typ 2 data:
+								Read Raw Data:
+								<pre
+									class="m-0 overflow-scroll overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
+										readRawData,
+										formatBigInt,
+										2
+									)}</pre>
+							</div>
+							<div
+								class="my-4 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200"
+							>
+								Parsed Data:
 								<pre
 									class="m-0 overflow-scroll overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
 										v2PublishedGasData,

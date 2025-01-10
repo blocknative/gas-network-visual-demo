@@ -26,6 +26,8 @@ export const gasNetworkV2 = {
 	contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
 }
 
+export const defaultV2ContractDisplayValues = [107, 112]
+
 // You can then create the object that implements this interface:
 export const quantiles: QuantileMap = {
 	Q99: 99,
@@ -87,108 +89,139 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 	// Supported chains are sorted in the component handler
 	[ReadableChainKey.ARBITRUM]: {
 		chainId: 42161,
-		display: 'Arbitrum'
+		display: 'Arbitrum',
+    arch: 'evm'
 	},
 	[ReadableChainKey.AVALANCHE]: {
 		chainId: 43114,
-		display: 'Avalanche'
+		display: 'Avalanche',
+    arch: 'evm'
 	},
 	[ReadableChainKey.BASE]: {
 		chainId: 8453,
-		display: 'Base'
+		display: 'Base',
+    arch: 'evm'
 	},
 	[ReadableChainKey.BLAST]: {
 		chainId: 81457,
-		display: 'Blast'
+		display: 'Blast',
+    arch: 'evm'
 	},
 	[ReadableChainKey.CHILIZ]: {
 		chainId: 88888,
-		display: 'Chiliz'
+		display: 'Chiliz',
+    arch: 'evm'
 	},
 	[ReadableChainKey.CRONOS]: {
 		chainId: 25,
-		display: 'Cronos'
+		display: 'Cronos',
+    arch: 'evm'
 	},
 	[ReadableChainKey.MAIN]: {
 		chainId: 1,
 		display: 'Ethereum',
-		v2Supported: true
+		v2Supported: true,
+    arch: 'evm'
 	},
 	[ReadableChainKey.FANTOM]: {
 		chainId: 250,
-		display: 'Fantom'
+		display: 'Fantom',
+    arch: 'evm'
 	},
 	[ReadableChainKey.LINEA]: {
 		chainId: 59144,
-		display: 'Linea'
+		display: 'Linea',
+    arch: 'evm'
 	},
 	[ReadableChainKey.LISK]: {
 		chainId: 1135,
-		display: 'Lisk'
+		display: 'Lisk',
+    arch: 'evm'
 	},
 	[ReadableChainKey.MANTLE]: {
 		chainId: 5000,
-		display: 'Mantle'
+		display: 'Mantle',
+    arch: 'evm'
 	},
 	[ReadableChainKey.MOONBEAM]: {
 		chainId: 1284,
-		display: 'Moonbeam'
+		display: 'Moonbeam',
+    arch: 'evm'
 	},
 	[ReadableChainKey.OPTIMISM]: {
 		chainId: 10,
-		display: 'Optimism'
+		display: 'Optimism',
+    arch: 'evm'
 	},
 	[ReadableChainKey.POLYGON]: {
 		chainId: 137,
-		display: 'Polygon'
+		display: 'Polygon',
+    arch: 'evm'
 	},
 	[ReadableChainKey.RONIN]: {
 		chainId: 2020,
-		display: 'Ronin'
+		display: 'Ronin',
+    arch: 'evm'
 	},
 	[ReadableChainKey.SEI]: {
 		chainId: 1329,
-		display: 'SEI'
+		display: 'SEI',
+    arch: 'evm'
 	},
 	[ReadableChainKey.ZKSYNC]: {
 		chainId: 324,
-		display: 'zkSync'
+		display: 'zkSync',
+    arch: 'evm'
 	},
 	[ReadableChainKey.GNOSIS]: {
 		chainId: 100,
-		display: 'Gnosis'
+		display: 'Gnosis',
+    arch: 'evm'
 	},
 	[ReadableChainKey.IMMUTABLE]: {
 		chainId: 204,
-		display: 'Immutable zkEVM'
+		display: 'Immutable zkEVM',
+    arch: 'evm'
 	},
 	[ReadableChainKey.OPBNB]: {
 		chainId: 13371,
-		display: 'opBNB'
+		display: 'opBNB',
+    arch: 'evm'
 	},
 	[ReadableChainKey.SCROLL]: {
 		chainId: 534352,
-		display: 'Scroll'
+		display: 'Scroll',
+    arch: 'evm'
 	},
 	[ReadableChainKey.ZETACHAIN]: {
 		chainId: 7000,
-		display: 'ZetaChain'
+		display: 'ZetaChain',
+    arch: 'evm'
 	},
 	[ReadableChainKey.POLYGONZKEVM]: {
 		chainId: 1101,
-		display: 'Polygon zkEVM'
+		display: 'Polygon zkEVM',
+    arch: 'evm'
 	},
 	[ReadableChainKey.WORLDCHAIN]: {
 		chainId: 480,
-		display: 'World Chain'
+		display: 'World Chain',
+    arch: 'evm'
 	},
 
 	// Add new chains above this
 	// Unsupported chain for error testing
 	[ReadableChainKey.UNSUPPORTED_CHAIN]: {
 		chainId: 1638,
-		display: 'Unsupported Chain'
+		display: 'Unsupported Chain',
+    arch: 'unsupported'
 	}
+}
+
+export const archSchemaMap = {
+  btc: 1,
+  evm: 2,
+  unsupported: 0
 }
 
 export const v2ContractSchema = {
