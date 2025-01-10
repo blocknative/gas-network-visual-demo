@@ -46,7 +46,7 @@
 	let selectedWriteChain: WritableChainKey = WritableChainKey.SEPOLIA
 	let selectedQuantile: keyof QuantileMap = 'Q99'
 	let selectedTimeout = 3600
-	let v2Contract = true
+	let v2Contract = false
 
 	let onboard: OnboardAPI
 	onMount(async () => {
@@ -472,7 +472,8 @@
 						>
 							Read {readableChains[selectedReadChain].display} Estimations from {writableChains[
 								selectedWriteChain
-							].display} for the {quantiles[selectedQuantile]} Quantile
+							].display}
+							{#if !v2Contract}<span>for the {quantiles[selectedQuantile]} Quantile</span>{/if}
 						</button>
 
 						{#if publishedGasData}
