@@ -140,6 +140,7 @@
 					async (accPromise, typ) => {
 						const acc = await accPromise
 						const val = await gasNetContract.getInTime(arch, chainId, typ, selectedTimeout)
+					//	const val = await gasNetContract.getInTime(arch, chainId, typ, 600000)
 						const [value, height, timestamp] = val
 						console.log('getInTime for typ:', typ, ' res: ', val, [value, height, timestamp])
 						const resDataMap = v2ContractSchema[arch][chainId][typ]
@@ -506,12 +507,12 @@
 									bind:value={selectedTimeout}
 									class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 								>
-									<option value={10}>10 Sec</option>
-									<option value={30}>30 Sec</option>
-									<option value={60}>1 Min</option>
-									<option value={3600}>1 Hr</option>
-									<option value={86400}>1 Day</option>
-									<option value={604800}>1 Week</option>
+									<option value={10000}>10 Sec</option>
+									<option value={30000}>30 Sec</option>
+									<option value={60000}>1 Min</option>
+									<option value={3600000}>1 Hr</option>
+									<option value={86400000}>1 Day</option>
+									<option value={604800000}>1 Week</option>
 								</select>
 							</div>
 						</div>
