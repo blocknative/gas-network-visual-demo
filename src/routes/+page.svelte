@@ -38,7 +38,7 @@
 		maxPriorityFeePerGas: string
 		maxFeePerGas: string
 	} | null = null
-	let v2PublishedGasData: Record<string, number> | null = null
+	let v2PublishedGasData: Record<string, number | bigint> | null = null
 	const readRawData = {} as Record<number, [string, number, number]>
 	let gasEstimation: EstimationData | null = null
 	let transactionSignature: string | null = null
@@ -61,6 +61,10 @@
 	let onboard: OnboardAPI
 	onMount(async () => {
 		onboard = await getOnboard()
+		const savedSetting = localStorage.getItem('v2ContractEnabled')
+		if (savedSetting !== null) {
+			v2ContractEnabled = savedSetting === 'true'
+		}
 	})
 
 	$: if (onboard) {
@@ -135,20 +139,15 @@
 				const v2ValuesObject = await defaultV2ContractDisplayValues.reduce(
 					async (accPromise, typ) => {
 						const acc = await accPromise
-						const val = await gasNetContract.getInTime(
-							arch,
-							chainId,
-							typ,
-							selectedTimeout
-						)
-            const [value, height, timestamp] = val
+						const val = await gasNetContract.getInTime(arch, chainId, typ, selectedTimeout)
+						const [value, height, timestamp] = val
 						console.log('getInTime for typ:', typ, ' res: ', val, [value, height, timestamp])
 						const resDataMap = v2ContractSchema[arch][chainId][typ]
 						readRawData[typ] = [value, height, timestamp]
 						return {
 							...acc,
 							// Added for validation
-							[resDataMap.description + ' - TYPE:' + typ]: value
+							[resDataMap.description + ' - TYPE: ' + typ]: value
 						}
 					},
 					Promise.resolve({})
@@ -304,6 +303,11 @@
 			return a[1].display.localeCompare(b[1].display)
 		})
 	}
+
+	function updateV2ContractSetting(value: boolean) {
+		v2ContractEnabled = value
+		localStorage.setItem('v2ContractEnabled', String(value))
+	}
 </script>
 
 <main
@@ -332,7 +336,12 @@
 					<div class="mb-4 flex items-center gap-2">
 						<span class="text-sm font-medium text-brandBackground/80">Contract Version</span>
 						<label class="relative inline-flex cursor-pointer items-center">
-							<input type="checkbox" bind:checked={v2ContractEnabled} class="peer sr-only" />
+							<input
+								type="checkbox"
+								bind:checked={v2ContractEnabled}
+								on:change={() => updateV2ContractSetting(v2ContractEnabled)}
+								class="peer sr-only"
+							/>
 							<div
 								class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-brandAction peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brandAction/20 rtl:peer-checked:after:-translate-x-full"
 							></div>
@@ -537,7 +546,7 @@
 								Data read from {writableChains[selectedWriteChain].display} at: {readGasDataFromTargetChainTime}
 							</div>
 							<div
-								class="my-4 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200"
+								class="my-4 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200 p-1"
 							>
 								Read Raw Data:
 								<pre
@@ -547,16 +556,13 @@
 										2
 									)}</pre>
 							</div>
-							<div
-								class="my-4 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200"
-							>
-								Parsed Data:
-								<pre
-									class="m-0 overflow-scroll overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
-										v2PublishedGasData,
-										formatBigInt,
-										2
-									)}</pre>
+							<div class="my-4 flex w-full flex-col gap-2">
+									{#each Object.entries(v2PublishedGasData) as [key, value]}
+										<div class="flex justify-between gap-4 py-1">
+											<span class="font-medium">{key}:</span>
+											<span>{typeof value === 'bigint' ? value.toString() : value}</span>
+										</div>
+									{/each}
 							</div>
 						{/if}
 					</div>
