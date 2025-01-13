@@ -4,7 +4,6 @@
 	import type { Observable } from 'rxjs'
 	import type { OnboardAPI, WalletState } from '@web3-onboard/core'
 	import {
-		type GasEstimate,
 		ReadableChainKey,
 		WritableChainKey,
 		type PayloadValues,
@@ -139,10 +138,9 @@
 				const v2ValuesObject = await defaultV2ContractDisplayValues.reduce(
 					async (accPromise, typ) => {
 						const acc = await accPromise
-						const val = await gasNetContract.getInTime(arch, chainId, typ, selectedTimeout)
-					//	const val = await gasNetContract.getInTime(arch, chainId, typ, 600000)
-						const [value, height, timestamp] = val
-						console.log('getInTime for typ:', typ, ' res: ', val, [value, height, timestamp])
+						const [value, height, timestamp] = await gasNetContract.getInTime(arch, chainId, typ, selectedTimeout)
+						
+            console.log('getInTime for typ:', typ, ' res: ', [value, height, timestamp])
 						const resDataMap = v2ContractSchema[arch][chainId][typ]
 						readRawData[typ] = [value, height, timestamp]
 						return {
