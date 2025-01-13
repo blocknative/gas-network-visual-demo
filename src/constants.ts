@@ -26,7 +26,7 @@ export const gasNetworkV2 = {
 	contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
 }
 
-export const defaultV2ContractDisplayValues = [107, 112]
+export const defaultV2ContractDisplayValues = [107, 112, 321]
 
 // You can then create the object that implements this interface:
 export const quantiles: QuantileMap = {

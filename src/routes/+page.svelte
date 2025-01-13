@@ -135,13 +135,14 @@
 				const v2ValuesObject = await defaultV2ContractDisplayValues.reduce(
 					async (accPromise, typ) => {
 						const acc = await accPromise
-						const [value, height, timestamp] = await gasNetContract.getInTime(
+						const val = await gasNetContract.getInTime(
 							arch,
 							chainId,
 							typ,
 							selectedTimeout
 						)
-						console.log('getInTime for typ:', typ, ' res: ', [value, height, timestamp])
+            const [value, height, timestamp] = val
+						console.log('getInTime for typ:', typ, ' res: ', val, [value, height, timestamp])
 						const resDataMap = v2ContractSchema[arch.toString()][chainId.toString()][typ.toString()]
 						readRawData[typ] = [value, height, timestamp]
 						return {
