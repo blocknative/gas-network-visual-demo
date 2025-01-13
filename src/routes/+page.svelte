@@ -311,6 +311,8 @@
 	function updateV2ContractSetting(value: boolean) {
 		v2ContractEnabled = value
 		localStorage.setItem('v2ContractEnabled', String(value))
+    publishedGasData = null
+    v2PublishedGasData = null
 	}
 </script>
 

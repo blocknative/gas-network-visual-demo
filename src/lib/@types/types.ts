@@ -39,40 +39,39 @@ export interface PayloadValues {
 }
 
 export enum WritableChainKey {
-	SEPOLIA = 'sepolia',
-	// ARBITRUM_SEPOLIA = 'arbitrumSepolia',
-	OP_SEPOLIA = 'opSepolia',
-	BASE_SEPOLIA = 'baseSepolia',
-	LINEA_SEPOLIA = 'lineaSepolia',
-	DEVNET = 'devnet'
+  SEPOLIA = 'sepolia',
+  // ARBITRUM_SEPOLIA = 'arbitrumSepolia',
+  OP_SEPOLIA = 'opSepolia',
+  BASE_SEPOLIA = 'baseSepolia',
+  LINEA_SEPOLIA = 'lineaSepolia'
 }
 
 export enum ReadableChainKey {
-	ARBITRUM = 'arb',
-	AVALANCHE = 'avalanche',
-	BASE = 'base',
-	BLAST = 'blast',
-	CHILIZ = 'chiliz',
-	CRONOS = 'cronos',
-	MAIN = 'main',
-	FANTOM = 'fantom',
-	LINEA = 'linea',
-	LISK = 'lisk',
-	MANTLE = 'mantle',
-	MOONBEAM = 'moonbeam',
-	OPTIMISM = 'op',
-	POLYGON = 'polygon',
-	RONIN = 'ronin',
-	SEI = 'sei',
-	ZKSYNC = 'zksync',
-	UNSUPPORTED_CHAIN = 'unsupportedChain',
-	GNOSIS = 'gnosis',
-	IMMUTABLE = 'immutablezkenv',
-	OPBNB = 'opbnb',
-	SCROLL = 'scroll',
-	ZETACHAIN = 'zetachain',
-	POLYGONZKEVM = 'polygonzkevm',
-	WORLDCHAIN = 'worldchain'
+  ARBITRUM = 'arb',
+  AVALANCHE = 'avalanche',
+  BASE = 'base',
+  BLAST = 'blast',
+  CHILIZ = 'chiliz',
+  CRONOS = 'cronos',
+  MAIN = 'main',
+  FANTOM = 'fantom',
+  LINEA = 'linea',
+  LISK = 'lisk',
+  MANTLE = 'mantle',
+  MOONBEAM = 'moonbeam',
+  OPTIMISM = 'op',
+  POLYGON = 'polygon',
+  RONIN = 'ronin',
+  SEI = 'sei',
+  ZKSYNC = 'zksync',
+  UNSUPPORTED_CHAIN = 'unsupportedChain',
+  GNOSIS = 'gnosis',
+  IMMUTABLE = 'immutablezkenv',
+  OPBNB = 'opbnb',
+  SCROLL = 'scroll',
+  ZETACHAIN = 'zetachain',
+  POLYGONZKEVM = 'polygonzkevm',
+  WORLDCHAIN = 'worldchain'
 }
 export interface ReadChain {
 	chainId: number
