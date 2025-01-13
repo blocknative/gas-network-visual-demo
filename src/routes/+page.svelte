@@ -54,7 +54,7 @@
 	let selectedReadChain: ReadableChainKey = ReadableChainKey.MAIN
 	let selectedWriteChain: WritableChainKey = WritableChainKey.SEPOLIA
 	let selectedQuantile: keyof QuantileMap = 'Q99'
-	let selectedTimeout = 3600
+	let selectedTimeout = 3600000
 	let v2ContractEnabled = false
 
 	let onboard: OnboardAPI
