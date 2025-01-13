@@ -218,13 +218,13 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 	}
 }
 
-export const archSchemaMap = {
+export const archSchemaMap: Record<string, number> = {
   btc: 1,
   evm: 2,
   unsupported: 0
 }
 
-export const v2ContractSchema = {
+export const v2ContractSchema: Record<number, Record<number, Record<number, { name: string, type: string, description: string }>>> = {
 	'1': {},
 	'2': {
 		'1': {

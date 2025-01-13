@@ -143,7 +143,7 @@
 						)
             const [value, height, timestamp] = val
 						console.log('getInTime for typ:', typ, ' res: ', val, [value, height, timestamp])
-						const resDataMap = v2ContractSchema[arch.toString()][chainId.toString()][typ.toString()]
+						const resDataMap = v2ContractSchema[arch][chainId][typ]
 						readRawData[typ] = [value, height, timestamp]
 						return {
 							...acc,
