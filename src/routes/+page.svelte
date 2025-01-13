@@ -402,7 +402,7 @@
 					{#if v2ContractValues}
 						<Drawer {isDrawerOpen}>
 							<pre
-								class="m-0 overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
+								class="m-0 overflow-x-auto bg-gray-50 p-1 text-xs text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
 									v2ContractValues,
 									formatBigInt,
 									2
@@ -411,7 +411,7 @@
 						{#if v2ContractRawRes}
 							Raw Data:
 							<pre
-								class="m-0 overflow-scroll overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{v2ContractRawRes}</pre>
+								class="m-0 overflow-x-auto bg-gray-50 p-1 text-xs text-gray-800 sm:p-6 sm:text-sm">{v2ContractRawRes}</pre>
 						{/if}
 						<p>
 							Data created on GasNet at: {new Date(
@@ -535,7 +535,7 @@
 								Data read from {writableChains[selectedWriteChain].display} at: {readGasDataFromTargetChainTime}
 							</div>
 							<div
-								class="my-4 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200"
+								class="my-2 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200"
 							>
 								<pre
 									class="m-0 overflow-scroll overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
@@ -550,7 +550,7 @@
 								Data read from {writableChains[selectedWriteChain].display} at: {readGasDataFromTargetChainTime}
 							</div>
 							<div
-								class="my-4 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200 p-1"
+								class="my-2 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200 p-1"
 							>
 								Read Raw Data:
 								<pre
@@ -560,7 +560,7 @@
 										2
 									)}</pre>
 							</div>
-							<div class="my-4 flex w-full flex-col gap-2">
+							<div class="my-4 mx-2 flex w-full flex-col gap-2 text-xs sm:text-sm pb-3">
 								{#each Object.entries(v2PublishedGasData) as [key, value]}
 									<div class="flex justify-between gap-4 py-1">
 										<span class="font-medium">{key}:</span>
