@@ -27,7 +27,7 @@
 	import type { EstimationData, QuantileMap } from '$lib/@types/types'
 	import Drawer from '$lib/components/Drawer.svelte'
 	import { createEstimationObject } from '$lib/utils'
-	import { Contract } from 'ethers'
+	import type { Contract } from 'ethers'
 
 	let v2ContractValues: PayloadValues | undefined
 	let v2ContractRawRes: string | null = null
@@ -79,6 +79,31 @@
 		}
 		return ethersModule
 	}
+
+  async function handleV2ContractValues(gasNetContract: Contract) {
+    const arch = archSchemaMap[readableChains[selectedReadChain].arch]
+				const chainId = readableChains[selectedReadChain].chainId
+				const v2ValuesObject = await defaultV2ContractDisplayValues.reduce(
+					async (accPromise, typ) => {
+						const acc = await accPromise
+						const [value, height, timestamp] = await gasNetContract.getInTime(arch, chainId, typ, selectedTimeout)
+						
+						const resDataMap = v2ContractSchema[arch][chainId][typ]
+						readRawData[typ] = [value, height, timestamp]
+						return {
+							...acc,
+							// Added for validation
+							[resDataMap.description]: (Number(value) / 1e9).toPrecision(4)
+						}
+					},
+					Promise.resolve({})
+				)
+
+				if (v2ValuesObject) {
+					console.log('v2ValuesObject', v2ValuesObject)
+					v2PublishedGasData = v2ValuesObject
+				}
+  }
 
 	async function fetchGasEstimationFromGasNet(chain: string) {
 		isLoading = true
@@ -133,29 +158,7 @@
 			})
 
 			if (v2ContractEnabled) {
-				const arch = archSchemaMap[readableChains[selectedReadChain].arch]
-				const chainId = readableChains[selectedReadChain].chainId
-				const v2ValuesObject = await defaultV2ContractDisplayValues.reduce(
-					async (accPromise, typ) => {
-						const acc = await accPromise
-						const [value, height, timestamp] = await gasNetContract.getInTime(arch, chainId, typ, selectedTimeout)
-						
-            console.log('getInTime for typ:', typ, ' res: ', [value, height, timestamp])
-						const resDataMap = v2ContractSchema[arch][chainId][typ]
-						readRawData[typ] = [value, height, timestamp]
-						return {
-							...acc,
-							// Added for validation
-							[resDataMap.description + ' - TYPE: ' + typ]: value
-						}
-					},
-					Promise.resolve({})
-				)
-
-				if (v2ValuesObject) {
-					console.log('v2ValuesObject', v2ValuesObject)
-					v2PublishedGasData = v2ValuesObject
-				}
+				handleV2ContractValues(gasNetContract)
 			} else {
 				const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
 					await gasNetContract.getGasEstimationQuantile(
@@ -234,7 +237,7 @@
 			buf.copy(value, 2, pos + 0x2)
 			pV.payloads.push({
 				typ: buf.readUint16BE(pos),
-				value: '0x' + value.toString('hex') // value.readBigUInt64BE(0),
+				value: '0x' + value.toString('hex')
 			} as VPayload)
 		}
 
@@ -559,7 +562,7 @@
 									{#each Object.entries(v2PublishedGasData) as [key, value]}
 										<div class="flex justify-between gap-4 py-1">
 											<span class="font-medium">{key}:</span>
-											<span>{typeof value === 'bigint' ? value.toString() : value}</span>
+											<span>{typeof value === 'bigint' ? value.toString() : value} gwei</span>
 										</div>
 									{/each}
 							</div>
