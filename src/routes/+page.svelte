@@ -80,30 +80,32 @@
 		return ethersModule
 	}
 
-  async function handleV2ContractValues(gasNetContract: Contract) {
-    const arch = archSchemaMap[readableChains[selectedReadChain].arch]
-				const chainId = readableChains[selectedReadChain].chainId
-				const v2ValuesObject = await defaultV2ContractDisplayValues.reduce(
-					async (accPromise, typ) => {
-						const acc = await accPromise
-						const [value, height, timestamp] = await gasNetContract.getInTime(arch, chainId, typ, selectedTimeout)
-						
-						const resDataMap = v2ContractSchema[arch][chainId][typ]
-						readRawData[typ] = [value, height, timestamp]
-						return {
-							...acc,
-							// Added for validation
-							[resDataMap.description]: (Number(value) / 1e9).toPrecision(4)
-						}
-					},
-					Promise.resolve({})
-				)
+	async function handleV2ContractValues(gasNetContract: Contract) {
+		const arch = archSchemaMap[readableChains[selectedReadChain].arch]
+		const chainId = readableChains[selectedReadChain].chainId
+		const v2ValuesObject = await defaultV2ContractDisplayValues.reduce(async (accPromise, typ) => {
+			const acc = await accPromise
+			const [value, height, timestamp] = await gasNetContract.getInTime(
+				arch,
+				chainId,
+				typ,
+				selectedTimeout
+			)
 
-				if (v2ValuesObject) {
-					console.log('v2ValuesObject', v2ValuesObject)
-					v2PublishedGasData = v2ValuesObject
-				}
-  }
+			const resDataMap = v2ContractSchema[arch][chainId][typ]
+			readRawData[typ] = [value, height, timestamp]
+			return {
+				...acc,
+				// Added for validation
+				[resDataMap.description]: (Number(value) / 1e9).toPrecision(4)
+			}
+		}, Promise.resolve({}))
+
+		if (v2ValuesObject) {
+			console.log('v2ValuesObject', v2ValuesObject)
+			v2PublishedGasData = v2ValuesObject
+		}
+	}
 
 	async function fetchGasEstimationFromGasNet(chain: string) {
 		isLoading = true
@@ -559,12 +561,12 @@
 									)}</pre>
 							</div>
 							<div class="my-4 flex w-full flex-col gap-2">
-									{#each Object.entries(v2PublishedGasData) as [key, value]}
-										<div class="flex justify-between gap-4 py-1">
-											<span class="font-medium">{key}:</span>
-											<span>{typeof value === 'bigint' ? value.toString() : value} gwei</span>
-										</div>
-									{/each}
+								{#each Object.entries(v2PublishedGasData) as [key, value]}
+									<div class="flex justify-between gap-4 py-1">
+										<span class="font-medium">{key}:</span>
+										<span>{typeof value === 'bigint' ? value.toString() : value} gwei</span>
+									</div>
+								{/each}
 							</div>
 						{/if}
 					</div>
