@@ -40,13 +40,20 @@ export const quantiles: QuantileMap = {
 
 //Add block observers to each one of the writable chains
 export const writableChains: Record<WritableChainKey, WriteChain> = {
-	// [WritableChainKey.DEVNET]: {
-	// 	chainId: 19735516467,
-	// 	display: 'Gas Devnet',
-	// 	rpcUrl: 'https://http-rpc.devnet.gas.network',
-	// 	v2Contract: '0x3277023a8577dDc27d65efBC2536d550F3011818',
-	// 	blockExplorerUrl: 'https://explorer.devnet.gas.network'
-	// },
+	[WritableChainKey.DEVNET]: {
+		chainId: 19735516467,
+		display: 'Gas Devnet',
+		rpcUrl: 'https://http-rpc.devnet.gas.network',
+		v2Contract: '0x3277023a8577dDc27d65efBC2536d550F3011818',
+		blockExplorerUrl: 'https://explorer.devnet.gas.network'
+	},
+  // [WritableChainKey.ARBITRUM_SEPOLIA]: {
+  //   chainId: 421614,
+  //   display: 'Arb Sepolia',
+  //   rpcUrl: 'https://arbitrum-sepolia.gateway.tenderly.co',
+  //   contract: '',
+  // blockExplorerUrl: 'https://sepolia.arbiscan.io'
+  // },
 	[WritableChainKey.SEPOLIA]: {
 		chainId: 11155111,
 		display: 'Ethereum Sepolia',
@@ -54,13 +61,6 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 		contract: '0xE4859432d9Af6D40C2D923e3F13D66057F4AEcA0',
 		blockExplorerUrl: 'https://sepolia.etherscan.io'
 	},
-	// [WritableChainKey.ARBITRUM_SEPOLIA]: {
-	//   chainId: 421614,
-	//   display: 'Arb Sepolia',
-	//   rpcUrl: 'https://arbitrum-sepolia.gateway.tenderly.co',
-	//   contract: '',
-	// blockExplorerUrl: 'https://sepolia.arbiscan.io'
-	// },
 	[WritableChainKey.OP_SEPOLIA]: {
 		chainId: 11155420,
 		display: 'Optimism Sepolia',
