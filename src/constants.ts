@@ -152,6 +152,18 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 		chainId: 480,
 		display: 'World Chain'
 	},
+	[ReadableChainKey.ROOTSTOCK]: {
+		chainId: 30,
+		display: 'Rootstock'
+	},
+	[ReadableChainKey.FRAXTAL]: {
+		chainId: 252,
+		display: 'Fraxtal'
+	},
+	[ReadableChainKey.ZORA]: {
+		chainId: 7777777,
+		display: 'Zora'
+	},
 
   // Add new chains above this
   // Unsupported chain for error testing

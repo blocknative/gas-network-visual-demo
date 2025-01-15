@@ -58,7 +58,10 @@ export enum ReadableChainKey {
   SCROLL = 'scroll',
   ZETACHAIN = 'zetachain',
   POLYGONZKEVM = 'polygonzkevm',
-  WORLDCHAIN = 'worldchain'
+  WORLDCHAIN = 'worldchain',
+  ROOTSTOCK = 'rootstock',
+  FRAXTAL = 'fraxtal',
+  ZORA = 'zora'
 }
  
 
