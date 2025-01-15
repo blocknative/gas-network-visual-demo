@@ -44,7 +44,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 		chainId: 19735516467,
 		display: 'Gas Devnet',
 		rpcUrl: 'https://http-rpc.devnet.gas.network',
-		v2Contract: '0x3277023a8577dDc27d65efBC2536d550F3011818',
+		v2Contract: '0xeb4AE8e5828d0675F4D8420A188F53E1Fdf65e5E',
 		blockExplorerUrl: 'https://explorer.devnet.gas.network'
 	},
   // [WritableChainKey.ARBITRUM_SEPOLIA]: {

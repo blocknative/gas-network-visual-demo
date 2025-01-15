@@ -80,33 +80,6 @@
 		return ethersModule
 	}
 
-	async function handleV2ContractValues(gasNetContract: Contract) {
-		const arch = archSchemaMap[readableChains[selectedReadChain].arch]
-		const chainId = readableChains[selectedReadChain].chainId
-		const v2ValuesObject = await defaultV2ContractDisplayValues.reduce(async (accPromise, typ) => {
-			const acc = await accPromise
-			const [value, height, timestamp] = await gasNetContract.getInTime(
-				arch,
-				chainId,
-				typ,
-				selectedTimeout
-			)
-
-			const resDataMap = v2ContractSchema[arch][chainId][typ]
-			readRawData[typ] = [value, height, timestamp]
-			return {
-				...acc,
-				// Added for validation
-				[resDataMap.description]: (Number(value) / 1e9).toPrecision(4)
-			}
-		}, Promise.resolve({}))
-
-		if (v2ValuesObject) {
-			console.log('v2ValuesObject', v2ValuesObject)
-			v2PublishedGasData = v2ValuesObject
-		}
-	}
-
 	async function fetchGasEstimationFromGasNet(chain: string) {
 		isLoading = true
 		transactionHash = null
@@ -134,7 +107,45 @@
 		}
 	}
 
-	async function readPublishedGasData(provider: any) {
+	async function handleV2OracleValues(gasNetContract: Contract) {
+		try {
+			const arch = archSchemaMap[readableChains[selectedReadChain].arch]
+			const chainId = readableChains[selectedReadChain].chainId
+			const v2ValuesObject = await defaultV2ContractDisplayValues.reduce(
+				async (accPromise, typ) => {
+					const acc = await accPromise
+					const [value, height, timestamp] = await gasNetContract.getInTime(
+						arch,
+						chainId,
+						typ,
+						selectedTimeout
+					)
+
+					const resDataMap = v2ContractSchema[arch][chainId][typ]
+					readRawData[typ] = [value, height, timestamp]
+					return {
+						...acc,
+						// Added for validation
+						[resDataMap.description]: (Number(value) / 1e9).toPrecision(4)
+					}
+				},
+				Promise.resolve({})
+			)
+
+			if (v2ValuesObject) {
+				console.log('v2ValuesObject', v2ValuesObject)
+				v2PublishedGasData = v2ValuesObject
+			}
+		} catch (error) {
+			v2PublishedGasData = null
+			isLoading = false
+			console.error('Error Reading V2 Published Data:', error)
+			const revertErrorFromContract = (error as any)?.info?.error?.message || (error as any)?.reason
+			readFromTargetNetErrorMessage = revertErrorFromContract || (error as string)
+		}
+	}
+
+	async function readFromOracle(provider: any) {
 		try {
 			readFromTargetNetErrorMessage = null
 			await onboard.setChain({ chainId: writableChains[selectedWriteChain].chainId })
@@ -160,7 +171,7 @@
 			})
 
 			if (v2ContractEnabled) {
-				handleV2ContractValues(gasNetContract)
+				handleV2OracleValues(gasNetContract)
 			} else {
 				const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
 					await gasNetContract.getGasEstimationQuantile(
@@ -177,7 +188,7 @@
 		} catch (error) {
 			publishedGasData = null
 			v2PublishedGasData = null
-			console.error('Gas data fetch error:', error)
+			console.error('Gas data read published data error:', error)
 			const revertErrorFromContract = (error as any)?.info?.error?.message || (error as any)?.reason
 			readFromTargetNetErrorMessage = revertErrorFromContract || (error as string)
 			isLoading = false
@@ -251,34 +262,32 @@
 		publishErrorMessage = null
 		readFromGasNetErrorMessage = null
 		gasEstimation = null
+
 		try {
 			const gasNetData = await fetchGasEstimationFromGasNet(readChainId.toString())
-			if (gasNetData) {
-				if (v2ContractEnabled) {
-					const { paramsPayload, rawReadChainData } = gasNetData as any
-					if (paramsPayload) {
-						v2ContractValues = paramsPayload
-						v2ContractRawRes = rawReadChainData
-						await onboard.setChain({ chainId: writeChainId })
-						await publishGasEstimation(provider)
-						return
-					}
-				} else {
-					const { estimationData, signature } = gasNetData as any
-					if (estimationData && signature) {
-						gasEstimation = estimationData
-						await onboard.setChain({ chainId: writeChainId })
-						await publishGasEstimation(provider)
-						return
-					}
-				}
+			if (!gasNetData) {
+				throw new Error('No data received from GasNet')
 			}
 
-			throw new Error(
-				v2ContractEnabled
-					? `Failed to fetch gas estimation: ${gasNetData?.paramsPayload} from GasNet`
-					: `Failed to fetch gas estimation: ${gasNetData?.estimationData} or signature: ${gasNetData?.signature} from GasNet`
-			)
+			if (v2ContractEnabled) {
+				const { paramsPayload, rawReadChainData } = gasNetData as any
+				if (!paramsPayload) {
+					throw new Error(`Failed to fetch V2 gas estimation: ${gasNetData?.paramsPayload}`)
+				}
+				
+				v2ContractValues = paramsPayload
+				v2ContractRawRes = rawReadChainData
+			} else {
+				const { estimationData, signature } = gasNetData as any
+				if (!estimationData || !signature) {
+					throw new Error(`Failed to fetch gas estimation or signature`)
+				}
+				
+				gasEstimation = estimationData
+			}
+
+			await onboard.setChain({ chainId: writeChainId })
+			await publishGasEstimation(provider)
 		} catch (e) {
 			console.error(e)
 		}
@@ -311,8 +320,8 @@
 	function updateV2ContractSetting(value: boolean) {
 		v2ContractEnabled = value
 		localStorage.setItem('v2ContractEnabled', String(value))
-    publishedGasData = null
-    v2PublishedGasData = null
+		publishedGasData = null
+		v2PublishedGasData = null
 	}
 </script>
 
@@ -523,7 +532,7 @@
 						</div>
 						<button
 							class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/80"
-							on:click={() => readPublishedGasData(provider)}
+							on:click={() => readFromOracle(provider)}
 						>
 							Read {readableChains[selectedReadChain].display} Estimations from {writableChains[
 								selectedWriteChain
@@ -562,7 +571,7 @@
 										2
 									)}</pre>
 							</div>
-							<div class="my-4 mx-2 flex w-full flex-col gap-2 text-xs sm:text-sm pb-3">
+							<div class="mx-2 my-4 flex w-full flex-col gap-2 pb-3 text-xs sm:text-sm">
 								{#each Object.entries(v2PublishedGasData) as [key, value]}
 									<div class="flex justify-between gap-4 py-1">
 										<span class="font-medium">{key}:</span>
