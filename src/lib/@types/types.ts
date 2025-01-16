@@ -75,4 +75,5 @@ export interface WriteChain {
   display: string
   rpcUrl: string
   contract: string
+  blockExplorerUrl: string
 }

@@ -22,35 +22,48 @@ export const quantiles: QuantileMap = {
 }
 
 export const writableChains: Record<WritableChainKey, WriteChain> = {
+	// [WritableChainKey.DEVNET]: {
+	// 	chainId: 19735516467,
+	// 	display: 'Gas Devnet',
+	// 	rpcUrl: 'https://http-rpc.devnet.gas.network',
+	// 	v2Contract: '0xeb4AE8e5828d0675F4D8420A188F53E1Fdf65e5E',
+	// 	blockExplorerUrl: 'https://explorer.devnet.gas.network'
+	// },
+  // [WritableChainKey.ARBITRUM_SEPOLIA]: {
+  //   chainId: 421614,
+  //   display: 'Arb Sepolia',
+  //   rpcUrl: 'https://arbitrum-sepolia.gateway.tenderly.co',
+  //   contract: '',
+  // blockExplorerUrl: 'https://sepolia.arbiscan.io'
+  // },
 	[WritableChainKey.SEPOLIA]: {
 		chainId: 11155111,
 		display: 'Ethereum Sepolia',
 		rpcUrl: 'https://endpoints.omniatech.io/v1/eth/sepolia/public',
-		contract: '0xE4859432d9Af6D40C2D923e3F13D66057F4AEcA0'
+		contract: '0xE4859432d9Af6D40C2D923e3F13D66057F4AEcA0',
+		blockExplorerUrl: 'https://sepolia.etherscan.io'
 	},
-	// [WritableChainKey.ARBITRUM_SEPOLIA]: {
-	//   chainId: 421614,
-	//   display: 'Arb Sepolia',
-	//   rpcUrl: 'https://arbitrum-sepolia.gateway.tenderly.co',
-	//   contract: ''
-	// },
 	[WritableChainKey.OP_SEPOLIA]: {
 		chainId: 11155420,
 		display: 'Optimism Sepolia',
 		rpcUrl: 'https://sepolia.optimism.io',
-		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1'
+		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
+		blockExplorerUrl: 'https://sepolia-optimism.etherscan.io'
 	},
 	[WritableChainKey.BASE_SEPOLIA]: {
 		chainId: 84532,
 		display: 'Base Sepolia',
 		rpcUrl: 'https://sepolia.base.org',
-		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1'
+		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
+		blockExplorerUrl: 'https://sepolia.basescan.org'
 	},
 	[WritableChainKey.LINEA_SEPOLIA]: {
 		chainId: 59141,
 		display: 'Linea Sepolia',
 		rpcUrl: 'https://linea-sepolia-rpc.publicnode.com',
-		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1'
+		v2Contract: '0xb690C4CbDE4747FD614477Ab24c7630C5aAa6Ec5',
+		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
+		blockExplorerUrl: 'https://sepolia.lineascan.build'
 	}
 }
 
