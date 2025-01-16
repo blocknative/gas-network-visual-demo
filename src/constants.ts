@@ -30,11 +30,11 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	// 	blockExplorerUrl: 'https://explorer.devnet.gas.network'
 	// },
 	// [WritableChainKey.ARBITRUM_SEPOLIA]: {
-	//   chainId: 421614,
-	//   display: 'Arb Sepolia',
-	//   rpcUrl: 'https://arbitrum-sepolia.gateway.tenderly.co',
-	//   contract: '',
-	// blockExplorerUrl: 'https://sepolia.arbiscan.io'
+	// 	chainId: 421614,
+	// 	display: 'Arb Sepolia',
+	// 	rpcUrl: 'https://arbitrum-sepolia.gateway.tenderly.co',
+	// 	contract: '',
+	// 	blockExplorerUrl: 'https://sepolia.arbiscan.io'
 	// },
 	[WritableChainKey.SEPOLIA]: {
 		chainId: 11155111,
