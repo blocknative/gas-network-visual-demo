@@ -208,6 +208,18 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 		display: 'World Chain',
     arch: 'evm'
 	},
+	[ReadableChainKey.ROOTSTOCK]: {
+		chainId: 30,
+		display: 'Rootstock'
+	},
+	[ReadableChainKey.FRAXTAL]: {
+		chainId: 252,
+		display: 'Fraxtal'
+	},
+	[ReadableChainKey.ZORA]: {
+		chainId: 7777777,
+		display: 'Zora'
+	},
 
 	// Add new chains above this
 	// Unsupported chain for error testing

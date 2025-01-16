@@ -262,7 +262,6 @@
 		publishErrorMessage = null
 		readFromGasNetErrorMessage = null
 		gasEstimation = null
-
 		try {
 			const gasNetData = await fetchGasEstimationFromGasNet(readChainId.toString())
 			if (!gasNetData) {
