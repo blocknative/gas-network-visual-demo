@@ -33,7 +33,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	// 	chainId: 421614,
 	// 	display: 'Arb Sepolia',
 	// 	rpcUrl: 'https://arbitrum-sepolia.gateway.tenderly.co',
-	// 	contract: '',
+	// 	contract: ''
 	// },
 	[WritableChainKey.OP_SEPOLIA]: {
 		chainId: 11155420,
