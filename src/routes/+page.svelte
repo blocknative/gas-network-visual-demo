@@ -140,7 +140,7 @@
 	async function handleGasEstimation(provider: any, readChainId: number, writeChainId: number) {
 		publishErrorMessage = null
 		readFromGasNetErrorMessage = null
-    gasEstimation = null
+		gasEstimation = null
 		try {
 			const gasNetData = await fetchGasEstimationFromGasNet(readChainId.toString())
 			if (gasNetData) {
@@ -274,12 +274,12 @@
 						<div class="my-4 flex flex-col gap-2">
 							<p class="text-gray-600">Confirmed Hash:</p>
 							<a
-								href="https://sepolia.etherscan.io/tx/{transactionHash}"
+								href={`${writableChains[selectedWriteChain].blockExplorerUrl}/tx/${transactionHash}`}
 								target="_blank"
 								rel="noopener noreferrer"
 								class="overflow-hidden text-ellipsis text-blue-500 hover:underline"
 							>
-								{`https://sepolia.etherscan.io/tx/${transactionHash}`}
+								{`${writableChains[selectedWriteChain].blockExplorerUrl}/tx/${transactionHash}`}
 							</a>
 						</div>
 					{/if}
