@@ -29,13 +29,13 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	// 	v2Contract: '0xeb4AE8e5828d0675F4D8420A188F53E1Fdf65e5E',
 	// 	blockExplorerUrl: 'https://explorer.devnet.gas.network'
 	// },
-  // [WritableChainKey.ARBITRUM_SEPOLIA]: {
-  //   chainId: 421614,
-  //   display: 'Arb Sepolia',
-  //   rpcUrl: 'https://arbitrum-sepolia.gateway.tenderly.co',
-  //   contract: '',
-  // blockExplorerUrl: 'https://sepolia.arbiscan.io'
-  // },
+	// [WritableChainKey.ARBITRUM_SEPOLIA]: {
+	//   chainId: 421614,
+	//   display: 'Arb Sepolia',
+	//   rpcUrl: 'https://arbitrum-sepolia.gateway.tenderly.co',
+	//   contract: '',
+	// blockExplorerUrl: 'https://sepolia.arbiscan.io'
+	// },
 	[WritableChainKey.SEPOLIA]: {
 		chainId: 11155111,
 		display: 'Ethereum Sepolia',
@@ -67,7 +67,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 }
 
 export const readableChains: Record<ReadableChainKey, ReadChain> = {
-  // Supported chains are sorted in the component handler
+	// Supported chains are sorted in the component handler
 	[ReadableChainKey.ARBITRUM]: {
 		chainId: 42161,
 		display: 'Arbitrum'
@@ -177,8 +177,8 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 		display: 'Zora'
 	},
 
-  // Add new chains above this
-  // Unsupported chain for error testing
+	// Add new chains above this
+	// Unsupported chain for error testing
 	[ReadableChainKey.UNSUPPORTED_CHAIN]: {
 		chainId: 1638,
 		display: 'Unsupported Chain'
