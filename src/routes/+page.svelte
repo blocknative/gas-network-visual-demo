@@ -37,8 +37,11 @@
 		maxPriorityFeePerGas: string
 		maxFeePerGas: string
 	} | null = null
-	$: v2PublishedGasData = null
-	const readRawData = {} as Record<number, [string, number, number]>
+	let v2PublishedGasData: Record<string, number | bigint> | null = null
+	let v2RawData: Record<number, [string, number, number]> = {} as Record<
+		number,
+		[string, number, number]
+	>
 	let gasEstimation: EstimationData | null = null
 	let transactionSignature: string | null = null
 	let transactionHash: string | null = null
@@ -89,14 +92,11 @@
 			const rpcProvider = new ethers.JsonRpcProvider(gasNetwork.url)
 			if (v2ContractEnabled) {
 				const gasNetContract = new ethers.Contract(gasNetwork.v2Contract, gasnetV2.abi, rpcProvider)
-				
-        const { arch } = readableChains[selectedReadChain]
-        const payload = await gasNetContract.getValues(
-					archSchemaMap[arch],
-					chain
-				)
-				
-        return { paramsPayload: parsePayload(payload), rawReadChainData: payload }
+
+				const { arch } = readableChains[selectedReadChain]
+				const payload = await gasNetContract.getValues(archSchemaMap[arch], chain)
+
+				return { paramsPayload: parsePayload(payload), rawReadChainData: payload }
 			} else {
 				const gasNetContract = new ethers.Contract(gasNetwork.contract, gasnet.abi, rpcProvider)
 				const [estimation, signature] = await gasNetContract.getEstimation(chain)
@@ -114,13 +114,14 @@
 
 	async function handleV2OracleValues(gasNetContract: Contract) {
 		try {
+			v2RawData = {} as Record<number, [string, number, number]>
 			const arch = archSchemaMap[readableChains[selectedReadChain].arch]
 			const chainId = readableChains[selectedReadChain].chainId
+
 			const v2ValuesObject = await (
 				chainId === 1 ? mainnetV2ContractTypValues : evmV2ContractTypValues
 			).reduce(async (accPromise, typ) => {
 				const acc = await accPromise
-				console.log('acc', acc, arch, chainId, typ)
 				const contractRespPerType = await gasNetContract.getInTime(
 					arch,
 					chainId,
@@ -137,16 +138,14 @@
 					)
 					return acc
 				}
-				readRawData[typ] = [value, height, timestamp]
+				v2RawData[typ] = [value, height, timestamp]
 				return {
 					...acc,
 					// Added for validation
 					[resDataMap.description]: (Number(value) / 1e9).toPrecision(4)
 				}
 			}, Promise.resolve({}))
-
 			if (v2ValuesObject) {
-				console.log('v2ValuesObject', v2ValuesObject)
 				v2PublishedGasData = v2ValuesObject
 			}
 		} catch (error) {
@@ -578,7 +577,7 @@
 								Read Raw Data:
 								<pre
 									class="m-0 overflow-scroll overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
-										readRawData,
+										v2RawData,
 										formatBigInt,
 										2
 									)}</pre>
