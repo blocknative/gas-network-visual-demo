@@ -15,7 +15,6 @@
 		writableChains,
 		quantiles,
 		gasNetwork,
-		gasNetworkV2,
 		archSchemaMap,
 		v2ContractSchema,
 		defaultV2ContractDisplayValues
@@ -86,13 +85,12 @@
 		try {
 			const { ethers } = await loadEthers()
 
+      const rpcProvider = new ethers.JsonRpcProvider(gasNetwork.url)
 			if (v2ContractEnabled) {
-				const rpcProvider = new ethers.JsonRpcProvider(gasNetworkV2.url)
-				const gasNetContract = new ethers.Contract(gasNetworkV2.contract, gasnetV2.abi, rpcProvider)
+				const gasNetContract = new ethers.Contract(gasNetwork.v2Contract, gasnetV2.abi, rpcProvider)
 				const payload = await gasNetContract.getValues(2, chain)
 				return { paramsPayload: parsePayload(payload), rawReadChainData: payload }
 			} else {
-				const rpcProvider = new ethers.JsonRpcProvider(gasNetwork.url)
 				const gasNetContract = new ethers.Contract(gasNetwork.contract, gasnet.abi, rpcProvider)
 				const [estimation, signature] = await gasNetContract.getEstimation(chain)
 				transactionSignature = signature

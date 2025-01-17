@@ -7,23 +7,10 @@ import {
 } from '$lib/@types/types'
 
 export const gasNetwork = {
-	//	url: 'https://proxy.gas.network',
-	//	contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
-
-	//url: 'https://http-rpc.devnet.bnc-tooling.com',
-	//contract: '0x75F68Cda7D257fF6A253d4d12757b733d9A7dA3E', //'0x50D090B45AB70a88eE15F702939FA2ab4CFCA5e7'
-
-	//	url: 'http://0.0.0.0:8545',
-	//contract: '0xC2F61FAfA65D874725e485f4B52B9B495559F381'
-
-	url: 'https://http-rpc.devnet.gas.network',
+	// url: 'https://http-rpc.devnet.gas.network',
+  url: 'https://test.devnet.gas.network',
 	contract: '0xC2F61FAfA65D874725e485f4B52B9B495559F381',
 	v2Contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
-}
-
-export const gasNetworkV2 = {
-	url: 'http://pretender-min.prod',
-	contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
 }
 
 export const defaultV2ContractDisplayValues = [107, 112, 322]
@@ -40,13 +27,6 @@ export const quantiles: QuantileMap = {
 
 //Add block observers to each one of the writable chains
 export const writableChains: Record<WritableChainKey, WriteChain> = {
-	[WritableChainKey.DEVNET]: {
-		chainId: 19735516467,
-		display: 'Gas Devnet',
-		rpcUrl: 'https://http-rpc.devnet.gas.network',
-		v2Contract: '0xeb4AE8e5828d0675F4D8420A188F53E1Fdf65e5E',
-		blockExplorerUrl: 'https://explorer.devnet.gas.network'
-	},
   // [WritableChainKey.ARBITRUM_SEPOLIA]: {
   //   chainId: 421614,
   //   display: 'Arb Sepolia',
@@ -54,6 +34,13 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
   //   contract: '',
   // blockExplorerUrl: 'https://sepolia.arbiscan.io'
   // },
+	[WritableChainKey.DEVNET]: {
+		chainId: 19735516467,
+		display: 'Gas Devnet',
+		rpcUrl: 'https://http-rpc.devnet.gas.network',
+		v2Contract: '0xeb4AE8e5828d0675F4D8420A188F53E1Fdf65e5E',
+		blockExplorerUrl: 'https://explorer.devnet.gas.network'
+	},
 	[WritableChainKey.SEPOLIA]: {
 		chainId: 11155111,
 		display: 'Ethereum Sepolia',
@@ -210,15 +197,18 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 	},
 	[ReadableChainKey.ROOTSTOCK]: {
 		chainId: 30,
-		display: 'Rootstock'
+		display: 'Rootstock',
+    arch: 'evm'
 	},
 	[ReadableChainKey.FRAXTAL]: {
 		chainId: 252,
-		display: 'Fraxtal'
+		display: 'Fraxtal',
+    arch: 'evm'
 	},
 	[ReadableChainKey.ZORA]: {
 		chainId: 7777777,
-		display: 'Zora'
+		display: 'Zora',
+    arch: 'evm'
 	},
 
 	// Add new chains above this
