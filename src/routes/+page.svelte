@@ -28,7 +28,7 @@
 	import { createEstimationObject } from '$lib/utils'
 	import type { Contract } from 'ethers'
 
-	let v2ContractValues: PayloadValues | undefined
+	let v2ContractValues: PayloadValues | null = null
 	let v2ContractRawRes: string | null = null
 
 	let publishedGasData: {
@@ -260,6 +260,7 @@
 		publishErrorMessage = null
 		readFromGasNetErrorMessage = null
 		gasEstimation = null
+    v2ContractValues = null
 		try {
 			const gasNetData = await fetchGasEstimationFromGasNet(readChainId.toString())
 			if (!gasNetData) {
