@@ -26,7 +26,6 @@ export const quantiles: QuantileMap = {
 	Q70: 70
 }
 
-//Add block observers to each one of the writable chains
 export const writableChains: Record<WritableChainKey, WriteChain> = {
 	// [WritableChainKey.ARBITRUM_SEPOLIA]: {
 	//   chainId: 421614,
