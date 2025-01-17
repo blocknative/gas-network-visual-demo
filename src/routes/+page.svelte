@@ -314,7 +314,7 @@
 	function orderAndFilterChainsAlphabetically() {
 		const rChains = v2ContractEnabled
 			? Object.entries(writableChains).filter((chain) => chain[1].v2Contract)
-			: Object.entries(writableChains)
+			: Object.entries(writableChains).filter((chain) => !chain[1].contract)
 		return rChains.sort((a, b) => {
 			return a[1].display.localeCompare(b[1].display)
 		})

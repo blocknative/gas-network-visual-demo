@@ -39,8 +39,8 @@ export interface PayloadValues {
 }
 
 export enum WritableChainKey {
-	SEPOLIA = 'sepolia',
 	// ARBITRUM_SEPOLIA = 'arbitrumSepolia',
+	SEPOLIA = 'sepolia',
 	OP_SEPOLIA = 'opSepolia',
 	BASE_SEPOLIA = 'baseSepolia',
 	LINEA_SEPOLIA = 'lineaSepolia',
