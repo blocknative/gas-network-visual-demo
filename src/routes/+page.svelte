@@ -16,8 +16,9 @@
 		quantiles,
 		gasNetwork,
 		archSchemaMap,
-		v2ContractSchema,
-		defaultV2ContractDisplayValues
+		evmTypeSchema,
+		evmV2ContractTypValues,
+		mainnetV2ContractTypValues
 	} from '../constants'
 	import consumerV2 from '$lib/abis/consumerV2.json'
 	import gasnetV2 from '$lib/abis/gasnetV2.json'
@@ -36,7 +37,7 @@
 		maxPriorityFeePerGas: string
 		maxFeePerGas: string
 	} | null = null
-	let v2PublishedGasData: Record<string, number | bigint> | null = null
+	$: v2PublishedGasData = null
 	const readRawData = {} as Record<number, [string, number, number]>
 	let gasEstimation: EstimationData | null = null
 	let transactionSignature: string | null = null
@@ -85,11 +86,17 @@
 		try {
 			const { ethers } = await loadEthers()
 
-      const rpcProvider = new ethers.JsonRpcProvider(gasNetwork.url)
+			const rpcProvider = new ethers.JsonRpcProvider(gasNetwork.url)
 			if (v2ContractEnabled) {
 				const gasNetContract = new ethers.Contract(gasNetwork.v2Contract, gasnetV2.abi, rpcProvider)
-				const payload = await gasNetContract.getValues(2, chain)
-				return { paramsPayload: parsePayload(payload), rawReadChainData: payload }
+				
+        const { arch } = readableChains[selectedReadChain]
+        const payload = await gasNetContract.getValues(
+					archSchemaMap[arch],
+					chain
+				)
+				
+        return { paramsPayload: parsePayload(payload), rawReadChainData: payload }
 			} else {
 				const gasNetContract = new ethers.Contract(gasNetwork.contract, gasnet.abi, rpcProvider)
 				const [estimation, signature] = await gasNetContract.getEstimation(chain)
@@ -109,26 +116,34 @@
 		try {
 			const arch = archSchemaMap[readableChains[selectedReadChain].arch]
 			const chainId = readableChains[selectedReadChain].chainId
-			const v2ValuesObject = await defaultV2ContractDisplayValues.reduce(
-				async (accPromise, typ) => {
-					const acc = await accPromise
-					const [value, height, timestamp] = await gasNetContract.getInTime(
-						arch,
-						chainId,
-						typ,
-						selectedTimeout
-					)
+			const v2ValuesObject = await (
+				chainId === 1 ? mainnetV2ContractTypValues : evmV2ContractTypValues
+			).reduce(async (accPromise, typ) => {
+				const acc = await accPromise
+				console.log('acc', acc, arch, chainId, typ)
+				const contractRespPerType = await gasNetContract.getInTime(
+					arch,
+					chainId,
+					typ,
+					selectedTimeout
+				)
 
-					const resDataMap = v2ContractSchema[arch][chainId][typ]
-					readRawData[typ] = [value, height, timestamp]
-					return {
-						...acc,
-						// Added for validation
-						[resDataMap.description]: (Number(value) / 1e9).toPrecision(4)
-					}
-				},
-				Promise.resolve({})
-			)
+				const [value, height, timestamp] = contractRespPerType
+
+				const resDataMap = evmTypeSchema?.[typ]
+				if (!resDataMap) {
+					console.error(
+						`No resDataMap found within the Type Map Schema for arch: ${arch}, chainId: ${chainId}, typ: ${typ}`
+					)
+					return acc
+				}
+				readRawData[typ] = [value, height, timestamp]
+				return {
+					...acc,
+					// Added for validation
+					[resDataMap.description]: (Number(value) / 1e9).toPrecision(4)
+				}
+			}, Promise.resolve({}))
 
 			if (v2ValuesObject) {
 				console.log('v2ValuesObject', v2ValuesObject)
@@ -169,6 +184,7 @@
 			})
 
 			if (v2ContractEnabled) {
+				v2PublishedGasData = null
 				handleV2OracleValues(gasNetContract)
 			} else {
 				const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
@@ -260,7 +276,7 @@
 		publishErrorMessage = null
 		readFromGasNetErrorMessage = null
 		gasEstimation = null
-    v2ContractValues = null
+		v2ContractValues = null
 		try {
 			const gasNetData = await fetchGasEstimationFromGasNet(readChainId.toString())
 			if (!gasNetData) {
@@ -269,10 +285,11 @@
 
 			if (v2ContractEnabled) {
 				const { paramsPayload, rawReadChainData } = gasNetData as any
+
 				if (!paramsPayload) {
 					throw new Error(`Failed to fetch V2 gas estimation: ${gasNetData?.paramsPayload}`)
 				}
-				
+
 				v2ContractValues = paramsPayload
 				v2ContractRawRes = rawReadChainData
 			} else {
@@ -280,7 +297,7 @@
 				if (!estimationData || !signature) {
 					throw new Error(`Failed to fetch gas estimation or signature`)
 				}
-				
+
 				gasEstimation = estimationData
 			}
 
@@ -305,10 +322,7 @@
 	}
 
 	function orderAndFilterReadableChainsAlphabetically() {
-		const rChains = v2ContractEnabled
-			? Object.entries(readableChains).filter((chain) => chain[1].v2Supported)
-			: Object.entries(readableChains)
-		return rChains.sort((a, b) => {
+		return Object.entries(readableChains).sort((a, b) => {
 			if (a[0] === 'unsupportedChain') return 1
 			if (b[0] === 'unsupportedChain') return -1
 			return a[1].display.localeCompare(b[1].display)
@@ -317,9 +331,9 @@
 
 	function updateV2ContractSetting(value: boolean) {
 		v2ContractEnabled = value
-		localStorage.setItem('v2ContractEnabled', String(value))
 		publishedGasData = null
 		v2PublishedGasData = null
+		localStorage.setItem('v2ContractEnabled', String(value))
 	}
 </script>
 
