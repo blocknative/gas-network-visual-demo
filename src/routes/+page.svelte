@@ -73,7 +73,11 @@
 		wallets$ = onboard.state.select('wallets').pipe(share())
 	}
 
-	$: if (v2ContractEnabled) selectedWriteChain = WritableChainKey.LINEA_SEPOLIA
+	$: if (v2ContractEnabled) {
+    selectedWriteChain = WritableChainKey.LINEA_SEPOLIA
+  } else {
+    selectedWriteChain = WritableChainKey.SEPOLIA
+  }
 
 	let ethersModule: typeof import('ethers')
 	async function loadEthers() {
@@ -314,7 +318,7 @@
 	function orderAndFilterChainsAlphabetically() {
 		const rChains = v2ContractEnabled
 			? Object.entries(writableChains).filter((chain) => chain[1].v2Contract)
-			: Object.entries(writableChains).filter((chain) => !chain[1].contract)
+			: Object.entries(writableChains).filter((chain) => chain[1].contract)
 		return rChains.sort((a, b) => {
 			return a[1].display.localeCompare(b[1].display)
 		})
