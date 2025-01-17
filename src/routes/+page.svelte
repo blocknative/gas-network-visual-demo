@@ -74,10 +74,10 @@
 	}
 
 	$: if (v2ContractEnabled) {
-    selectedWriteChain = WritableChainKey.LINEA_SEPOLIA
-  } else {
-    selectedWriteChain = WritableChainKey.SEPOLIA
-  }
+		selectedWriteChain = WritableChainKey.LINEA_SEPOLIA
+	} else {
+		selectedWriteChain = WritableChainKey.SEPOLIA
+	}
 
 	let ethersModule: typeof import('ethers')
 	async function loadEthers() {
@@ -193,7 +193,7 @@
 				const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
 					await gasNetContract.getGasEstimationQuantile(
 						BigInt(readableChains[selectedReadChain].chainId),
-						BigInt(selectedTimeout),
+						BigInt(selectedTimeout / 1000),
 						Number(quantiles[selectedQuantile])
 					)
 				publishedGasData = {
