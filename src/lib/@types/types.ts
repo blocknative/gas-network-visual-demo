@@ -39,58 +39,58 @@ export interface PayloadValues {
 }
 
 export enum WritableChainKey {
-  SEPOLIA = 'sepolia',
-  // ARBITRUM_SEPOLIA = 'arbitrumSepolia',
-  OP_SEPOLIA = 'opSepolia',
-  BASE_SEPOLIA = 'baseSepolia',
-  LINEA_SEPOLIA = 'lineaSepolia',
-  DEVNET = 'devnet'
+	SEPOLIA = 'sepolia',
+	// ARBITRUM_SEPOLIA = 'arbitrumSepolia',
+	OP_SEPOLIA = 'opSepolia',
+	BASE_SEPOLIA = 'baseSepolia',
+	LINEA_SEPOLIA = 'lineaSepolia',
+	DEVNET = 'devnet'
 }
 
 export enum ReadableChainKey {
-  ARBITRUM = 'arb',
-  AVALANCHE = 'avalanche',
-  BASE = 'base',
-  BLAST = 'blast',
-  CHILIZ = 'chiliz',
-  CRONOS = 'cronos',
-  MAIN = 'main',
-  FANTOM = 'fantom',
-  LINEA = 'linea',
-  LISK = 'lisk',
-  MANTLE = 'mantle',
-  MOONBEAM = 'moonbeam',
-  OPTIMISM = 'op',
-  POLYGON = 'polygon',
-  RONIN = 'ronin',
-  SEI = 'sei',
-  ZKSYNC = 'zksync',
-  UNSUPPORTED_CHAIN = 'unsupportedChain',
-  GNOSIS = 'gnosis',
-  IMMUTABLE = 'immutablezkenv',
-  OPBNB = 'opbnb',
-  SCROLL = 'scroll',
-  ZETACHAIN = 'zetachain',
-  POLYGONZKEVM = 'polygonzkevm',
-  WORLDCHAIN = 'worldchain',
-  ROOTSTOCK = 'rootstock',
-  FRAXTAL = 'fraxtal',
-  ZORA = 'zora',
+	ARBITRUM = 'arb',
+	AVALANCHE = 'avalanche',
+	BASE = 'base',
+	BLAST = 'blast',
+	CHILIZ = 'chiliz',
+	CRONOS = 'cronos',
+	MAIN = 'main',
+	FANTOM = 'fantom',
+	LINEA = 'linea',
+	LISK = 'lisk',
+	MANTLE = 'mantle',
+	MOONBEAM = 'moonbeam',
+	OPTIMISM = 'op',
+	POLYGON = 'polygon',
+	RONIN = 'ronin',
+	SEI = 'sei',
+	ZKSYNC = 'zksync',
+	UNSUPPORTED_CHAIN = 'unsupportedChain',
+	GNOSIS = 'gnosis',
+	IMMUTABLE = 'immutablezkenv',
+	OPBNB = 'opbnb',
+	SCROLL = 'scroll',
+	ZETACHAIN = 'zetachain',
+	POLYGONZKEVM = 'polygonzkevm',
+	WORLDCHAIN = 'worldchain',
+	ROOTSTOCK = 'rootstock',
+	FRAXTAL = 'fraxtal',
+	ZORA = 'zora'
 }
 export interface ReadChain {
 	chainId: number
 	display: string
-  arch: 'evm' | 'btc' | 'unsupported'
-  v2Supported?: boolean
+	arch: 'evm' | 'btc' | 'unsupported'
+	v2Supported?: boolean
 }
 
 export type WriteChain = {
-  chainId: number
-  display: string
-  rpcUrl: string
-  blockExplorerUrl: string
+	chainId: number
+	display: string
+	rpcUrl: string
+	blockExplorerUrl: string
 } & (
-  | { contract: string; v2Contract?: string }
-  | { contract?: string; v2Contract: string }
-  | { contract: string; v2Contract: string }
+	| { contract: string; v2Contract?: string }
+	| { contract?: string; v2Contract: string }
+	| { contract: string; v2Contract: string }
 )
