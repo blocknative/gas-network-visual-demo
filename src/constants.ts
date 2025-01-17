@@ -34,13 +34,13 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	//   contract: '',
 	// blockExplorerUrl: 'https://sepolia.arbiscan.io'
 	// },
-	[WritableChainKey.DEVNET]: {
-		chainId: 19735516467,
-		display: 'Gas Devnet',
-		rpcUrl: 'https://http-rpc.devnet.gas.network',
-		v2Contract: '0xeb4AE8e5828d0675F4D8420A188F53E1Fdf65e5E',
-		blockExplorerUrl: 'https://explorer.devnet.gas.network'
-	},
+	// [WritableChainKey.DEVNET]: {
+	// 	chainId: 19735516467,
+	// 	display: 'Gas Devnet',
+	// 	rpcUrl: 'https://http-rpc.devnet.gas.network',
+	// 	v2Contract: '0xeb4AE8e5828d0675F4D8420A188F53E1Fdf65e5E',
+	// 	blockExplorerUrl: 'https://explorer.devnet.gas.network'
+	// },
 	[WritableChainKey.SEPOLIA]: {
 		chainId: 11155111,
 		display: 'Ethereum Sepolia',
