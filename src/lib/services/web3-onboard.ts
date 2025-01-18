@@ -77,6 +77,12 @@ export async function getOnboard() {
 					rpcUrl: 'https://mainnet.optimism.io'
 				},
 				{
+					id: 19735516467,
+					token: 'GAS',
+					label: 'Gas Devnet',
+					rpcUrl: 'https://http-rpc.devnet.gas.network'
+				},
+				{
 					id: 59141,
 					token: 'LineaETH',
 					label: 'Linea Sepolia',
