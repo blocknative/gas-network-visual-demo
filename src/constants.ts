@@ -53,14 +53,16 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 		display: 'Optimism Sepolia',
 		rpcUrl: 'https://sepolia.optimism.io',
 		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
-		blockExplorerUrl: 'https://sepolia-optimism.etherscan.io'
+		blockExplorerUrl: 'https://sepolia-optimism.etherscan.io',
+		v2Contract: '0x20A5DCE3646BD975edEE3082319bd0dB64A0e0B9'
 	},
 	[WritableChainKey.BASE_SEPOLIA]: {
 		chainId: 84532,
 		display: 'Base Sepolia',
 		rpcUrl: 'https://sepolia.base.org',
 		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
-		blockExplorerUrl: 'https://sepolia.basescan.org'
+		blockExplorerUrl: 'https://sepolia.basescan.org',
+		v2Contract: '0xD87f5Ea40C592DfFAe5B87922E1cdA2bb44CB67F'
 	},
 	[WritableChainKey.LINEA_SEPOLIA]: {
 		chainId: 59141,
