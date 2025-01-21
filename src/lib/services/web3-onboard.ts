@@ -87,6 +87,12 @@ export async function getOnboard() {
 					token: 'LineaETH',
 					label: 'Linea Sepolia',
 					rpcUrl: 'https://rpc.sepolia.linea.build'
+				},
+				{
+					id: 59144,
+					token: 'LineaETH',
+					label: 'Linea',
+					rpcUrl: 'https://rpc.linea.build'
 				}
 			],
 			connect: {
