@@ -47,6 +47,7 @@
 	let transactionHash: string | null = null
 	let publishErrorMessage: string | null = null
 	let readFromGasNetErrorMessage: string | null = null
+	let v2NoDataFoundErrorMsg: string | null = null
 	let readFromTargetNetErrorMessage: string | null = null
 	let isLoading = false
 	let isDrawerOpen = true
@@ -120,8 +121,11 @@
 		try {
 			v2RawData = {} as Record<number, [string, number, number]>
 			const arch = archSchemaMap[readableChains[selectedReadChain].arch]
-			const chainId = readableChains[selectedReadChain].chainId
+			const { chainId, display } = readableChains[selectedReadChain]
+			v2NoDataFoundErrorMsg = null
 
+			let blockNumber
+			let estTimestamp
 			const v2ValuesObject = await (
 				chainId === 1 ? mainnetV2ContractTypValues : evmV2ContractTypValues
 			).reduce(async (accPromise, typ) => {
@@ -134,6 +138,12 @@
 				)
 
 				const [value, height, timestamp] = contractRespPerType
+				if (value === 0n && height === 0n && timestamp === 0n) {
+					v2NoDataFoundErrorMsg = `Estimate not available for ${display} at selected recency`
+				}
+
+				blockNumber = height
+				estTimestamp = timestamp
 
 				const resDataMap = evmTypeSchema?.[typ]
 				if (!resDataMap) {
@@ -142,8 +152,15 @@
 					)
 					return acc
 				}
+
 				v2RawData[typ] = [value, height, timestamp]
 				return {
+					'Estimate Timestamp': new Date(Number(estTimestamp)).toLocaleString(undefined, {
+						timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+						dateStyle: 'medium',
+						timeStyle: 'long'
+					}),
+					'Estimate Block Number': blockNumber,
 					...acc,
 					// Added for validation
 					[resDataMap.description]: (Number(value) / 1e9).toPrecision(4)
@@ -586,14 +603,25 @@
 										2
 									)}</pre>
 							</div>
-							<div class="mx-2 my-4 flex w-full flex-col gap-2 pb-3 text-xs sm:text-sm">
-								{#each Object.entries(v2PublishedGasData) as [key, value]}
-									<div class="flex justify-between gap-4 py-1">
-										<span class="font-medium">{key}:</span>
-										<span>{typeof value === 'bigint' ? value.toString() : value} gwei</span>
-									</div>
-								{/each}
-							</div>
+							{#if v2NoDataFoundErrorMsg}
+								<div class="w-full overflow-auto rounded-lg border border-red-500 p-4 text-red-500">
+									{v2NoDataFoundErrorMsg}
+								</div>
+							{/if}
+							{#if !v2NoDataFoundErrorMsg}
+								<div class="mx-2 my-4 flex w-full flex-col gap-2 pb-3 text-xs sm:text-sm">
+									{#each Object.entries(v2PublishedGasData) as [key, value]}
+										<div class="flex justify-between gap-4 py-1">
+											<span class="font-medium">{key}:</span>
+											{#if key.includes('Gas')}
+												<span>{typeof value === 'bigint' ? value.toString() : value} gwei</span>
+											{:else}
+												<span>{value}</span>
+											{/if}
+										</div>
+									{/each}
+								</div>
+							{/if}
 						{/if}
 					</div>
 
