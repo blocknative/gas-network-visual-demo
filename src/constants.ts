@@ -77,7 +77,6 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 		display: 'Linea Mainnet',
 		rpcUrl: 'https://rpc.linea.build',
 		v2Contract: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13',
-		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
 		blockExplorerUrl: 'https://lineascan.build'
 	}
 }
