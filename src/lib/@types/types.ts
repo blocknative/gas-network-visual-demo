@@ -76,7 +76,11 @@ export enum ReadableChainKey {
 	WORLDCHAIN = 'worldchain',
 	ROOTSTOCK = 'rootstock',
 	FRAXTAL = 'fraxtal',
-	ZORA = 'zora'
+	ZORA = 'zora',
+	INK = 'ink',
+	LENSSEPOLIA = 'lenssepolia',
+	PALM = 'palm',
+	STORYODYSSEY = 'storyodyssey'
 }
 export interface ReadChain {
 	chainId: number

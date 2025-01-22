@@ -218,6 +218,26 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 		display: 'Zora',
 		arch: 'evm'
 	},
+	[ReadableChainKey.INK]: {
+		chainId: 57073,
+		display: 'Ink',
+		arch: 'evm'
+	},
+	[ReadableChainKey.LENSSEPOLIA]: {
+		chainId: 37111,
+		display: 'Lens Sepolia',
+		arch: 'evm'
+	},
+	[ReadableChainKey.PALM]: {
+		chainId: 11297108109,
+		display: 'Palm',
+		arch: 'evm'
+	},
+	[ReadableChainKey.STORYODYSSEY]: {
+		chainId: 1516,
+		display: 'Story Odyssey',
+		arch: 'evm'
+	},
 
 	// Add new chains above this
 	// Unsupported chain for error testing
