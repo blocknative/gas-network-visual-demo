@@ -612,14 +612,14 @@
 							</div>
 						{/if}
 						{#if v2PublishedGasData}
-							<div class="w-full text-left">
-								Data read from {writableChains[selectedWriteChain].display} at: {readGasDataFromTargetChainTime}
-							</div>
 							{#if v2NoDataFoundErrorMsg}
 								<div class="w-full overflow-auto rounded-lg border border-red-500 p-4 text-red-500">
 									{v2NoDataFoundErrorMsg}
 								</div>
 							{:else}
+								<div class="w-full text-left">
+									Data read from {writableChains[selectedWriteChain].display} at: {readGasDataFromTargetChainTime}
+								</div>
 								<div
 									class="my-2 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200 p-1"
 								>
