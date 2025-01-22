@@ -84,9 +84,10 @@
 		const seconds = Math.floor(diff / 1000)
 		const minutes = Math.floor(seconds / 60)
 		const hours = Math.floor(minutes / 60)
+		const remainingSeconds = seconds % 60
 
 		if (hours > 0) return `${hours}h ago`
-		if (minutes > 0) return `${minutes}m ago`
+		if (minutes > 0) return `${minutes}m ${remainingSeconds}s ago`
 		return `${seconds}s ago`
 	}
 
