@@ -615,23 +615,22 @@
 							<div class="w-full text-left">
 								Data read from {writableChains[selectedWriteChain].display} at: {readGasDataFromTargetChainTime}
 							</div>
-							<div
-								class="my-2 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200 p-1"
-							>
-								Read Raw Data:
-								<pre
-									class="m-0 overflow-scroll overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
-										v2RawData,
-										formatBigInt,
-										2
-									)}</pre>
-							</div>
 							{#if v2NoDataFoundErrorMsg}
 								<div class="w-full overflow-auto rounded-lg border border-red-500 p-4 text-red-500">
 									{v2NoDataFoundErrorMsg}
 								</div>
-							{/if}
-							{#if !v2NoDataFoundErrorMsg}
+							{:else}
+								<div
+									class="my-2 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200 p-1"
+								>
+									Read Raw Data:
+									<pre
+										class="m-0 overflow-scroll overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
+											v2RawData,
+											formatBigInt,
+											2
+										)}</pre>
+								</div>
 								<div class="mx-2 my-4 flex w-full flex-col gap-2 pb-3 text-xs sm:text-sm">
 									{#each Object.entries(v2PublishedGasData) as [key, value]}
 										<div class="flex justify-between gap-4 py-1">
