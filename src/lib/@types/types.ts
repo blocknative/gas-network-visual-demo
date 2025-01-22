@@ -80,7 +80,12 @@ export enum ReadableChainKey {
 	INK = 'ink',
 	LENSSEPOLIA = 'lenssepolia',
 	PALM = 'palm',
-	STORYODYSSEY = 'storyodyssey'
+	STORYODYSSEY = 'storyodyssey',
+	BOB = 'bob',
+	SNAX = 'snax',
+	TAIKO = 'taiko',
+	METIS = 'metis',
+	MODE = 'mode'
 }
 export interface ReadChain {
 	chainId: number

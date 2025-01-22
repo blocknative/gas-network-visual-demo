@@ -238,6 +238,31 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 		display: 'Story Odyssey',
 		arch: 'evm'
 	},
+	[ReadableChainKey.BOB]: {
+		chainId: 60808,
+		display: 'Bob',
+		arch: 'evm'
+	},
+	[ReadableChainKey.SNAX]: {
+		chainId: 2192,
+		display: 'SNAXchain',
+		arch: 'evm'
+	},
+	[ReadableChainKey.TAIKO]: {
+		chainId: 167000,
+		display: 'Taiko',
+		arch: 'evm'
+	},
+	[ReadableChainKey.METIS]: {
+		chainId: 1088,
+		display: 'Metis',
+		arch: 'evm'
+	},
+	[ReadableChainKey.MODE]: {
+		chainId: 34443,
+		display: 'Mode',
+		arch: 'evm'
+	},
 
 	// Add new chains above this
 	// Unsupported chain for error testing
