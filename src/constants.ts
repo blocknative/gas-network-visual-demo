@@ -71,6 +71,13 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 		v2Contract: '0xb690C4CbDE4747FD614477Ab24c7630C5aAa6Ec5',
 		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
 		blockExplorerUrl: 'https://sepolia.lineascan.build'
+	},
+	[WritableChainKey.LINEA_MAINNET]: {
+		chainId: 59144,
+		display: 'Linea Mainnet',
+		rpcUrl: 'https://rpc.linea.build',
+		v2Contract: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13',
+		blockExplorerUrl: 'https://lineascan.build'
 	}
 }
 
