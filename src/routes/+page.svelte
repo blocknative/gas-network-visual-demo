@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { share } from 'rxjs/operators'
-	import type { Observable } from 'rxjs'
+	import { map, share } from 'rxjs/operators'
+	import { timer, type Observable } from 'rxjs'
 	import type { OnboardAPI, WalletState } from '@web3-onboard/core'
 	import {
 		ReadableChainKey,
@@ -29,9 +29,6 @@
 	import { createEstimationObject } from '$lib/utils'
 	import type { Contract } from 'ethers'
 
-	let v2ContractValues: PayloadValues | null = null
-	let v2ContractRawRes: string | null = null
-
 	let publishedGasData: {
 		gasPrice: string
 		maxPriorityFeePerGas: string
@@ -42,6 +39,9 @@
 		number,
 		[string, number, number]
 	>
+
+	let v2ContractValues: PayloadValues | null = null
+	let v2ContractRawRes: string | null = null
 	let gasEstimation: EstimationData | null = null
 	let transactionSignature: string | null = null
 	let transactionHash: string | null = null
@@ -49,6 +49,7 @@
 	let readFromGasNetErrorMessage: string | null = null
 	let v2NoDataFoundErrorMsg: string | null = null
 	let readFromTargetNetErrorMessage: string | null = null
+	let v2Timestamp: number | null = null
 	let isLoading = false
 	let isDrawerOpen = true
 	let wallets$: Observable<WalletState[]>
@@ -69,6 +70,25 @@
 			v2ContractEnabled = savedSetting === 'true'
 		}
 	})
+
+	// Create a reactive timer that updates when v2Timestamp changes
+	$: timeElapsed$ = v2Timestamp
+		? timer(0, 1000).pipe(
+				map(() => getTimeElapsed(v2Timestamp!)),
+				share()
+			)
+		: null
+
+	function getTimeElapsed(timestamp: number) {
+		const diff = Date.now() - timestamp
+		const seconds = Math.floor(diff / 1000)
+		const minutes = Math.floor(seconds / 60)
+		const hours = Math.floor(minutes / 60)
+
+		if (hours > 0) return `${hours}h ago`
+		if (minutes > 0) return `${minutes}m ago`
+		return `${seconds}s ago`
+	}
 
 	$: if (onboard) {
 		wallets$ = onboard.state.select('wallets').pipe(share())
@@ -123,6 +143,7 @@
 			const arch = archSchemaMap[readableChains[selectedReadChain].arch]
 			const { chainId, display } = readableChains[selectedReadChain]
 			v2NoDataFoundErrorMsg = null
+			v2Timestamp = null
 
 			let blockNumber
 			let estTimestamp
@@ -154,6 +175,7 @@
 				}
 
 				v2RawData[typ] = [value, height, timestamp]
+				v2Timestamp = Number(timestamp)
 				return {
 					'Estimate Timestamp': new Date(Number(estTimestamp)).toLocaleString(undefined, {
 						timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -171,6 +193,7 @@
 			}
 		} catch (error) {
 			v2PublishedGasData = null
+			v2Timestamp = null
 			isLoading = false
 			console.error('Error Reading V2 Published Data:', error)
 			const revertErrorFromContract = (error as any)?.info?.error?.message || (error as any)?.reason
@@ -616,7 +639,12 @@
 											{#if key.includes('Gas')}
 												<span>{typeof value === 'bigint' ? value.toString() : value} gwei</span>
 											{:else}
-												<span>{value}</span>
+												<div>
+													<span>{value}</span>
+													{#if timeElapsed$ && key === 'Estimate Timestamp'}
+														<span>{` (${$timeElapsed$})`}</span>
+													{/if}
+												</div>
 											{/if}
 										</div>
 									{/each}
