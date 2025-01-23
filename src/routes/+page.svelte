@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { share } from 'rxjs/operators'
-	import type { Observable } from 'rxjs'
+	import { map, share } from 'rxjs/operators'
+	import { timer, type Observable } from 'rxjs'
 	import type { OnboardAPI, WalletState } from '@web3-onboard/core'
 	import {
 		ReadableChainKey,
@@ -29,9 +29,6 @@
 	import { createEstimationObject } from '$lib/utils'
 	import type { Contract } from 'ethers'
 
-	let v2ContractValues: PayloadValues | null = null
-	let v2ContractRawRes: string | null = null
-
 	let publishedGasData: {
 		gasPrice: string
 		maxPriorityFeePerGas: string
@@ -42,12 +39,17 @@
 		number,
 		[string, number, number]
 	>
+
+	let v2ContractValues: PayloadValues | null = null
+	let v2ContractRawRes: string | null = null
 	let gasEstimation: EstimationData | null = null
 	let transactionSignature: string | null = null
 	let transactionHash: string | null = null
 	let publishErrorMessage: string | null = null
 	let readFromGasNetErrorMessage: string | null = null
+	let v2NoDataFoundErrorMsg: string | null = null
 	let readFromTargetNetErrorMessage: string | null = null
+	let v2Timestamp: number | null = null
 	let isLoading = false
 	let isDrawerOpen = true
 	let wallets$: Observable<WalletState[]>
@@ -68,6 +70,26 @@
 			v2ContractEnabled = savedSetting === 'true'
 		}
 	})
+
+	// Create a reactive timer that updates when v2Timestamp changes
+	$: timeElapsed$ = v2Timestamp
+		? timer(0, 1000).pipe(
+				map(() => getTimeElapsed(v2Timestamp!)),
+				share()
+			)
+		: null
+
+	function getTimeElapsed(timestamp: number) {
+		const diff = Date.now() - timestamp
+		const seconds = Math.floor(diff / 1000)
+		const minutes = Math.floor(seconds / 60)
+		const hours = Math.floor(minutes / 60)
+		const remainingSeconds = seconds % 60
+
+		if (hours > 0) return `${hours}h ago`
+		if (minutes > 0) return `${minutes}m ${remainingSeconds}s ago`
+		return `${seconds}s ago`
+	}
 
 	$: if (onboard) {
 		wallets$ = onboard.state.select('wallets').pipe(share())
@@ -120,8 +142,12 @@
 		try {
 			v2RawData = {} as Record<number, [string, number, number]>
 			const arch = archSchemaMap[readableChains[selectedReadChain].arch]
-			const chainId = readableChains[selectedReadChain].chainId
+			const { chainId, display } = readableChains[selectedReadChain]
+			v2NoDataFoundErrorMsg = null
+			v2Timestamp = null
 
+			let blockNumber
+			let estTimestamp
 			const v2ValuesObject = await (
 				chainId === 1 ? mainnetV2ContractTypValues : evmV2ContractTypValues
 			).reduce(async (accPromise, typ) => {
@@ -134,6 +160,12 @@
 				)
 
 				const [value, height, timestamp] = contractRespPerType
+				if (value === 0n && height === 0n && timestamp === 0n) {
+					v2NoDataFoundErrorMsg = `Estimate not available for ${display} at selected recency`
+				}
+
+				blockNumber = height
+				estTimestamp = timestamp
 
 				const resDataMap = evmTypeSchema?.[typ]
 				if (!resDataMap) {
@@ -142,8 +174,16 @@
 					)
 					return acc
 				}
+
 				v2RawData[typ] = [value, height, timestamp]
+				v2Timestamp = Number(timestamp)
 				return {
+					'Estimate Timestamp': new Date(Number(estTimestamp)).toLocaleString(undefined, {
+						timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+						dateStyle: 'medium',
+						timeStyle: 'long'
+					}),
+					'Estimate Block Number': blockNumber,
 					...acc,
 					// Added for validation
 					[resDataMap.description]: (Number(value) / 1e9).toPrecision(4)
@@ -154,6 +194,7 @@
 			}
 		} catch (error) {
 			v2PublishedGasData = null
+			v2Timestamp = null
 			isLoading = false
 			console.error('Error Reading V2 Published Data:', error)
 			const revertErrorFromContract = (error as any)?.info?.error?.message || (error as any)?.reason
@@ -572,28 +613,43 @@
 							</div>
 						{/if}
 						{#if v2PublishedGasData}
-							<div class="w-full text-left">
-								Data read from {writableChains[selectedWriteChain].display} at: {readGasDataFromTargetChainTime}
-							</div>
-							<div
-								class="my-2 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200 p-1"
-							>
-								Read Raw Data:
-								<pre
-									class="m-0 overflow-scroll overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
-										v2RawData,
-										formatBigInt,
-										2
-									)}</pre>
-							</div>
-							<div class="mx-2 my-4 flex w-full flex-col gap-2 pb-3 text-xs sm:text-sm">
-								{#each Object.entries(v2PublishedGasData) as [key, value]}
-									<div class="flex justify-between gap-4 py-1">
-										<span class="font-medium">{key}:</span>
-										<span>{typeof value === 'bigint' ? value.toString() : value} gwei</span>
-									</div>
-								{/each}
-							</div>
+							{#if v2NoDataFoundErrorMsg}
+								<div class="w-full overflow-auto rounded-lg border border-red-500 p-4 text-red-500">
+									{v2NoDataFoundErrorMsg}
+								</div>
+							{:else}
+								<div class="w-full text-left">
+									Data read from {writableChains[selectedWriteChain].display} at: {readGasDataFromTargetChainTime}
+								</div>
+								<div
+									class="my-2 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200 p-1"
+								>
+									Read Raw Data:
+									<pre
+										class="m-0 overflow-scroll overflow-x-auto bg-gray-50 p-2 text-xs leading-relaxed text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
+											v2RawData,
+											formatBigInt,
+											2
+										)}</pre>
+								</div>
+								<div class="mx-2 my-4 flex w-full flex-col gap-2 pb-3 text-xs sm:text-sm">
+									{#each Object.entries(v2PublishedGasData) as [key, value]}
+										<div class="flex justify-between gap-4 py-1">
+											<span class="font-medium">{key}:</span>
+											{#if key.includes('Gas')}
+												<span>{typeof value === 'bigint' ? value.toString() : value} gwei</span>
+											{:else}
+												<div>
+													<span>{value}</span>
+													{#if timeElapsed$ && key === 'Estimate Timestamp'}
+														<span>{` (${$timeElapsed$})`}</span>
+													{/if}
+												</div>
+											{/if}
+										</div>
+									{/each}
+								</div>
+							{/if}
 						{/if}
 					</div>
 
