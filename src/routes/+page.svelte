@@ -178,6 +178,7 @@
 				v2RawData[typ] = [value, height, timestamp]
 				v2Timestamp = Number(timestamp)
 				return {
+					'Estimate Chain ID': chainId,
 					'Estimate Timestamp': new Date(Number(estTimestamp)).toLocaleString(undefined, {
 						timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 						dateStyle: 'medium',
