@@ -46,7 +46,8 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 		display: 'Ethereum Sepolia',
 		rpcUrl: 'https://endpoints.omniatech.io/v1/eth/sepolia/public',
 		contract: '0xE4859432d9Af6D40C2D923e3F13D66057F4AEcA0',
-		blockExplorerUrl: 'https://sepolia.etherscan.io'
+		blockExplorerUrl: 'https://sepolia.etherscan.io',
+		v2Contract: '0xCc936bE977BeDb5140C5584d8B6043C9068622A6'
 	},
 	[WritableChainKey.OP_SEPOLIA]: {
 		chainId: 11155420,
