@@ -10,7 +10,7 @@ export const gasNetwork = {
 	// url: 'https://http-rpc.devnet.gas.network',
 	url: 'https://test.devnet.gas.network',
 	contract: '0xC2F61FAfA65D874725e485f4B52B9B495559F381',
-	v2Contract: '0x106A0e60fb930b96BDF9da93997747601435e1d9'
+	v2Contract: '0x22973B6Fa2c15278f930d302AE8670abC4Fa6f28'
 }
 
 export const evmV2ContractTypValues = [107, 322]
@@ -232,11 +232,6 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 	[ReadableChainKey.PALM]: {
 		chainId: 11297108109,
 		display: 'Palm',
-		arch: 'evm'
-	},
-	[ReadableChainKey.STORYODYSSEY]: {
-		chainId: 1516,
-		display: 'Story Odyssey',
 		arch: 'evm'
 	},
 	[ReadableChainKey.BOB]: {
