@@ -80,7 +80,6 @@ export enum ReadableChainKey {
 	INK = 'ink',
 	LENSSEPOLIA = 'lenssepolia',
 	PALM = 'palm',
-	STORYODYSSEY = 'storyodyssey',
 	BOB = 'bob',
 	SNAX = 'snax',
 	TAIKO = 'taiko',
