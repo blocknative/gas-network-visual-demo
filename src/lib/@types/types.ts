@@ -84,7 +84,8 @@ export enum ReadableChainKey {
 	SNAX = 'snax',
 	TAIKO = 'taiko',
 	METIS = 'metis',
-	MODE = 'mode'
+	MODE = 'mode',
+	BSC = 'bsc'
 }
 export interface ReadChain {
 	chainId: number

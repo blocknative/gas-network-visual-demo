@@ -259,6 +259,11 @@ export const readableChains: Record<ReadableChainKey, ReadChain> = {
 		display: 'Mode',
 		arch: 'evm'
 	},
+	[ReadableChainKey.BSC]: {
+		chainId: 56,
+		display: 'BNB Smart Chain',
+		arch: 'evm'
+	},
 
 	// Add new chains above this
 	// Unsupported chain for error testing
