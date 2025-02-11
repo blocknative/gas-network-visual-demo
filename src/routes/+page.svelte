@@ -88,17 +88,7 @@
 			)
 		: null
 
-	function getTimeElapsed(timestamp: number) {
-		const diff = Date.now() - timestamp
-		const seconds = Math.floor(diff / 1000)
-		const minutes = Math.floor(seconds / 60)
-		const hours = Math.floor(minutes / 60)
-		const remainingSeconds = seconds % 60
-
-		if (hours > 0) return `${hours}h ago`
-		if (minutes > 0) return `${minutes}m ${remainingSeconds}s ago`
-		return `${seconds}s ago`
-	}
+	$: isV2 = contractVersion === ContractType.v2
 
 	$: if (onboard) {
 		wallets$ = onboard.state.select('wallets').pipe(share())
@@ -117,6 +107,18 @@
 			ethersModule = await import('ethers')
 		}
 		return ethersModule
+	}
+
+	function getTimeElapsed(timestamp: number) {
+		const diff = Date.now() - timestamp
+		const seconds = Math.floor(diff / 1000)
+		const minutes = Math.floor(seconds / 60)
+		const hours = Math.floor(minutes / 60)
+		const remainingSeconds = seconds % 60
+
+		if (hours > 0) return `${hours}h ago`
+		if (minutes > 0) return `${minutes}m ${remainingSeconds}s ago`
+		return `${seconds}s ago`
 	}
 
 	async function fetchGasEstimationFromGasNet(chain: string) {
@@ -406,8 +408,6 @@
 				? WritableChainKey.LINEA_MAINNET
 				: WritableChainKey.LINEA_SEPOLIA
 	}
-
-	$: isV2 = contractVersion === ContractType.v2
 </script>
 
 <main
