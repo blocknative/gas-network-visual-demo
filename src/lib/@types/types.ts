@@ -91,16 +91,17 @@ export enum ReadableChainKey {
 }
 export interface ReadChain {
 	chainId: number
-	display: string
+	label: string
 	arch: 'evm' | 'btc' | 'unsupported'
 	v2Supported?: boolean
 }
 
 export type WriteChain = {
 	chainId: number
-	display: string
+	label: string
 	rpcUrl: string
 	blockExplorerUrl: string
+  testnet?: boolean
 } & (
 	| { contract: string; v2Contract?: string }
 	| { contract?: string; v2Contract: string }

@@ -11,23 +11,25 @@
 	} from '$lib/@types/types'
 	import { getOnboard } from '$lib/services/web3-onboard'
 	import {
-		readableChains,
 		writableChains,
 		quantiles,
 		gasNetwork,
 		archSchemaMap,
 		evmTypeSchema,
 		evmV2ContractTypValues,
-		mainnetV2ContractTypValues
+		mainnetV2ContractTypValues,
+		DEFAULT_READ_CHAIN_ID,
+		UNSUPPORTED_CHAIN
 	} from '../constants'
 	import consumerV2 from '$lib/abis/consumerV2.json'
 	import gasnetV2 from '$lib/abis/gasnetV2.json'
 	import consumer from '$lib/abis/consumer.json'
 	import gasnet from '$lib/abis/gasnet.json'
-	import type { EstimationData, QuantileMap } from '$lib/@types/types'
+	import type { EstimationData, QuantileMap, ReadChain } from '$lib/@types/types'
 	import Drawer from '$lib/components/Drawer.svelte'
 	import { createEstimationObject } from '$lib/utils'
 	import type { Contract } from 'ethers'
+	import { fetchChains } from '$lib/services/api'
 
 	let publishedGasData: {
 		gasPrice: string
@@ -56,14 +58,20 @@
 	let readGasDataFromTargetChainTime: string
 
 	// Update your selected chain variables to use the enums
-	let selectedReadChain: ReadableChainKey = ReadableChainKey.MAIN
+	let selectedReadChain: ReadChain
 	let selectedWriteChain: WritableChainKey = WritableChainKey.SEPOLIA
 	let selectedQuantile: keyof QuantileMap = 'Q99'
 	let selectedTimeout = 3600000
 	let v2ContractEnabled = true
 
+	let readableChains: ReadChain[] | undefined = undefined
 	let onboard: OnboardAPI
 	onMount(async () => {
+		readableChains = await fetchChains()
+		if (!readableChains) {
+			throw new Error('Failed to fetch chains')
+		}
+		selectedReadChain = readableChains.find((c) => c.chainId === DEFAULT_READ_CHAIN_ID)!
 		onboard = await getOnboard()
 		const savedSetting = localStorage.getItem('v2ContractEnabled')
 		if (savedSetting !== null) {
@@ -119,7 +127,7 @@
 			if (v2ContractEnabled) {
 				const gasNetContract = new ethers.Contract(gasNetwork.v2Contract, gasnetV2.abi, rpcProvider)
 
-				const { arch } = readableChains[selectedReadChain]
+				const { arch } = selectedReadChain
 				const payload = await gasNetContract.getValues(archSchemaMap[arch], chain)
 
 				return { paramsPayload: parsePayload(payload), rawReadChainData: payload }
@@ -141,8 +149,8 @@
 	async function handleV2OracleValues(gasNetContract: Contract) {
 		try {
 			v2RawData = {} as Record<number, [string, number, number]>
-			const arch = archSchemaMap[readableChains[selectedReadChain].arch]
-			const { chainId, display } = readableChains[selectedReadChain]
+			const arch = archSchemaMap[selectedReadChain.arch]
+			const { chainId, label } = selectedReadChain
 			v2NoDataFoundErrorMsg = null
 			v2Timestamp = null
 
@@ -161,7 +169,7 @@
 
 				const [value, height, timestamp] = contractRespPerType
 				if (value === 0n && height === 0n && timestamp === 0n) {
-					v2NoDataFoundErrorMsg = `Estimate not available for ${display} at selected recency`
+					v2NoDataFoundErrorMsg = `Estimate not available for ${label} at selected recency`
 				}
 
 				blockNumber = height
@@ -234,7 +242,7 @@
 			} else {
 				const [gasPrice, maxPriorityFeePerGas, maxFeePerGas] =
 					await gasNetContract.getGasEstimationQuantile(
-						BigInt(readableChains[selectedReadChain].chainId),
+						BigInt(selectedReadChain.chainId),
 						BigInt(selectedTimeout / 1000),
 						Number(quantiles[selectedQuantile])
 					)
@@ -362,15 +370,15 @@
 			? Object.entries(writableChains).filter((chain) => chain[1].v2Contract)
 			: Object.entries(writableChains).filter((chain) => chain[1].contract)
 		return rChains.sort((a, b) => {
-			return a[1].display.localeCompare(b[1].display)
+			return a[1].label.localeCompare(b[1].label)
 		})
 	}
 
 	function orderAndFilterReadableChainsAlphabetically() {
-		return Object.entries(readableChains).sort((a, b) => {
-			if (a[0] === 'unsupportedChain') return 1
-			if (b[0] === 'unsupportedChain') return -1
-			return a[1].display.localeCompare(b[1].display)
+		return [...readableChains!, UNSUPPORTED_CHAIN].sort((a, b) => {
+			if (a.arch === 'unsupported') return 1
+			if (b.arch === 'unsupported') return -1
+			return a.label.localeCompare(b.label)
 		})
 	}
 
@@ -441,8 +449,8 @@
 								bind:value={selectedReadChain}
 								class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 							>
-								{#each orderAndFilterReadableChainsAlphabetically() as [key, chain]}
-									<option value={key}>{chain.display}</option>
+								{#each orderAndFilterReadableChainsAlphabetically() as chain}
+									<option value={chain}>{chain.label}</option>
 								{/each}
 							</select>
 						</div>
@@ -456,7 +464,7 @@
 								class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 							>
 								{#each orderAndFilterChainsAlphabetically() as [key, chain]}
-									<option value={key}>{chain.display}</option>
+									<option value={key}>{chain.label}</option>
 								{/each}
 							</select>
 						</div>
@@ -466,13 +474,13 @@
 						on:click={() =>
 							handleGasEstimation(
 								provider,
-								readableChains[selectedReadChain].chainId,
+								selectedReadChain.chainId,
 								writableChains[selectedWriteChain].chainId
 							)}
 					>
-						Read {readableChains[selectedReadChain].display} Estimations and Write to {writableChains[
+						Read {selectedReadChain.label} Estimations and Write to {writableChains[
 							selectedWriteChain
-						].display}
+						].label}
 					</button>
 
 					{#if v2ContractValues}
@@ -599,16 +607,15 @@
 							class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/80"
 							on:click={() => readFromOracle(provider)}
 						>
-							Read {readableChains[selectedReadChain].display} Estimations from {writableChains[
-								selectedWriteChain
-							].display}
+							Read {selectedReadChain.label} Estimations from {writableChains[selectedWriteChain]
+								.label}
 							{#if !v2ContractEnabled}<span>for the {quantiles[selectedQuantile]} Quantile</span
 								>{/if}
 						</button>
 
 						{#if publishedGasData}
 							<div class="w-full text-left">
-								Data read from {writableChains[selectedWriteChain].display} at: {readGasDataFromTargetChainTime}
+								Data read from {writableChains[selectedWriteChain].label} at: {readGasDataFromTargetChainTime}
 							</div>
 							<div
 								class="my-2 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200"
@@ -628,7 +635,7 @@
 								</div>
 							{:else}
 								<div class="w-full text-left">
-									Data read from {writableChains[selectedWriteChain].display} at: {readGasDataFromTargetChainTime}
+									Data read from {writableChains[selectedWriteChain].label} at: {readGasDataFromTargetChainTime}
 								</div>
 								<div
 									class="my-2 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200 p-1"
