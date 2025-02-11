@@ -104,7 +104,7 @@
 	}
 
 	$: if (v2ContractEnabled) {
-		selectedWriteChain = WritableChainKey.LINEA_SEPOLIA
+		selectedWriteChain = WritableChainKey.LINEA_MAINNET
 	} else {
 		selectedWriteChain = WritableChainKey.SEPOLIA
 	}
@@ -365,10 +365,15 @@
 		return typeof value === 'bigint' ? value.toString() : value
 	}
 
-	function orderAndFilterChainsAlphabetically() {
+	function orderAndFilterChainsAlphabetically(filterTestnets: boolean) {
 		const rChains = v2ContractEnabled
-			? Object.entries(writableChains).filter((chain) => chain[1].v2Contract)
-			: Object.entries(writableChains).filter((chain) => chain[1].contract)
+			? Object.entries(writableChains).filter(
+					(chain) => chain[1].v2Contract && (filterTestnets || !chain[1].testnet)
+				)
+			: Object.entries(writableChains).filter(
+					(chain) => chain[1].contract && (filterTestnets || !chain[1].testnet)
+				)
+
 		return rChains.sort((a, b) => {
 			return a[1].label.localeCompare(b[1].label)
 		})
@@ -388,6 +393,13 @@
 		v2PublishedGasData = null
 		localStorage.setItem('v2ContractEnabled', String(value))
 	}
+
+	$: testnetsEnabled = false
+	function updateTestnetsEnabled(value: boolean) {
+		testnetsEnabled = value
+		if (!value && writableChains[selectedWriteChain].testnet)
+			selectedWriteChain = WritableChainKey.LINEA_MAINNET
+	}
 </script>
 
 <main
@@ -396,7 +408,14 @@
 	<div
 		class="mx-auto max-w-3xl rounded-xl border border-brandAction/50 bg-brandForeground p-6 shadow-md sm:p-8"
 	>
-		<h1 class="mb-8 text-center text-3xl">Gas Network Demo</h1>
+		<div class="relative w-full">
+			<h1 class="mb-8 text-center text-3xl">Gas Network Demo</h1>
+			<span
+				class="absolute right-0 top-0 rounded-md border border-brandBackground p-2 text-sm font-medium text-brandBackground/80"
+			>
+				<a href="https://gasnetwork.notion.site/" target="_blank">Documentation</a>
+			</span>
+		</div>
 
 		{#if onboard && !$wallets$?.length}
 			<div class="flex flex-col gap-2">
@@ -414,28 +433,38 @@
 				<div class="flex flex-col gap-2 sm:gap-4">
 					<!-- V2 contract toggle -->
 					<div class="flex items-center justify-between gap-5">
-						<div class="mb-4 flex items-center gap-2">
-							<span class="text-sm font-medium text-brandBackground/80">Contract Version</span>
-							<label class="relative inline-flex cursor-pointer items-center">
-								<input
-									type="checkbox"
-									bind:checked={v2ContractEnabled}
-									on:change={() => updateV2ContractSetting(v2ContractEnabled)}
-									class="peer sr-only"
-								/>
-								<div
-									class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-brandAction peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brandAction/20 rtl:peer-checked:after:-translate-x-full"
-								></div>
-								<span class="ms-3 text-sm font-medium text-brandBackground/80">
-									{v2ContractEnabled ? 'V2' : 'V1'}
-								</span>
-							</label>
-						</div>
-
-						<div class="mb-4 flex items-center gap-2">
-							<span class="text-sm font-medium text-brandBackground/80">
-								<a href="https://gasnetwork.notion.site/" target="_blank">Documentation</a>
-							</span>
+						<div class="flex w-full justify-between">
+							<div class="mb-4 flex items-center gap-2">
+								<span class="text-sm font-medium text-brandBackground/80">Contract Version</span>
+								<label class="relative inline-flex cursor-pointer items-center">
+									<input
+										type="checkbox"
+										bind:checked={v2ContractEnabled}
+										on:change={() => updateV2ContractSetting(v2ContractEnabled)}
+										class="peer sr-only"
+									/>
+									<div
+										class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-brandAction peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brandAction/20 rtl:peer-checked:after:-translate-x-full"
+									></div>
+									<span class="ms-3 text-sm font-medium text-brandBackground/80">
+										{v2ContractEnabled ? 'V2' : 'V1'}
+									</span>
+								</label>
+							</div>
+							<div class="mb-4 flex items-center gap-2">
+								<span class="text-sm font-medium text-brandBackground/80">Testnets</span>
+								<label class="relative inline-flex cursor-pointer items-center">
+									<input
+										type="checkbox"
+										bind:checked={testnetsEnabled}
+										on:change={() => updateTestnetsEnabled(testnetsEnabled)}
+										class="peer sr-only"
+									/>
+									<div
+										class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-brandAction peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brandAction/20 rtl:peer-checked:after:-translate-x-full"
+									></div>
+								</label>
+							</div>
 						</div>
 					</div>
 
@@ -463,7 +492,7 @@
 								bind:value={selectedWriteChain}
 								class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 							>
-								{#each orderAndFilterChainsAlphabetically() as [key, chain]}
+								{#each orderAndFilterChainsAlphabetically(testnetsEnabled) as [key, chain]}
 									<option value={key}>{chain.label}</option>
 								{/each}
 							</select>
