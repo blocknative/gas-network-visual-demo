@@ -59,7 +59,7 @@
 
 	// Update your selected chain variables to use the enums
 	let selectedReadChain: ReadChain
-	let selectedWriteChain: WritableChainKey = WritableChainKey.SEPOLIA
+	let selectedWriteChain: WritableChainKey = WritableChainKey.LINEA_MAINNET
 	let selectedQuantile: keyof QuantileMap = 'Q99'
 	let selectedTimeout = 3600000
 	let v2ContractEnabled = true
@@ -365,13 +365,13 @@
 		return typeof value === 'bigint' ? value.toString() : value
 	}
 
-	function orderAndFilterChainsAlphabetically(filterTestnets: boolean) {
+	$: displayWritableMainnets = true
+	function orderAndFilterChainsAlphabetically() {
 		const chainList = Object.entries(writableChains)
-
 		return chainList
 			.filter(([_, chain]) => {
 				const hasRequiredContract = v2ContractEnabled ? chain.v2Contract : chain.contract
-				const matchesTestnetFilter = filterTestnets ? chain.testnet : !chain.testnet
+				const matchesTestnetFilter = displayWritableMainnets ? !chain.testnet : chain.testnet
 				return hasRequiredContract && matchesTestnetFilter
 			})
 			.sort((a, b) => a[1].label.localeCompare(b[1].label))
@@ -389,14 +389,16 @@
 		v2ContractEnabled = value
 		publishedGasData = null
 		v2PublishedGasData = null
+		if (!value) {
+			displayWritableMainnets = false
+		}
+		updateDisplayWritableMainnets()
 		localStorage.setItem('v2ContractEnabled', String(value))
 	}
 
-	$: testnetsEnabled = false
-	function updateTestnetsEnabled(value: boolean) {
-		testnetsEnabled = value
+	function updateDisplayWritableMainnets() {
 		selectedWriteChain =
-			!value && writableChains[selectedWriteChain].testnet
+			displayWritableMainnets && writableChains[selectedWriteChain].testnet
 				? WritableChainKey.LINEA_MAINNET
 				: WritableChainKey.LINEA_SEPOLIA
 	}
@@ -452,18 +454,26 @@
 								</label>
 							</div>
 							<div class="mb-4 flex items-center gap-2">
-								<span class="text-sm font-medium text-brandBackground/80">Testnets</span>
+								<span
+									class={`text-sm font-medium text-brandBackground/80 ${displayWritableMainnets ? 'text-black' : 'text-gray-500'}`}
+									>Testnets</span
+								>
 								<label class="relative inline-flex cursor-pointer items-center">
 									<input
 										type="checkbox"
-										bind:checked={testnetsEnabled}
-										on:change={() => updateTestnetsEnabled(testnetsEnabled)}
+										bind:checked={displayWritableMainnets}
+										on:change={() => updateDisplayWritableMainnets()}
+										disabled={!v2ContractEnabled}
 										class="peer sr-only"
 									/>
 									<div
 										class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-brandAction peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brandAction/20 rtl:peer-checked:after:-translate-x-full"
 									></div>
 								</label>
+								<span
+									class={`text-sm font-medium text-brandBackground/80 ${displayWritableMainnets ? 'text-black' : 'text-gray-500'}`}
+									>Mainnets</span
+								>
 							</div>
 						</div>
 					</div>
@@ -492,7 +502,7 @@
 								bind:value={selectedWriteChain}
 								class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 							>
-								{#each orderAndFilterChainsAlphabetically(testnetsEnabled) as [key, chain]}
+								{#each orderAndFilterChainsAlphabetically() as [key, chain]}
 									<option value={key}>{chain.label}</option>
 								{/each}
 							</select>
