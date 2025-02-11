@@ -7,6 +7,16 @@ export interface QuantileMap {
 	Q70: 70
 }
 
+export enum ContractType {
+	v1 = 1,
+	v2 = 2
+}
+
+export enum WritableNetworkType {
+	MAINNET = 'mainnet',
+	TESTNET = 'testnet'
+}
+
 export interface GasEstimate {
 	gasPrice: bigint
 	maxPriorityFeePerGas: bigint

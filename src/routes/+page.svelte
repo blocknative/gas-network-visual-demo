@@ -4,8 +4,9 @@
 	import { timer, type Observable } from 'rxjs'
 	import type { OnboardAPI, WalletState } from '@web3-onboard/core'
 	import {
-		ReadableChainKey,
+		ContractType,
 		WritableChainKey,
+		WritableNetworkType,
 		type PayloadValues,
 		type VPayload
 	} from '$lib/@types/types'
@@ -57,12 +58,12 @@
 	let wallets$: Observable<WalletState[]>
 	let readGasDataFromTargetChainTime: string
 
-	// Update your selected chain variables to use the enums
 	let selectedReadChain: ReadChain
 	let selectedWriteChain: WritableChainKey = WritableChainKey.LINEA_MAINNET
 	let selectedQuantile: keyof QuantileMap = 'Q99'
 	let selectedTimeout = 3600000
-	let contractVersion: number = 2
+	let contractVersion = ContractType.v2
+	let writableNetworkType: WritableNetworkType = WritableNetworkType.MAINNET
 
 	let readableChains: ReadChain[] | undefined = undefined
 	let onboard: OnboardAPI
@@ -103,10 +104,11 @@
 		wallets$ = onboard.state.select('wallets').pipe(share())
 	}
 
-	$: if (contractVersion === 2) {
+	$: if (contractVersion === ContractType.v2) {
 		selectedWriteChain = WritableChainKey.LINEA_MAINNET
-	} else {
+	} else if (contractVersion === ContractType.v1) {
 		selectedWriteChain = WritableChainKey.SEPOLIA
+		writableNetworkType = WritableNetworkType.TESTNET
 	}
 
 	let ethersModule: typeof import('ethers')
@@ -124,7 +126,7 @@
 			const { ethers } = await loadEthers()
 
 			const rpcProvider = new ethers.JsonRpcProvider(gasNetwork.url)
-			if (contractVersion === 2) {
+			if (contractVersion === ContractType.v2) {
 				const gasNetContract = new ethers.Contract(gasNetwork.v2Contract, gasnetV2.abi, rpcProvider)
 
 				const { arch } = selectedReadChain
@@ -220,13 +222,13 @@
 			const ethersProvider = new ethers.BrowserProvider(provider, 'any')
 			const signer = await ethersProvider.getSigner()
 			const contractAddress =
-				contractVersion === 2 && writableChains[selectedWriteChain].v2Contract
+				contractVersion === ContractType.v2 && writableChains[selectedWriteChain].v2Contract
 					? writableChains[selectedWriteChain].v2Contract!
 					: writableChains[selectedWriteChain].contract!
 
 			const gasNetContract = new ethers.Contract(
 				contractAddress,
-				contractVersion === 2 ? consumerV2.abi : consumer.abi,
+				contractVersion === ContractType.v2 ? consumerV2.abi : consumer.abi,
 				signer
 			)
 
@@ -236,7 +238,7 @@
 				timeStyle: 'long'
 			})
 
-			if (contractVersion === 2) {
+			if (contractVersion === ContractType.v2) {
 				v2PublishedGasData = null
 				handleV2OracleValues(gasNetContract)
 			} else {
@@ -268,18 +270,18 @@
 			const ethersProvider = new ethers.BrowserProvider(provider, 'any')
 			const signer = await ethersProvider.getSigner()
 			const contractAddress =
-				contractVersion === 2 && writableChains[selectedWriteChain].v2Contract
+				contractVersion === ContractType.v2 && writableChains[selectedWriteChain].v2Contract
 					? writableChains[selectedWriteChain].v2Contract!
 					: writableChains[selectedWriteChain].contract!
 
 			const consumerContract = new ethers.Contract(
 				contractAddress,
-				contractVersion === 2 ? consumerV2.abi : consumer.abi,
+				contractVersion === ContractType.v2 ? consumerV2.abi : consumer.abi,
 				signer
 			)
 
 			let transaction
-			if (contractVersion === 2) {
+			if (contractVersion === ContractType.v2) {
 				transaction = await consumerContract.storeValues(v2ContractRawRes)
 			} else {
 				transaction = await consumerContract.setEstimation(gasEstimation, transactionSignature)
@@ -336,7 +338,7 @@
 				throw new Error('No data received from GasNet')
 			}
 
-			if (contractVersion === 2) {
+			if (contractVersion === ContractType.v2) {
 				const { paramsPayload, rawReadChainData } = gasNetData as any
 
 				if (!paramsPayload) {
@@ -365,13 +367,14 @@
 		return typeof value === 'bigint' ? value.toString() : value
 	}
 
-	let displayWritableMainnets: 'mainnet' | 'testnet' = 'mainnet'
 	function orderAndFilterChainsAlphabetically() {
 		const chainList = Object.entries(writableChains)
 		return chainList
 			.filter(([_, chain]) => {
-				const hasRequiredContract = contractVersion === 2 ? chain.v2Contract : chain.contract
-				const matchesTestnetFilter = displayWritableMainnets === 'mainnet' ? !chain.testnet : chain.testnet
+				const hasRequiredContract =
+					contractVersion === ContractType.v2 ? chain.v2Contract : chain.contract
+				const matchesTestnetFilter =
+					writableNetworkType === WritableNetworkType.MAINNET ? !chain.testnet : chain.testnet
 				return hasRequiredContract && matchesTestnetFilter
 			})
 			.sort((a, b) => a[1].label.localeCompare(b[1].label))
@@ -389,8 +392,8 @@
 		contractVersion = version
 		publishedGasData = null
 		v2PublishedGasData = null
-		if (version === 1) {
-			displayWritableMainnets = 'testnet'
+		if (version === ContractType.v1) {
+			writableNetworkType = WritableNetworkType.TESTNET
 		}
 		updateDisplayWritableMainnets()
 		localStorage.setItem('contractVersion', String(version))
@@ -398,12 +401,13 @@
 
 	function updateDisplayWritableMainnets() {
 		selectedWriteChain =
-			displayWritableMainnets === 'mainnet' && writableChains[selectedWriteChain].testnet
+			writableNetworkType === WritableNetworkType.MAINNET &&
+			writableChains[selectedWriteChain].testnet
 				? WritableChainKey.LINEA_MAINNET
 				: WritableChainKey.LINEA_SEPOLIA
 	}
 
-	$: isV2 = contractVersion === 2
+	$: isV2 = contractVersion === ContractType.v2
 </script>
 
 <main
@@ -438,29 +442,33 @@
 					<!-- V2 contract toggle -->
 					<div class="flex items-center justify-between gap-5">
 						<div class="flex w-full justify-between">
-							<div class="mb-4 flex items-center gap-2 flex-col">
-                <label for="contract-version" class="text-sm font-medium text-brandBackground/80">Contract Version</label>
-                <select
-                  id="contract-version"
-                  bind:value={contractVersion}
-                  on:change={() => updateContractSetting(contractVersion)}
-                  class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
-                >
-                  <option value={1}>V1</option>
-                  <option value={2}>V2</option>
-                </select>
-              </div>
-							<div class="mb-4 flex items-center gap-2 flex-col">
-								<label for="network-type" class="text-sm font-medium text-brandBackground/80">Network Type</label>
+							<div class="mb-4 flex flex-col items-center gap-2">
+								<label for="contract-version" class="text-sm font-medium text-brandBackground/80"
+									>Contract Version</label
+								>
+								<select
+									id="contract-version"
+									bind:value={contractVersion}
+									on:change={() => updateContractSetting(contractVersion)}
+									class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+								>
+									<option value={1}>V1</option>
+									<option value={2}>V2</option>
+								</select>
+							</div>
+							<div class="mb-4 flex flex-col items-center gap-2">
+								<label for="network-type" class="text-sm font-medium text-brandBackground/80"
+									>Network Type</label
+								>
 								<select
 									id="network-type"
-									bind:value={displayWritableMainnets}
+									bind:value={writableNetworkType}
 									on:change={() => updateDisplayWritableMainnets()}
 									disabled={!isV2}
 									class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 								>
-									<option value="testnet">Testnets</option>
-									<option value="mainnet">Mainnets</option>
+									<option value={WritableNetworkType.TESTNET}>Testnets</option>
+									<option value={WritableNetworkType.MAINNET}>Mainnets</option>
 								</select>
 							</div>
 						</div>
@@ -591,7 +599,7 @@
 
 					<div class="flex w-full flex-col items-center justify-between gap-4">
 						<div class="flex w-full items-start justify-between gap-5">
-							{#if contractVersion === 1}
+							{#if contractVersion === ContractType.v1}
 								<div class="flex w-full flex-col gap-1">
 									<label
 										for="quantile-select"
@@ -636,7 +644,8 @@
 						>
 							Read {selectedReadChain.label} Estimations from {writableChains[selectedWriteChain]
 								.label}
-							{#if contractVersion === 1}<span>for the {quantiles[selectedQuantile]} Quantile</span
+							{#if contractVersion === ContractType.v1}<span
+									>for the {quantiles[selectedQuantile]} Quantile</span
 								>{/if}
 						</button>
 

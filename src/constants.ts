@@ -1,8 +1,4 @@
-import {
-	type WriteChain,
-	WritableChainKey,
-	type QuantileMap
-} from '$lib/@types/types'
+import { type WriteChain, WritableChainKey, type QuantileMap } from '$lib/@types/types'
 
 export const gasNetwork = {
 	url: 'https://http-rpc.devnet.gas.network',
@@ -46,7 +42,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 		contract: '0xE4859432d9Af6D40C2D923e3F13D66057F4AEcA0',
 		blockExplorerUrl: 'https://sepolia.etherscan.io',
 		v2Contract: '0xCc936bE977BeDb5140C5584d8B6043C9068622A6',
-    testnet: true
+		testnet: true
 	},
 	[WritableChainKey.OP_SEPOLIA]: {
 		chainId: 11155420,
@@ -55,7 +51,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
 		blockExplorerUrl: 'https://sepolia-optimism.etherscan.io',
 		v2Contract: '0x20A5DCE3646BD975edEE3082319bd0dB64A0e0B9',
-    testnet: true
+		testnet: true
 	},
 	[WritableChainKey.BASE_SEPOLIA]: {
 		chainId: 84532,
@@ -64,7 +60,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
 		blockExplorerUrl: 'https://sepolia.basescan.org',
 		v2Contract: '0xD87f5Ea40C592DfFAe5B87922E1cdA2bb44CB67F',
-    testnet: true
+		testnet: true
 	},
 	[WritableChainKey.LINEA_SEPOLIA]: {
 		chainId: 59141,
@@ -73,7 +69,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 		v2Contract: '0xb690C4CbDE4747FD614477Ab24c7630C5aAa6Ec5',
 		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
 		blockExplorerUrl: 'https://sepolia.lineascan.build',
-    testnet: true
+		testnet: true
 	},
 	[WritableChainKey.LINEA_MAINNET]: {
 		chainId: 59144,
