@@ -7,8 +7,8 @@ import {
 } from '$lib/@types/types'
 
 export const gasNetwork = {
-	// url: 'https://http-rpc.devnet.gas.network',
-	url: 'https://test.devnet.gas.network',
+	url: 'https://http-rpc.devnet.gas.network',
+	// url: 'https://test.devnet.gas.network',
 	contract: '0xC2F61FAfA65D874725e485f4B52B9B495559F381',
 	v2Contract: '0x22973B6Fa2c15278f930d302AE8670abC4Fa6f28'
 }
@@ -79,6 +79,20 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 		rpcUrl: 'https://rpc.linea.build',
 		v2Contract: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13',
 		blockExplorerUrl: 'https://lineascan.build'
+	},
+	[WritableChainKey.BASE_MAINNET]: {
+		chainId: 8453,
+		display: 'Base Mainnet',
+		rpcUrl: 'https://base.llamarpc.com',
+		v2Contract: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13',
+		blockExplorerUrl: 'https://basescan.org/'
+	},
+	[WritableChainKey.OP_MAINNET]: {
+		chainId: 10,
+		display: 'Optimism Mainnet',
+		rpcUrl: 'https://optimism.llamarpc.com',
+		v2Contract: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13',
+		blockExplorerUrl: 'https://optimistic.etherscan.io/'
 	}
 }
 
