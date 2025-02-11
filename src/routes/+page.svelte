@@ -366,17 +366,15 @@
 	}
 
 	function orderAndFilterChainsAlphabetically(filterTestnets: boolean) {
-		const rChains = v2ContractEnabled
-			? Object.entries(writableChains).filter(
-					(chain) => chain[1].v2Contract && (filterTestnets || !chain[1].testnet)
-				)
-			: Object.entries(writableChains).filter(
-					(chain) => chain[1].contract && (filterTestnets || !chain[1].testnet)
-				)
+		const chainList = Object.entries(writableChains)
 
-		return rChains.sort((a, b) => {
-			return a[1].label.localeCompare(b[1].label)
-		})
+		return chainList
+			.filter(([_, chain]) => {
+				const hasRequiredContract = v2ContractEnabled ? chain.v2Contract : chain.contract
+				const matchesTestnetFilter = filterTestnets ? chain.testnet : !chain.testnet
+				return hasRequiredContract && matchesTestnetFilter
+			})
+			.sort((a, b) => a[1].label.localeCompare(b[1].label))
 	}
 
 	function orderAndFilterReadableChainsAlphabetically() {
@@ -397,8 +395,10 @@
 	$: testnetsEnabled = false
 	function updateTestnetsEnabled(value: boolean) {
 		testnetsEnabled = value
-		if (!value && writableChains[selectedWriteChain].testnet)
-			selectedWriteChain = WritableChainKey.LINEA_MAINNET
+		selectedWriteChain =
+			!value && writableChains[selectedWriteChain].testnet
+				? WritableChainKey.LINEA_MAINNET
+				: WritableChainKey.LINEA_SEPOLIA
 	}
 </script>
 
