@@ -91,6 +91,20 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 		rpcUrl: 'https://optimism.llamarpc.com',
 		v2Contract: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13',
 		blockExplorerUrl: 'https://optimistic.etherscan.io/'
+	},
+	[WritableChainKey.MAINNET]: {
+		chainId: 1,
+		label: 'Ethereum Mainnet',
+		rpcUrl: 'https://eth.llamarpc.com',
+		v2Contract: '0x063FEaF3D1A724Fe0cc46F0481Ec15279beb9581',
+		blockExplorerUrl: 'https://mainnet.etherscan.io'
+	},
+	[WritableChainKey.ARBITRUM_ONE]: {
+		chainId: 42161,
+		label: 'Arbitrum One',
+		rpcUrl: 'https://arbitrum.llamarpc.com',
+		v2Contract: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13',
+		blockExplorerUrl: 'https://arbiscan.io/'
 	}
 }
 

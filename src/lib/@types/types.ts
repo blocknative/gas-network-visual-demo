@@ -57,7 +57,9 @@ export enum WritableChainKey {
 	LINEA_SEPOLIA = 'lineaSepolia',
 	LINEA_MAINNET = 'linea',
 	BASE_MAINNET = 'base',
-	OP_MAINNET = 'optimism'
+	OP_MAINNET = 'optimism',
+	MAINNET = 'mainnet',
+	ARBITRUM_ONE = 'arbitrumOne'
 }
 
 export enum ReadableChainKey {
