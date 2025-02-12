@@ -7,6 +7,18 @@ export interface QuantileMap {
 	Q70: 70
 }
 
+export enum OracleVersion {
+	v1 = 1,
+	v2 = 2
+}
+
+export type OracleVersions = 1 | 2
+
+export enum WritableNetworkType {
+	MAINNET = 'mainnet',
+	TESTNET = 'testnet'
+}
+
 export interface GasEstimate {
 	gasPrice: bigint
 	maxPriorityFeePerGas: bigint
@@ -47,7 +59,10 @@ export enum WritableChainKey {
 	LINEA_SEPOLIA = 'lineaSepolia',
 	LINEA_MAINNET = 'linea',
 	BASE_MAINNET = 'base',
-	OP_MAINNET = 'optimism'
+	OP_MAINNET = 'optimism',
+	MAINNET = 'mainnet',
+	ARBITRUM_ONE = 'arbitrumOne',
+	UNICHAIN_MAINNET = 'unichain'
 }
 
 export enum ReadableChainKey {
@@ -91,18 +106,29 @@ export enum ReadableChainKey {
 }
 export interface ReadChain {
 	chainId: number
-	display: string
+	label: string
 	arch: 'evm' | 'btc' | 'unsupported'
 	v2Supported?: boolean
 }
 
 export type WriteChain = {
 	chainId: number
-	display: string
+	label: string
 	rpcUrl: string
 	blockExplorerUrl: string
+	oracleVersions: OracleVersions[]
+	testnet?: boolean
 } & (
 	| { contract: string; v2Contract?: string }
 	| { contract?: string; v2Contract: string }
 	| { contract: string; v2Contract: string }
 )
+
+export interface LocalSettings {
+	oracleVersion: undefined | number
+	networkType: undefined | WritableNetworkType
+	readChain: undefined | ReadChain
+	writeChain: undefined | WritableChainKey
+	quantile: undefined | keyof QuantileMap
+	timeout: undefined | number
+}
