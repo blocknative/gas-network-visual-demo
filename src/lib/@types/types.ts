@@ -7,10 +7,12 @@ export interface QuantileMap {
 	Q70: 70
 }
 
-export enum ContractType {
+export enum OracleVersion {
 	v1 = 1,
 	v2 = 2
 }
+
+export type OracleVersions = 1 | 2
 
 export enum WritableNetworkType {
 	MAINNET = 'mainnet',
@@ -119,3 +121,12 @@ export type WriteChain = {
 	| { contract?: string; v2Contract: string }
 	| { contract: string; v2Contract: string }
 )
+
+export interface LocalSettings {
+	oracleVersion: undefined | number
+	networkType: undefined | WritableNetworkType
+	readChain: undefined | ReadChain
+	writeChain: undefined | WritableChainKey
+	quantile: undefined | keyof QuantileMap
+	timeout: undefined | number
+}

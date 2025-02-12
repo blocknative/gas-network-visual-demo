@@ -7,6 +7,8 @@ export const gasNetwork = {
 	v2Contract: '0x22973B6Fa2c15278f930d302AE8670abC4Fa6f28'
 }
 
+export const LOCAL_SETTING_KEY = 'bn-gas-demo-settings'
+
 export const evmV2ContractTypValues = [107, 322]
 export const mainnetV2ContractTypValues = [107, 112, 322]
 

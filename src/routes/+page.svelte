@@ -4,7 +4,7 @@
 	import { timer, type Observable } from 'rxjs'
 	import type { OnboardAPI, WalletState } from '@web3-onboard/core'
 	import {
-		ContractType,
+		OracleVersion,
 		WritableChainKey,
 		WritableNetworkType,
 		type PayloadValues,
@@ -20,13 +20,20 @@
 		evmV2ContractTypValues,
 		mainnetV2ContractTypValues,
 		DEFAULT_READ_CHAIN_ID,
-		UNSUPPORTED_CHAIN
+		UNSUPPORTED_CHAIN,
+		LOCAL_SETTING_KEY
 	} from '../constants'
 	import consumerV2 from '$lib/abis/consumerV2.json'
 	import gasnetV2 from '$lib/abis/gasnetV2.json'
 	import consumer from '$lib/abis/consumer.json'
 	import gasnet from '$lib/abis/gasnet.json'
-	import type { EstimationData, QuantileMap, ReadChain } from '$lib/@types/types'
+	import type {
+		EstimationData,
+		LocalSettings,
+		OracleVersions,
+		QuantileMap,
+		ReadChain
+	} from '$lib/@types/types'
 	import Drawer from '$lib/components/Drawer.svelte'
 	import { createEstimationObject } from '$lib/utils'
 	import type { Contract } from 'ethers'
@@ -59,11 +66,20 @@
 	let readGasDataFromTargetChainTime: string
 
 	let selectedReadChain: ReadChain
-	let selectedWriteChain: WritableChainKey = WritableChainKey.LINEA_MAINNET
-	let selectedQuantile: keyof QuantileMap = 'Q99'
-	let selectedTimeout = 3600000
-	let contractVersion = ContractType.v2
-	let writableNetworkType: WritableNetworkType = WritableNetworkType.MAINNET
+	let selectedWriteChain: WritableChainKey
+	let selectedQuantile: keyof QuantileMap
+	let selectedTimeout: number
+	let contractVersion: number
+	let writableNetworkType: WritableNetworkType
+
+	let localSettings: LocalSettings = {
+		oracleVersion: undefined,
+		networkType: undefined,
+		readChain: undefined,
+		writeChain: undefined,
+		quantile: undefined,
+		timeout: undefined
+	}
 
 	let readableChains: ReadChain[] | undefined = undefined
 	let onboard: OnboardAPI
@@ -72,13 +88,27 @@
 		if (!readableChains) {
 			throw new Error('Failed to fetch chains')
 		}
-		selectedReadChain = readableChains.find((c) => c.chainId === DEFAULT_READ_CHAIN_ID)!
 		onboard = await getOnboard()
-		const savedSetting = localStorage.getItem('contractVersion')
-		if (savedSetting !== null) {
-			contractVersion = Number(savedSetting)
-		}
+		handleLocalStorageSettings(readableChains)
 	})
+
+	$: if (
+		selectedWriteChain ||
+		selectedQuantile ||
+		selectedTimeout ||
+		writableNetworkType ||
+		selectedReadChain
+	) {
+		localSettings = {
+			oracleVersion: contractVersion,
+			networkType: writableNetworkType,
+			readChain: selectedReadChain,
+			writeChain: selectedWriteChain,
+			quantile: selectedQuantile,
+			timeout: selectedTimeout
+		}
+		localStorage.setItem('bn-gas-demo-settings', JSON.stringify(localSettings))
+	}
 
 	// Create a reactive timer that updates when v2Timestamp changes
 	$: timeElapsed$ = v2Timestamp
@@ -88,17 +118,33 @@
 			)
 		: null
 
-	$: isV2 = contractVersion === ContractType.v2
+	$: v2TestnetsAvailable =
+		contractVersion === OracleVersion.v2 &&
+		Object.values(writableChains).some((chain) => chain.v2Contract && !chain.testnet)
 
 	$: if (onboard) {
 		wallets$ = onboard.state.select('wallets').pipe(share())
 	}
 
-	$: if (contractVersion === ContractType.v2) {
-		selectedWriteChain = WritableChainKey.LINEA_MAINNET
-	} else if (contractVersion === ContractType.v1) {
-		selectedWriteChain = WritableChainKey.SEPOLIA
-		writableNetworkType = WritableNetworkType.TESTNET
+	function handleLocalStorageSettings(readableChains: ReadChain[]) {
+		const oldSavedSetting = localStorage.getItem('contractVersion')
+		if (oldSavedSetting) {
+			contractVersion = Number(oldSavedSetting)
+			localSettings.oracleVersion = contractVersion
+			localStorage.removeItem('contractVersion')
+		}
+
+		const savedSettings = localStorage.getItem(LOCAL_SETTING_KEY)
+		localSettings = JSON.parse(savedSettings ?? '{}')
+		const { oracleVersion, networkType, readChain, writeChain, quantile, timeout } = localSettings
+		selectedWriteChain = writeChain ?? WritableChainKey.LINEA_MAINNET
+		selectedQuantile = quantile ?? 'Q99'
+		selectedTimeout = timeout ?? 3600000
+		writableNetworkType = networkType ?? WritableNetworkType.MAINNET
+		selectedReadChain = readableChains.find(
+			(c) => c.chainId === (readChain?.chainId ?? DEFAULT_READ_CHAIN_ID)
+		)!
+		contractVersion = oracleVersion ?? OracleVersion.v2
 	}
 
 	let ethersModule: typeof import('ethers')
@@ -128,7 +174,7 @@
 			const { ethers } = await loadEthers()
 
 			const rpcProvider = new ethers.JsonRpcProvider(gasNetwork.url)
-			if (contractVersion === ContractType.v2) {
+			if (contractVersion === OracleVersion.v2) {
 				const gasNetContract = new ethers.Contract(gasNetwork.v2Contract, gasnetV2.abi, rpcProvider)
 
 				const { arch } = selectedReadChain
@@ -224,13 +270,13 @@
 			const ethersProvider = new ethers.BrowserProvider(provider, 'any')
 			const signer = await ethersProvider.getSigner()
 			const contractAddress =
-				contractVersion === ContractType.v2 && writableChains[selectedWriteChain].v2Contract
+				contractVersion === OracleVersion.v2 && writableChains[selectedWriteChain].v2Contract
 					? writableChains[selectedWriteChain].v2Contract!
 					: writableChains[selectedWriteChain].contract!
 
 			const gasNetContract = new ethers.Contract(
 				contractAddress,
-				contractVersion === ContractType.v2 ? consumerV2.abi : consumer.abi,
+				contractVersion === OracleVersion.v2 ? consumerV2.abi : consumer.abi,
 				signer
 			)
 
@@ -240,7 +286,7 @@
 				timeStyle: 'long'
 			})
 
-			if (contractVersion === ContractType.v2) {
+			if (contractVersion === OracleVersion.v2) {
 				v2PublishedGasData = null
 				handleV2OracleValues(gasNetContract)
 			} else {
@@ -272,18 +318,18 @@
 			const ethersProvider = new ethers.BrowserProvider(provider, 'any')
 			const signer = await ethersProvider.getSigner()
 			const contractAddress =
-				contractVersion === ContractType.v2 && writableChains[selectedWriteChain].v2Contract
+				contractVersion === OracleVersion.v2 && writableChains[selectedWriteChain].v2Contract
 					? writableChains[selectedWriteChain].v2Contract!
 					: writableChains[selectedWriteChain].contract!
 
 			const consumerContract = new ethers.Contract(
 				contractAddress,
-				contractVersion === ContractType.v2 ? consumerV2.abi : consumer.abi,
+				contractVersion === OracleVersion.v2 ? consumerV2.abi : consumer.abi,
 				signer
 			)
 
 			let transaction
-			if (contractVersion === ContractType.v2) {
+			if (contractVersion === OracleVersion.v2) {
 				transaction = await consumerContract.storeValues(v2ContractRawRes)
 			} else {
 				transaction = await consumerContract.setEstimation(gasEstimation, transactionSignature)
@@ -340,7 +386,7 @@
 				throw new Error('No data received from GasNet')
 			}
 
-			if (contractVersion === ContractType.v2) {
+			if (contractVersion === OracleVersion.v2) {
 				const { paramsPayload, rawReadChainData } = gasNetData as any
 
 				if (!paramsPayload) {
@@ -374,7 +420,7 @@
 		return chainList
 			.filter(([_, chain]) => {
 				const hasRequiredContract =
-					contractVersion === ContractType.v2 ? chain.v2Contract : chain.contract
+					contractVersion === OracleVersion.v2 ? chain.v2Contract : chain.contract
 				const matchesTestnetFilter =
 					writableNetworkType === WritableNetworkType.MAINNET ? !chain.testnet : chain.testnet
 				return hasRequiredContract && matchesTestnetFilter
@@ -390,15 +436,14 @@
 		})
 	}
 
-	function updateContractSetting(version: 1 | 2) {
+	function updateContractSetting(version: OracleVersions) {
 		contractVersion = version
 		publishedGasData = null
 		v2PublishedGasData = null
-		if (version === ContractType.v1) {
+		if (version === OracleVersion.v1) {
 			writableNetworkType = WritableNetworkType.TESTNET
 		}
 		updateDisplayWritableMainnets()
-		localStorage.setItem('contractVersion', String(version))
 	}
 
 	function updateDisplayWritableMainnets() {
@@ -449,7 +494,7 @@
 								<select
 									id="contract-version"
 									bind:value={contractVersion}
-									on:change={() => updateContractSetting(contractVersion)}
+									on:change={() => updateContractSetting(contractVersion as OracleVersions)}
 									class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 								>
 									<option value={1}>V1 Oracle</option>
@@ -465,7 +510,7 @@
 									id="network-type"
 									bind:value={writableNetworkType}
 									on:change={() => updateDisplayWritableMainnets()}
-									disabled={!isV2}
+									disabled={!v2TestnetsAvailable}
 									class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 								>
 									<option value={WritableNetworkType.TESTNET}>Testnets</option>
@@ -600,7 +645,7 @@
 
 					<div class="flex w-full flex-col items-center justify-between gap-4">
 						<div class="flex w-full items-start justify-between gap-5">
-							{#if contractVersion === ContractType.v1}
+							{#if contractVersion === OracleVersion.v1}
 								<div class="flex w-full flex-col gap-1">
 									<label
 										for="quantile-select"
@@ -645,7 +690,7 @@
 						>
 							Read {selectedReadChain.label} Estimations from {writableChains[selectedWriteChain]
 								.label}
-							{#if contractVersion === ContractType.v1}<span
+							{#if contractVersion === OracleVersion.v1}<span
 									>for the {quantiles[selectedQuantile]} Quantile</span
 								>{/if}
 						</button>
