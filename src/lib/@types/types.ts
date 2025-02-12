@@ -1,5 +1,3 @@
-import type { quantiles } from '../../constants'
-
 export interface QuantileMap {
 	Q99: 99
 	Q98: 98
