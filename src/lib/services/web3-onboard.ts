@@ -93,6 +93,12 @@ export async function getOnboard() {
 					token: 'LineaETH',
 					label: 'Linea',
 					rpcUrl: 'https://rpc.linea.build'
+				},
+				{
+					id: 130,
+					token: 'ETH',
+					label: 'Unichain',
+					rpcUrl: 'https://mainnet.unichain.org'
 				}
 			],
 			connect: {

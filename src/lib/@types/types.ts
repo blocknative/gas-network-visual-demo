@@ -61,7 +61,8 @@ export enum WritableChainKey {
 	BASE_MAINNET = 'base',
 	OP_MAINNET = 'optimism',
 	MAINNET = 'mainnet',
-	ARBITRUM_ONE = 'arbitrumOne'
+	ARBITRUM_ONE = 'arbitrumOne',
+	UNICHAIN_MAINNET = 'unichain'
 }
 
 export enum ReadableChainKey {

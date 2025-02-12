@@ -107,6 +107,13 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 		rpcUrl: 'https://arbitrum.llamarpc.com',
 		v2Contract: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13',
 		blockExplorerUrl: 'https://arbiscan.io/'
+	},
+	[WritableChainKey.UNICHAIN_MAINNET]: {
+		chainId: 130,
+		label: 'Unichain Mainnet',
+		rpcUrl: 'https://mainnet.unichain.org',
+		v2Contract: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13',
+		blockExplorerUrl: 'https://uniscan.xyz/'
 	}
 }
 
