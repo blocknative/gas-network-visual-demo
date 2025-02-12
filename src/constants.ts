@@ -39,6 +39,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	// },
 	[WritableChainKey.SEPOLIA]: {
 		chainId: 11155111,
+    oracleVersions:[1, 2],
 		label: 'Ethereum Sepolia',
 		rpcUrl: 'https://endpoints.omniatech.io/v1/eth/sepolia/public',
 		contract: '0xE4859432d9Af6D40C2D923e3F13D66057F4AEcA0',
@@ -48,6 +49,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	},
 	[WritableChainKey.OP_SEPOLIA]: {
 		chainId: 11155420,
+    oracleVersions:[1, 2],
 		label: 'Optimism Sepolia',
 		rpcUrl: 'https://sepolia.optimism.io',
 		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
@@ -57,6 +59,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	},
 	[WritableChainKey.BASE_SEPOLIA]: {
 		chainId: 84532,
+    oracleVersions:[1, 2],
 		label: 'Base Sepolia',
 		rpcUrl: 'https://sepolia.base.org',
 		contract: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
@@ -66,6 +69,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	},
 	[WritableChainKey.LINEA_SEPOLIA]: {
 		chainId: 59141,
+    oracleVersions:[1, 2],
 		label: 'Linea Sepolia',
 		rpcUrl: 'https://linea-sepolia-rpc.publicnode.com',
 		v2Contract: '0xb690C4CbDE4747FD614477Ab24c7630C5aAa6Ec5',
@@ -75,6 +79,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	},
 	[WritableChainKey.LINEA_MAINNET]: {
 		chainId: 59144,
+    oracleVersions:[2],
 		label: 'Linea Mainnet',
 		rpcUrl: 'https://rpc.linea.build',
 		v2Contract: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13',
@@ -82,6 +87,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	},
 	[WritableChainKey.BASE_MAINNET]: {
 		chainId: 8453,
+    oracleVersions:[2],
 		label: 'Base Mainnet',
 		rpcUrl: 'https://base.llamarpc.com',
 		v2Contract: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13',
@@ -89,6 +95,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	},
 	[WritableChainKey.OP_MAINNET]: {
 		chainId: 10,
+    oracleVersions:[2],
 		label: 'Optimism Mainnet',
 		rpcUrl: 'https://optimism.llamarpc.com',
 		v2Contract: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13',
@@ -96,6 +103,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	},
 	[WritableChainKey.MAINNET]: {
 		chainId: 1,
+    oracleVersions:[2],
 		label: 'Ethereum Mainnet',
 		rpcUrl: 'https://eth.llamarpc.com',
 		v2Contract: '0x063FEaF3D1A724Fe0cc46F0481Ec15279beb9581',
@@ -103,6 +111,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	},
 	[WritableChainKey.ARBITRUM_ONE]: {
 		chainId: 42161,
+    oracleVersions:[2],
 		label: 'Arbitrum One',
 		rpcUrl: 'https://arbitrum.llamarpc.com',
 		v2Contract: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13',
@@ -110,6 +119,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	},
 	[WritableChainKey.UNICHAIN_MAINNET]: {
 		chainId: 130,
+    oracleVersions:[2],
 		label: 'Unichain Mainnet',
 		rpcUrl: 'https://mainnet.unichain.org',
 		v2Contract: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13',

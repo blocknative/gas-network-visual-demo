@@ -436,6 +436,8 @@
 		})
 	}
 
+	let lastSelectChainOfDifferentContractVersion: WritableChainKey | null = null
+
 	function updateContractSetting(version: OracleVersions) {
 		contractVersion = version
 		publishedGasData = null
@@ -443,15 +445,31 @@
 		if (version === OracleVersion.v1) {
 			writableNetworkType = WritableNetworkType.TESTNET
 		}
-		updateDisplayWritableMainnets()
+		if (!writableChains[selectedWriteChain].oracleVersions.includes(version)) {
+			selectedWriteChain =
+				writableNetworkType === WritableNetworkType.MAINNET &&
+				writableChains[selectedWriteChain].testnet
+					? WritableChainKey.LINEA_MAINNET
+					: WritableChainKey.LINEA_SEPOLIA
+		}
 	}
 
 	function updateDisplayWritableMainnets() {
-		selectedWriteChain =
-			writableNetworkType === WritableNetworkType.MAINNET &&
-			writableChains[selectedWriteChain].testnet
-				? WritableChainKey.LINEA_MAINNET
-				: WritableChainKey.LINEA_SEPOLIA
+		if (!lastSelectChainOfDifferentContractVersion) {
+			lastSelectChainOfDifferentContractVersion = selectedWriteChain
+			selectedWriteChain =
+				writableNetworkType === WritableNetworkType.MAINNET &&
+				writableChains[selectedWriteChain].testnet
+					? WritableChainKey.LINEA_MAINNET
+					: WritableChainKey.LINEA_SEPOLIA
+			return
+		}
+		if (lastSelectChainOfDifferentContractVersion) {
+			const tempLastChain = selectedWriteChain
+			selectedWriteChain = lastSelectChainOfDifferentContractVersion
+			lastSelectChainOfDifferentContractVersion = tempLastChain
+			return
+		}
 	}
 </script>
 
