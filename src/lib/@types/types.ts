@@ -1,3 +1,5 @@
+import type { quantiles } from '../../constants'
+
 export interface QuantileMap {
 	Q99: 99
 	Q98: 98
@@ -115,7 +117,7 @@ export type WriteChain = {
 	label: string
 	rpcUrl: string
 	blockExplorerUrl: string
-  testnet?: boolean
+	testnet?: boolean
 } & (
 	| { contract: string; v2Contract?: string }
 	| { contract?: string; v2Contract: string }
