@@ -118,9 +118,9 @@
 			)
 		: null
 
-	$: v2TestnetsAvailable =
-		contractVersion === OracleVersion.v2 &&
-		Object.values(writableChains).some((chain) => chain.v2Contract && !chain.testnet)
+	$: testnetsAvailable = Object.values(writableChains).some(
+		(chain) => chain.contractByVersion[contractVersion] && !chain.testnet
+	)
 
 	$: if (onboard) {
 		wallets$ = onboard.state.select('wallets').pipe(share())
@@ -270,9 +270,10 @@
 			const ethersProvider = new ethers.BrowserProvider(provider, 'any')
 			const signer = await ethersProvider.getSigner()
 			const contractAddress =
-				contractVersion === OracleVersion.v2 && writableChains[selectedWriteChain].v2Contract
-					? writableChains[selectedWriteChain].v2Contract!
-					: writableChains[selectedWriteChain].contract!
+				contractVersion === OracleVersion.v2 &&
+				writableChains[selectedWriteChain].contractByVersion[OracleVersion.v2]
+					? writableChains[selectedWriteChain].contractByVersion[OracleVersion.v2]!
+					: writableChains[selectedWriteChain].contractByVersion[OracleVersion.v1]!
 
 			const gasNetContract = new ethers.Contract(
 				contractAddress,
@@ -318,9 +319,10 @@
 			const ethersProvider = new ethers.BrowserProvider(provider, 'any')
 			const signer = await ethersProvider.getSigner()
 			const contractAddress =
-				contractVersion === OracleVersion.v2 && writableChains[selectedWriteChain].v2Contract
-					? writableChains[selectedWriteChain].v2Contract!
-					: writableChains[selectedWriteChain].contract!
+				contractVersion === OracleVersion.v2 &&
+				writableChains[selectedWriteChain].contractByVersion[OracleVersion.v2]
+					? writableChains[selectedWriteChain].contractByVersion[OracleVersion.v2]!
+					: writableChains[selectedWriteChain].contractByVersion[OracleVersion.v1]!
 
 			const consumerContract = new ethers.Contract(
 				contractAddress,
@@ -420,7 +422,9 @@
 		return chainList
 			.filter(([_, chain]) => {
 				const hasRequiredContract =
-					contractVersion === OracleVersion.v2 ? chain.v2Contract : chain.contract
+					contractVersion === OracleVersion.v2
+						? chain.contractByVersion[OracleVersion.v2]
+						: chain.contractByVersion[OracleVersion.v1]
 				const matchesTestnetFilter =
 					writableNetworkType === WritableNetworkType.MAINNET ? !chain.testnet : chain.testnet
 				return hasRequiredContract && matchesTestnetFilter
@@ -438,6 +442,14 @@
 
 	let lastSelectChainOfDifferentContractVersion: WritableChainKey | null = null
 
+	function setSelectedWriteChain() {
+		selectedWriteChain =
+			writableNetworkType === WritableNetworkType.MAINNET &&
+			writableChains[selectedWriteChain].testnet
+				? WritableChainKey.LINEA_MAINNET
+				: WritableChainKey.LINEA_SEPOLIA
+	}
+
 	function updateContractSetting(version: OracleVersions) {
 		contractVersion = version
 		publishedGasData = null
@@ -445,23 +457,19 @@
 		if (version === OracleVersion.v1) {
 			writableNetworkType = WritableNetworkType.TESTNET
 		}
-		if (!writableChains[selectedWriteChain].oracleVersions.includes(version)) {
-			selectedWriteChain =
-				writableNetworkType === WritableNetworkType.MAINNET &&
-				writableChains[selectedWriteChain].testnet
-					? WritableChainKey.LINEA_MAINNET
-					: WritableChainKey.LINEA_SEPOLIA
+		if (
+			!Object.keys(writableChains[selectedWriteChain].contractByVersion).includes(
+				version.toString()
+			)
+		) {
+			setSelectedWriteChain()
 		}
 	}
 
 	function updateDisplayWritableMainnets() {
 		if (!lastSelectChainOfDifferentContractVersion) {
 			lastSelectChainOfDifferentContractVersion = selectedWriteChain
-			selectedWriteChain =
-				writableNetworkType === WritableNetworkType.MAINNET &&
-				writableChains[selectedWriteChain].testnet
-					? WritableChainKey.LINEA_MAINNET
-					: WritableChainKey.LINEA_SEPOLIA
+			setSelectedWriteChain()
 			return
 		}
 		if (lastSelectChainOfDifferentContractVersion) {
@@ -528,7 +536,7 @@
 									id="network-type"
 									bind:value={writableNetworkType}
 									on:change={() => updateDisplayWritableMainnets()}
-									disabled={!v2TestnetsAvailable}
+									disabled={!testnetsAvailable}
 									class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 								>
 									<option value={WritableNetworkType.TESTNET}>Testnets</option>

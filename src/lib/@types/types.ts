@@ -116,13 +116,9 @@ export type WriteChain = {
 	label: string
 	rpcUrl: string
 	blockExplorerUrl: string
-	oracleVersions: OracleVersions[]
 	testnet?: boolean
-} & (
-	| { contract: string; v2Contract?: string }
-	| { contract?: string; v2Contract: string }
-	| { contract: string; v2Contract: string }
-)
+  contractByVersion: Record<number, string>
+}
 
 export interface LocalSettings {
 	oracleVersion: undefined | number
