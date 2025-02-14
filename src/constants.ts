@@ -39,10 +39,10 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	// },
 	[WritableChainKey.SEPOLIA]: {
 		chainId: 11155111,
-    contractByVersion: {
-      1:'0xE4859432d9Af6D40C2D923e3F13D66057F4AEcA0',
-      2: '0xCc936bE977BeDb5140C5584d8B6043C9068622A6'
-    },
+		contractByVersion: {
+			1: '0xE4859432d9Af6D40C2D923e3F13D66057F4AEcA0',
+			2: '0xCc936bE977BeDb5140C5584d8B6043C9068622A6'
+		},
 		label: 'Ethereum Sepolia',
 		rpcUrl: 'https://endpoints.omniatech.io/v1/eth/sepolia/public',
 		blockExplorerUrl: 'https://sepolia.etherscan.io',
@@ -50,7 +50,10 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	},
 	[WritableChainKey.OP_SEPOLIA]: {
 		chainId: 11155420,
-    contractByVersion:{1: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1', 2:'0x20A5DCE3646BD975edEE3082319bd0dB64A0e0B9'},
+		contractByVersion: {
+			1: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
+			2: '0x20A5DCE3646BD975edEE3082319bd0dB64A0e0B9'
+		},
 		label: 'Optimism Sepolia',
 		rpcUrl: 'https://sepolia.optimism.io',
 		blockExplorerUrl: 'https://sepolia-optimism.etherscan.io',
@@ -58,7 +61,10 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	},
 	[WritableChainKey.BASE_SEPOLIA]: {
 		chainId: 84532,
-    contractByVersion:{1:'0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1', 2:'0xD87f5Ea40C592DfFAe5B87922E1cdA2bb44CB67F'},
+		contractByVersion: {
+			1: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
+			2: '0xD87f5Ea40C592DfFAe5B87922E1cdA2bb44CB67F'
+		},
 		label: 'Base Sepolia',
 		rpcUrl: 'https://sepolia.base.org',
 		blockExplorerUrl: 'https://sepolia.basescan.org',
@@ -66,7 +72,10 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	},
 	[WritableChainKey.LINEA_SEPOLIA]: {
 		chainId: 59141,
-    contractByVersion:{1: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1', 2:'0xb690C4CbDE4747FD614477Ab24c7630C5aAa6Ec5'},
+		contractByVersion: {
+			1: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
+			2: '0xb690C4CbDE4747FD614477Ab24c7630C5aAa6Ec5'
+		},
 		label: 'Linea Sepolia',
 		rpcUrl: 'https://linea-sepolia-rpc.publicnode.com',
 		blockExplorerUrl: 'https://sepolia.lineascan.build',
@@ -74,42 +83,42 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	},
 	[WritableChainKey.LINEA_MAINNET]: {
 		chainId: 59144,
-    contractByVersion:{2:'0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13'},
+		contractByVersion: { 2: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13' },
 		label: 'Linea Mainnet',
 		rpcUrl: 'https://rpc.linea.build',
 		blockExplorerUrl: 'https://lineascan.build'
 	},
 	[WritableChainKey.BASE_MAINNET]: {
 		chainId: 8453,
-    contractByVersion:{2:'0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13'},
+		contractByVersion: { 2: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13' },
 		label: 'Base Mainnet',
 		rpcUrl: 'https://base.llamarpc.com',
 		blockExplorerUrl: 'https://basescan.org/'
 	},
 	[WritableChainKey.OP_MAINNET]: {
 		chainId: 10,
-    contractByVersion:{2:'0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13'},
+		contractByVersion: { 2: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13' },
 		label: 'Optimism Mainnet',
 		rpcUrl: 'https://optimism.llamarpc.com',
 		blockExplorerUrl: 'https://optimistic.etherscan.io/'
 	},
 	[WritableChainKey.MAINNET]: {
 		chainId: 1,
-    contractByVersion:{2:'0x063FEaF3D1A724Fe0cc46F0481Ec15279beb9581'},
+		contractByVersion: { 2: '0x063FEaF3D1A724Fe0cc46F0481Ec15279beb9581' },
 		label: 'Ethereum Mainnet',
 		rpcUrl: 'https://eth.llamarpc.com',
 		blockExplorerUrl: 'https://mainnet.etherscan.io'
 	},
 	[WritableChainKey.ARBITRUM_ONE]: {
 		chainId: 42161,
-    contractByVersion:{2:'0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13'},
+		contractByVersion: { 2: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13' },
 		label: 'Arbitrum One',
 		rpcUrl: 'https://arbitrum.llamarpc.com',
 		blockExplorerUrl: 'https://arbiscan.io/'
 	},
 	[WritableChainKey.UNICHAIN_MAINNET]: {
 		chainId: 130,
-    contractByVersion:{2:'0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13'},
+		contractByVersion: { 2: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13' },
 		label: 'Unichain Mainnet',
 		rpcUrl: 'https://mainnet.unichain.org',
 		blockExplorerUrl: 'https://uniscan.xyz/'

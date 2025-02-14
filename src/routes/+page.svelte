@@ -126,6 +126,15 @@
 		wallets$ = onboard.state.select('wallets').pipe(share())
 	}
 
+	$: oracleVersionsAvailable = Object.values(writableChains).reduce((acc, chain) => {
+		Object.keys(chain.contractByVersion).forEach((v) => {
+			console.log(typeof v, v)
+			const version = parseInt(v)
+			!acc.includes(version) && acc.push(version)
+		})
+		return acc
+	}, [] as number[]).sort((a, b) => a - b)
+
 	function handleLocalStorageSettings(readableChains: ReadChain[]) {
 		const oldSavedSetting = localStorage.getItem('contractVersion')
 		if (oldSavedSetting) {
@@ -513,20 +522,23 @@
 					<!-- V2 contract toggle -->
 					<div class="flex items-center justify-between gap-5">
 						<div class="flex w-full justify-between">
-							<div class="mb-4 flex flex-col items-center gap-2">
-								<label for="contract-version" class="text-sm font-medium text-brandBackground/80"
-									>Contract Version</label
-								>
-								<select
-									id="contract-version"
-									bind:value={contractVersion}
-									on:change={() => updateContractSetting(contractVersion as OracleVersions)}
-									class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
-								>
-									<option value={1}>V1 Oracle</option>
-									<option value={2}>V2 Oracle</option>
-								</select>
-							</div>
+							{#if oracleVersionsAvailable?.length}
+								<div class="mb-4 flex flex-col items-center gap-2">
+									<label for="contract-version" class="text-sm font-medium text-brandBackground/80"
+										>Contract Version</label
+									>
+									<select
+										id="contract-version"
+										bind:value={contractVersion}
+										on:change={() => updateContractSetting(contractVersion as OracleVersions)}
+										class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+									>
+										{#each oracleVersionsAvailable as version}
+											<option value={version}>{`V${version} Oracle`}</option>
+										{/each}
+									</select>
+								</div>
+							{/if}
 							<div class="mb-4 flex flex-col items-center gap-2">
 								<label for="network-type" class="text-sm font-medium text-brandBackground/80"
 									>Network Type</label
