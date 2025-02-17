@@ -476,16 +476,11 @@
 <main
 	class="h-full min-h-[100vh] w-full bg-brandBackground p-4 font-sans text-brandBackground sm:p-6"
 >
-	<div
+	<div 
 		class="mx-auto max-w-3xl rounded-xl border border-brandAction/50 bg-brandForeground p-6 shadow-md sm:p-8"
 	>
 		<div class="relative w-full">
 			<h1 class="mb-8 text-center text-3xl">Gas Network Demo</h1>
-			<span
-				class="absolute right-0 top-0 rounded-md border border-brandBackground p-2 text-sm font-medium text-brandBackground/80"
-			>
-				<a href="https://gasnetwork.notion.site/" target="_blank">Documentation</a>
-			</span>
 		</div>
 
 		{#if onboard && !$wallets$?.length}
@@ -777,6 +772,13 @@
 				</div>
 			{/each}
 		{/if}
+
+		<br />
+		<div class="flex justify-center">
+			<span class="rounded-md border border-brandBackground p-2 text-sm font-medium text-brandBackground/80">
+				<a href="https://gasnetwork.notion.site/" target="_blank">Documentation</a>
+			</span>
+		</div>
 	</div>
 </main>
 
