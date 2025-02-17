@@ -79,7 +79,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	[WritableChainKey.LINEA_MAINNET]: {
 		chainId: 59144,
     oracleVersions:[2],
-		label: 'Linea Mainnet',
+		label: 'Linea',
 		rpcUrl: 'https://rpc.linea.build',
 		v2Contract: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13',
 		blockExplorerUrl: 'https://lineascan.build'
@@ -87,7 +87,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	[WritableChainKey.BASE_MAINNET]: {
 		chainId: 8453,
     oracleVersions:[2],
-		label: 'Base Mainnet',
+		label: 'Base',
 		rpcUrl: 'https://base.llamarpc.com',
 		v2Contract: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13',
 		blockExplorerUrl: 'https://basescan.org/'
@@ -95,7 +95,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	[WritableChainKey.OP_MAINNET]: {
 		chainId: 10,
     oracleVersions:[2],
-		label: 'Optimism Mainnet',
+		label: 'Optimism',
 		rpcUrl: 'https://optimism.llamarpc.com',
 		v2Contract: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13',
 		blockExplorerUrl: 'https://optimistic.etherscan.io/'
@@ -103,7 +103,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	[WritableChainKey.MAINNET]: {
 		chainId: 1,
     oracleVersions:[2],
-		label: 'Ethereum Mainnet',
+		label: 'Ethereum',
 		rpcUrl: 'https://eth.llamarpc.com',
 		v2Contract: '0x063FEaF3D1A724Fe0cc46F0481Ec15279beb9581',
 		blockExplorerUrl: 'https://mainnet.etherscan.io'
@@ -119,7 +119,7 @@ export const writableChains: Record<WritableChainKey, WriteChain> = {
 	[WritableChainKey.UNICHAIN_MAINNET]: {
 		chainId: 130,
     oracleVersions:[2],
-		label: 'Unichain Mainnet',
+		label: 'Unichain',
 		rpcUrl: 'https://mainnet.unichain.org',
 		v2Contract: '0x2c84370DaddBcD67d729689671A9Fe63DF39Cf13',
 		blockExplorerUrl: 'https://uniscan.xyz/'

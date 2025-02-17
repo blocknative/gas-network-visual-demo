@@ -526,8 +526,8 @@
 									disabled={!v2TestnetsAvailable}
 									class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 								>
-									<option value={WritableNetworkType.TESTNET}>Testnets</option>
-									<option value={WritableNetworkType.MAINNET}>Mainnets</option>
+									<option value={WritableNetworkType.TESTNET}>Testnet</option>
+									<option value={WritableNetworkType.MAINNET}>Mainnet</option>
 								</select>
 							</div>
 						</div>
@@ -572,7 +572,7 @@
 								writableChains[selectedWriteChain].chainId
 							)}
 					>
-						Read {selectedReadChain.label} Estimations and Write to {writableChains[
+						Write {selectedReadChain.label} Estimations to {writableChains[
 							selectedWriteChain
 						].label}
 					</button>
