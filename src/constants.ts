@@ -1,8 +1,7 @@
 import { type WriteChain, WritableChainKey, type QuantileMap } from '$lib/@types/types'
 
 export const gasNetwork = {
-	url: 'https://http-rpc.devnet.gas.network',
-	// url: 'https://test.devnet.gas.network',
+	url: 'https://rpc.gas.network',
 	contract: '0xC2F61FAfA65D874725e485f4B52B9B495559F381',
 	v2Contract: '0x22973B6Fa2c15278f930d302AE8670abC4Fa6f28'
 }
