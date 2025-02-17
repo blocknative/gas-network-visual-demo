@@ -144,17 +144,17 @@ export const evmTypeSchema: Record<number, { name: string; type: string; descrip
 	'107': {
 		name: 'base_fee_per_gas',
 		type: 'number',
-		description: 'Base Fee Per Gas'
+		description: 'Base Fee'
 	},
 	'112': {
 		name: 'blob_base_fee_per_gas',
 		type: 'number',
-		description: 'Blob Base Fee Per Gas'
+		description: 'Blob Base Fee'
 	},
 	'322': {
 		name: 'pred_max_priority_fee_per_gas_p90',
 		type: 'number',
-		description: 'Max Priority Fee Per Gas Prediction - p90'
+		description: 'P90 Max Priority Fee'
 	}
 }
 

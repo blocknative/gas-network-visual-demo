@@ -236,13 +236,13 @@
 				v2RawData[typ] = [value, height, timestamp]
 				v2Timestamp = Number(timestamp)
 				return {
-					'Estimate Chain ID': chainId,
-					'Estimate Timestamp': new Date(Number(estTimestamp)).toLocaleString(undefined, {
+					'Chain ID': chainId,
+					'Timestamp': new Date(Number(estTimestamp)).toLocaleString(undefined, {
 						timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 						dateStyle: 'medium',
 						timeStyle: 'long'
 					}),
-					'Estimate Block Number': blockNumber,
+					'Block Number': blockNumber,
 					...acc,
 					// Added for validation
 					[resDataMap.description]: (Number(value) / 1e9).toPrecision(4)
@@ -747,13 +747,13 @@
 									{#each Object.entries(v2PublishedGasData) as [key, value]}
 										<div class="flex justify-between gap-4 py-1">
 											<span class="font-medium">{key}:</span>
-											{#if key.includes('Gas')}
+											{#if key.includes('Fee')}
 												<span>{typeof value === 'bigint' ? value.toString() : value} gwei</span>
 											{:else}
 												<div>
 													<span>{value}</span>
-													{#if timeElapsed$ && key === 'Estimate Timestamp'}
-														<span>{` (${$timeElapsed$})`}</span>
+													{#if timeElapsed$ && key === 'Timestamp'}
+														<br /><span class="flex" style="justify-content: right">{` (${$timeElapsed$})`}</span>
 													{/if}
 												</div>
 											{/if}
