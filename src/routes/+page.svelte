@@ -629,11 +629,11 @@
 					{/if}
 
 					{#if isLoading}
-						<div class="my-4 flex flex-col items-center gap-2">
+						<div class="my-2 flex flex-col items-center gap-2">
 							<div
-								class="h-13 w-13 animate-spin rounded-full border-4 border-brandAccent/30 border-t-brandAccent"
+								class="h-14 w-14 animate-spin rounded-full border-4 border-brandAccent/30 border-t-brandAccent"
 							></div>
-							<p class="text-center sm:text-left text-brandAccent/80">
+							<p class="text-center sm:text-left text-brandAccent/90">
 								Please Check Connected Browser Wallet for Progress
 							</p>
 						</div>
@@ -664,12 +664,12 @@
 					{/if}
 
 					<div class="flex w-full flex-col items-center justify-between gap-4">
-						<div class="flex w-full items-start justify-between gap-5">
+						<div class="flex w-full items-start justify-between gap-4">
 							{#if contractVersion === OracleVersion.v1}
 								<div class="flex w-full flex-col gap-1">
 									<label
 										for="quantile-select"
-										class="ml-1 text-xs font-medium text-brandBackground/80">Read Quantile</label
+										class="ml-1 text-xs font-medium text-white">Read Quantile</label
 									>
 									<select
 										id="quantile-select"
@@ -687,7 +687,7 @@
 								</div>
 							{/if}
 							<div class="flex w-full flex-col gap-1">
-								<label for="timeout-select" class="ml-1 text-xs font-medium text-brandBackground/80"
+								<label for="timeout-select" class="ml-1 text-xs font-medium text-white"
 									>Recency</label
 								>
 								<select
@@ -750,7 +750,7 @@
 											2
 										)}</pre>
 								</div>
-								<div class="mx-2 my-4 flex w-full flex-col gap-2 pb-3 text-xs sm:text-sm">
+								<div class="mx-2 my-3 flex w-full flex-col gap-2 pb-3 text-xs sm:text-sm">
 									{#each Object.entries(v2PublishedGasData) as [key, value]}
 										<div class="flex justify-between gap-4 py-1">
 											<span class="font-medium">{key}:</span>
