@@ -116,8 +116,11 @@ export type WriteChain = {
 	label: string
 	rpcUrl: string
 	blockExplorerUrl: string
-	testnet?: boolean
-  contractByVersion: Record<number, string>
+	arch: string
+  addressByVersion: Record<number, string>
+	icon?: string
+	
+  testnet?: boolean
 }
 
 export interface LocalSettings {

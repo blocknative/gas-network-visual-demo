@@ -119,7 +119,7 @@
 		: null
 
 	$: testnetsAvailable = Object.values(writableChains).some(
-		(chain) => chain.contractByVersion[contractVersion] && !chain.testnet
+		(chain) => chain.addressByVersion[contractVersion] && !chain.testnet
 	)
 
 	$: if (onboard) {
@@ -127,7 +127,7 @@
 	}
 
 	$: oracleVersionsAvailable = Object.values(writableChains).reduce((acc, chain) => {
-		Object.keys(chain.contractByVersion).forEach((v) => {
+		Object.keys(chain.addressByVersion).forEach((v) => {
 			console.log(typeof v, v)
 			const version = parseInt(v)
 			!acc.includes(version) && acc.push(version)
@@ -245,13 +245,13 @@
 				v2RawData[typ] = [value, height, timestamp]
 				v2Timestamp = Number(timestamp)
 				return {
-					'Estimate Chain ID': chainId,
-					'Estimate Timestamp': new Date(Number(estTimestamp)).toLocaleString(undefined, {
+					'Chain ID': chainId,
+					'Timestamp': new Date(Number(estTimestamp)).toLocaleString(undefined, {
 						timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 						dateStyle: 'medium',
 						timeStyle: 'long'
 					}),
-					'Estimate Block Number': blockNumber,
+					'Block Number': blockNumber,
 					...acc,
 					// Added for validation
 					[resDataMap.description]: (Number(value) / 1e9).toPrecision(4)
@@ -280,9 +280,9 @@
 			const signer = await ethersProvider.getSigner()
 			const contractAddress =
 				contractVersion === OracleVersion.v2 &&
-				writableChains[selectedWriteChain].contractByVersion[OracleVersion.v2]
-					? writableChains[selectedWriteChain].contractByVersion[OracleVersion.v2]!
-					: writableChains[selectedWriteChain].contractByVersion[OracleVersion.v1]!
+				writableChains[selectedWriteChain].addressByVersion[OracleVersion.v2]
+					? writableChains[selectedWriteChain].addressByVersion[OracleVersion.v2]!
+					: writableChains[selectedWriteChain].addressByVersion[OracleVersion.v1]!
 
 			const gasNetContract = new ethers.Contract(
 				contractAddress,
@@ -329,9 +329,9 @@
 			const signer = await ethersProvider.getSigner()
 			const contractAddress =
 				contractVersion === OracleVersion.v2 &&
-				writableChains[selectedWriteChain].contractByVersion[OracleVersion.v2]
-					? writableChains[selectedWriteChain].contractByVersion[OracleVersion.v2]!
-					: writableChains[selectedWriteChain].contractByVersion[OracleVersion.v1]!
+				writableChains[selectedWriteChain].addressByVersion[OracleVersion.v2]
+					? writableChains[selectedWriteChain].addressByVersion[OracleVersion.v2]!
+					: writableChains[selectedWriteChain].addressByVersion[OracleVersion.v1]!
 
 			const consumerContract = new ethers.Contract(
 				contractAddress,
@@ -432,8 +432,8 @@
 			.filter(([_, chain]) => {
 				const hasRequiredContract =
 					contractVersion === OracleVersion.v2
-						? chain.contractByVersion[OracleVersion.v2]
-						: chain.contractByVersion[OracleVersion.v1]
+						? chain.addressByVersion[OracleVersion.v2]
+						: chain.addressByVersion[OracleVersion.v1]
 				const matchesTestnetFilter =
 					writableNetworkType === WritableNetworkType.MAINNET ? !chain.testnet : chain.testnet
 				return hasRequiredContract && matchesTestnetFilter
@@ -467,7 +467,7 @@
 			writableNetworkType = WritableNetworkType.TESTNET
 		}
 		if (
-			!Object.keys(writableChains[selectedWriteChain].contractByVersion).includes(
+			!Object.keys(writableChains[selectedWriteChain].addressByVersion).includes(
 				version.toString()
 			)
 		) {
@@ -493,16 +493,11 @@
 <main
 	class="h-full min-h-[100vh] w-full bg-brandBackground p-4 font-sans text-brandBackground sm:p-6"
 >
-	<div
+	<div 
 		class="mx-auto max-w-3xl rounded-xl border border-brandAction/50 bg-brandForeground p-6 shadow-md sm:p-8"
 	>
 		<div class="relative w-full">
 			<h1 class="mb-8 text-center text-3xl">Gas Network Demo</h1>
-			<span
-				class="absolute right-0 top-0 rounded-md border border-brandBackground p-2 text-sm font-medium text-brandBackground/80"
-			>
-				<a href="https://gasnetwork.notion.site/" target="_blank">Documentation</a>
-			</span>
 		</div>
 
 		{#if onboard && !$wallets$?.length}
@@ -551,8 +546,8 @@
 									disabled={!testnetsAvailable}
 									class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
 								>
-									<option value={WritableNetworkType.TESTNET}>Testnets</option>
-									<option value={WritableNetworkType.MAINNET}>Mainnets</option>
+									<option value={WritableNetworkType.TESTNET}>Testnet</option>
+									<option value={WritableNetworkType.MAINNET}>Mainnet</option>
 								</select>
 							</div>
 						</div>
@@ -597,7 +592,7 @@
 								writableChains[selectedWriteChain].chainId
 							)}
 					>
-						Read {selectedReadChain.label} Estimations and Write to {writableChains[
+						Write {selectedReadChain.label} Estimations to {writableChains[
 							selectedWriteChain
 						].label}
 					</button>
@@ -772,13 +767,13 @@
 									{#each Object.entries(v2PublishedGasData) as [key, value]}
 										<div class="flex justify-between gap-4 py-1">
 											<span class="font-medium">{key}:</span>
-											{#if key.includes('Gas')}
+											{#if key.includes('Fee')}
 												<span>{typeof value === 'bigint' ? value.toString() : value} gwei</span>
 											{:else}
 												<div>
 													<span>{value}</span>
-													{#if timeElapsed$ && key === 'Estimate Timestamp'}
-														<span>{` (${$timeElapsed$})`}</span>
+													{#if timeElapsed$ && key === 'Timestamp'}
+														<br /><span class="flex" style="justify-content: right">{` (${$timeElapsed$})`}</span>
 													{/if}
 												</div>
 											{/if}
@@ -797,6 +792,13 @@
 				</div>
 			{/each}
 		{/if}
+
+		<br />
+		<div class="flex justify-center">
+			<span class="rounded-md border border-brandBackground p-2 text-sm font-medium text-brandBackground/80">
+				<a href="https://gasnetwork.notion.site/" target="_blank">Documentation</a>
+			</span>
+		</div>
 	</div>
 </main>
 
