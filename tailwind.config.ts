@@ -9,9 +9,10 @@ export default {
 	theme: {
 		extend: {
 			colors: {
-				brandBackground: '#280019',
-				brandForeground: '#FCE9CF',
-				brandAction: '#FB8D5B'
+				brandBackground: '#111111',
+				brandForeground: '#181818',
+				brandAction: '#59FBF5',
+        brandAccent: '#C8A74C'
 			},
 			fontFamily: {
 				system: ['system-ui', '-apple-system', 'sans-serif'],

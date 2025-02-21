@@ -38,6 +38,7 @@
 	import { createEstimationObject } from '$lib/utils'
 	import type { Contract } from 'ethers'
 	import { fetchChains } from '$lib/services/api'
+  import gasNetIcon from '$lib/svg/new-gas-net.svg?raw'
 
 	let publishedGasData: {
 		gasPrice: string
@@ -474,19 +475,25 @@
 </script>
 
 <main
-	class="h-full min-h-[100vh] w-full bg-brandBackground p-4 font-sans text-brandBackground sm:p-6"
+	class="h-full min-h-[100vh] w-full bg-black p-4 font-sans text-white sm:p-6"
 >
 	<div 
-		class="mx-auto max-w-3xl rounded-xl border border-brandAction/50 bg-brandForeground p-6 shadow-md sm:p-8"
+		class="mx-auto max-w-3xl rounded-xl border border-gray-800 bg-brandForeground p-6 shadow-2xl sm:p-8"
 	>
-		<div class="relative w-full">
-			<h1 class="mb-8 text-center text-3xl">Gas Network Demo</h1>
+		<div class="relative w-full flex flex-col items-center gap-6 mb-6">
+      <div class="flex items-center w-72">
+        {@html gasNetIcon}
+      </div>
+			<h1 class="text-center text-5xl font-normal text-white font-sans">Gas Network</h1>
+			<p class="text-center text-2xl font-light font-sans">
+				Unlocking Gas Markets For All Chains
+			</p>
 		</div>
 
 		{#if onboard && !$wallets$?.length}
 			<div class="flex flex-col gap-2">
 				<button
-					class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/80"
+					class="w-full rounded-full bg-brandAction py-4 px-8 font-medium text-black transition-all hover:bg-brandAction/70"
 					on:click={() => onboard.connectWallet()}
 				>
 					Connect Wallet
@@ -501,21 +508,21 @@
 					<div class="flex items-center justify-between gap-5">
 						<div class="flex w-full justify-between">
 							<div class="mb-4 flex flex-col items-center gap-2">
-								<label for="contract-version" class="text-sm font-medium text-brandBackground/80"
+								<label for="contract-version" class="text-sm font-medium text-white"
 									>Contract Version</label
 								>
 								<select
 									id="contract-version"
 									bind:value={contractVersion}
 									on:change={() => updateContractSetting(contractVersion as OracleVersions)}
-									class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+									class="w-full cursor-pointer rounded-lg border px-3 py-2 text-sm border-gray-400 text-gray-800 hover:border-brandAction focus:border-brandAction focus:ring-2 focus:ring-brandAction/10"
 								>
 									<option value={1}>V1 Oracle</option>
 									<option value={2}>V2 Oracle</option>
 								</select>
 							</div>
 							<div class="mb-4 flex flex-col items-center gap-2">
-								<label for="network-type" class="text-sm font-medium text-brandBackground/80"
+								<label for="network-type" class="text-sm font-medium text-white"
 									>Network Type</label
 								>
 
@@ -524,7 +531,7 @@
 									bind:value={writableNetworkType}
 									on:change={() => updateDisplayWritableMainnets()}
 									disabled={!v2TestnetsAvailable}
-									class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+									class="w-full cursor-pointer rounded-lg border px-3 py-2 text-sm text-gray-800 hover:border-brandAction focus:border-brandAction focus:ring-2 focus:ring-brandAction/10"
 								>
 									<option value={WritableNetworkType.TESTNET}>Testnet</option>
 									<option value={WritableNetworkType.MAINNET}>Mainnet</option>
@@ -535,13 +542,13 @@
 
 					<div class="flex items-center justify-between gap-5">
 						<div class="flex w-full flex-col gap-1">
-							<label for="read-chain" class="ml-1 text-xs font-medium text-brandBackground/80"
+							<label for="read-chain" class="ml-1 text-xs font-medium text-white"
 								>Estimates For</label
 							>
 							<select
 								id="read-chain"
 								bind:value={selectedReadChain}
-								class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+								class="w-full cursor-pointer rounded-lg border px-3 py-3 text-sm text-gray-800 hover:border-brandAction focus:border-brandAction focus:ring-2 focus:ring-brandAction/10"
 							>
 								{#each orderAndFilterReadableChainsAlphabetically() as chain}
 									<option value={chain}>{chain.label}</option>
@@ -549,13 +556,13 @@
 							</select>
 						</div>
 						<div class="flex w-full flex-col gap-1">
-							<label for="write-chain" class="ml-1 text-xs font-medium text-brandBackground/80"
+							<label for="write-chain" class="ml-1 text-xs font-medium text-white"
 								>Write To</label
 							>
 							<select
 								id="write-chain"
 								bind:value={selectedWriteChain}
-								class="w-full cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm text-gray-800 outline-none hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+								class="w-full cursor-pointer rounded-lg border px-3 py-3 text-sm text-gray-800 hover:border-brandAction focus:border-brandAction focus:ring-2 focus:ring-brandAction/10"
 							>
 								{#each orderAndFilterChainsAlphabetically() as [key, chain]}
 									<option value={key}>{chain.label}</option>
@@ -564,7 +571,7 @@
 						</div>
 					</div>
 					<button
-						class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/80"
+						class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-black transition-all hover:bg-brandAction/70"
 						on:click={() =>
 							handleGasEstimation(
 								provider,
@@ -624,9 +631,9 @@
 					{#if isLoading}
 						<div class="my-4 flex flex-col items-center gap-2">
 							<div
-								class="h-12 w-12 animate-spin rounded-full border-4 border-brandBackground/20 border-t-brandBackground"
+								class="h-13 w-13 animate-spin rounded-full border-4 border-brandAccent/30 border-t-brandAccent"
 							></div>
-							<p class="text-center sm:text-left">
+							<p class="text-center sm:text-left text-brandAccent/80">
 								Please Check Connected Browser Wallet for Progress
 							</p>
 						</div>
@@ -698,7 +705,7 @@
 							</div>
 						</div>
 						<button
-							class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/80"
+							class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/70"
 							on:click={() => readFromOracle(provider)}
 						>
 							Read {selectedReadChain.label} Estimations from {writableChains[selectedWriteChain]
@@ -775,7 +782,7 @@
 
 		<br />
 		<div class="flex justify-center">
-			<span class="rounded-md border border-brandBackground p-2 text-sm font-medium text-brandBackground/80">
+			<span class="rounded-full border border-brandAction py-3 px-6 text-sm font-medium text-brandAction hover:bg-brandAction/10 transition-colors">
 				<a href="https://gasnetwork.notion.site/" target="_blank">Documentation</a>
 			</span>
 		</div>
@@ -784,10 +791,25 @@
 
 <style>
 	:root {
-		--w3o-background-color: #fce9cf;
-		--w3o-text-color: #280019;
-		--w3o-border-color: hsl(35 88% 70% / 1);
-		--w3o-action-color: #fb3d00;
-		--w3o-border-radius: 1rem;
+		--w3o-background-color: #1c1c1c;
+		--w3o-text-color: #ffffff; 
+		--w3o-border-color: #333333;
+		--w3o-action-color: #59FBF5;
+		--w3o-border-radius: 0.75rem;
+	}
+
+	/* Update select styling */
+	select {
+		@apply bg-brandForeground border-gray-700 text-white;
+	}
+	
+	/* Update pre/code blocks */
+	pre {
+		@apply bg-brandForeground text-gray-300 border border-gray-700;
+	}
+
+	/* Add subtle glow effect to main action buttons */
+	button {
+		box-shadow: 0 0 20px rgba(0, 248, 226, 0.1);
 	}
 </style>
