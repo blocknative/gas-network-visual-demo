@@ -38,7 +38,7 @@
 	import { createEstimationObject } from '$lib/utils'
 	import type { Contract } from 'ethers'
 	import { fetchChains } from '$lib/services/api'
-  import gasNetIcon from '$lib/svg/new-gas-net.svg?raw'
+  import gasNetIcon from '$lib/svg/new-gas-net-icon.svg?raw'
 
 	let publishedGasData: {
 		gasPrice: string
@@ -478,7 +478,7 @@
 	class="h-full min-h-[100vh] w-full bg-black p-4 font-sans text-white sm:p-6"
 >
 	<div 
-		class="mx-auto max-w-3xl rounded-xl border border-gray-800 bg-brandForeground p-6 shadow-2xl sm:p-8"
+		class="mx-auto max-w-6xl rounded-xl border border-gray-800 bg-brandForeground p-6 shadow-2xl sm:p-8"
 	>
 		<div class="relative w-full flex flex-col items-center gap-6 mb-6">
       <div class="flex items-center w-72">
