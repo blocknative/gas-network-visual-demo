@@ -118,9 +118,8 @@ export type WriteChain = {
 	blockExplorerUrl: string
 	arch: string
   addressByVersion: Record<number, string>
-	icon?: string
-	
   testnet?: boolean
+	icon?: string
 }
 
 export interface LocalSettings {
