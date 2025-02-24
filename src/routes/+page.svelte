@@ -476,7 +476,7 @@
 
 <main class="h-full min-h-[100vh] w-full bg-black p-4 font-sans text-white sm:p-6">
 	<div
-		class="mx-auto max-w-6xl rounded-xl border border-gray-800 bg-brandForeground p-6 shadow-2xl sm:p-8"
+		class="mx-auto max-w-4xl rounded-xl border border-gray-800 bg-brandForeground p-6 shadow-2xl sm:p-8"
 	>
 		<div class="relative mb-6 flex w-full flex-col items-center gap-6">
 			<div class="flex w-72 items-center">
