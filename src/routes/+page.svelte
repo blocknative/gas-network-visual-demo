@@ -38,7 +38,7 @@
 	import { createEstimationObject } from '$lib/utils'
 	import type { Contract } from 'ethers'
 	import { fetchChains } from '$lib/services/api'
-  import gasNetIcon from '$lib/svg/new-gas-net-icon.svg?raw'
+	import gasNetIcon from '$lib/svg/new-gas-net-icon.svg?raw'
 
 	let publishedGasData: {
 		gasPrice: string
@@ -238,7 +238,7 @@
 				v2Timestamp = Number(timestamp)
 				return {
 					'Chain ID': chainId,
-					'Timestamp': new Date(Number(estTimestamp)).toLocaleString(undefined, {
+					Timestamp: new Date(Number(estTimestamp)).toLocaleString(undefined, {
 						timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 						dateStyle: 'medium',
 						timeStyle: 'long'
@@ -474,26 +474,22 @@
 	}
 </script>
 
-<main
-	class="h-full min-h-[100vh] w-full bg-black p-4 font-sans text-white sm:p-6"
->
-	<div 
+<main class="h-full min-h-[100vh] w-full bg-black p-4 font-sans text-white sm:p-6">
+	<div
 		class="mx-auto max-w-6xl rounded-xl border border-gray-800 bg-brandForeground p-6 shadow-2xl sm:p-8"
 	>
-		<div class="relative w-full flex flex-col items-center gap-6 mb-6">
-      <div class="flex items-center w-72">
-        {@html gasNetIcon}
-      </div>
-			<h1 class="text-center text-5xl font-normal text-white font-sans">Gas Network</h1>
-			<p class="text-center text-2xl font-light font-sans">
-				Unlocking Gas Markets For All Chains
-			</p>
+		<div class="relative mb-6 flex w-full flex-col items-center gap-6">
+			<div class="flex w-72 items-center">
+				{@html gasNetIcon}
+			</div>
+			<h1 class="text-center font-sans text-5xl font-normal text-white">Gas Network</h1>
+			<p class="text-center font-sans text-2xl font-light">Unlocking Gas Markets For All Chains</p>
 		</div>
 
 		{#if onboard && !$wallets$?.length}
-			<div class="flex flex-col gap-2">
+			<div class="flex justify-center w-full">
 				<button
-					class="w-full rounded-full bg-brandAction py-4 px-8 font-medium text-black transition-all hover:bg-brandAction/70"
+					class="w-full rounded-full bg-brandAction px-8 py-4 font-medium text-xl text-black transition-all hover:bg-brandAction/70 max-w-72"
 					on:click={() => onboard.connectWallet()}
 				>
 					Connect Wallet
@@ -515,15 +511,14 @@
 									id="contract-version"
 									bind:value={contractVersion}
 									on:change={() => updateContractSetting(contractVersion as OracleVersions)}
-									class="w-full cursor-pointer rounded-lg border px-3 py-2 text-sm border-gray-400 text-gray-800 hover:border-brandAction focus:border-brandAction focus:ring-2 focus:ring-brandAction/10"
+									class="w-full cursor-pointer rounded-lg border border-gray-400 px-3 py-2 text-sm text-gray-800 hover:border-brandAction focus:border-brandAction focus:ring-2 focus:ring-brandAction/10"
 								>
 									<option value={1}>V1 Oracle</option>
 									<option value={2}>V2 Oracle</option>
 								</select>
 							</div>
 							<div class="mb-4 flex flex-col items-center gap-2">
-								<label for="network-type" class="text-sm font-medium text-white"
-									>Network Type</label
+								<label for="network-type" class="text-sm font-medium text-white">Network Type</label
 								>
 
 								<select
@@ -556,9 +551,7 @@
 							</select>
 						</div>
 						<div class="flex w-full flex-col gap-1">
-							<label for="write-chain" class="ml-1 text-xs font-medium text-white"
-								>Write To</label
-							>
+							<label for="write-chain" class="ml-1 text-xs font-medium text-white">Write To</label>
 							<select
 								id="write-chain"
 								bind:value={selectedWriteChain}
@@ -571,7 +564,7 @@
 						</div>
 					</div>
 					<button
-						class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-black transition-all hover:bg-brandAction/70"
+						class="w-full bg-brandAction px-6 py-3 font-medium text-black transition-all hover:bg-brandAction/70 rounded-full"
 						on:click={() =>
 							handleGasEstimation(
 								provider,
@@ -579,15 +572,14 @@
 								writableChains[selectedWriteChain].chainId
 							)}
 					>
-						Write {selectedReadChain.label} Estimations to {writableChains[
-							selectedWriteChain
-						].label}
+						Write {selectedReadChain.label} Estimations to {writableChains[selectedWriteChain]
+							.label}
 					</button>
 
 					{#if v2ContractValues}
 						<Drawer {isDrawerOpen}>
 							<pre
-								class="m-0 overflow-x-auto bg-gray-50 p-1 text-xs text-gray-800 sm:p-6 sm:text-sm">{JSON.stringify(
+								class="m-0 overflow-auto bg-[#141414] p-4 text-sm text-gray-300 sm:p-6">{JSON.stringify(
 									v2ContractValues,
 									formatBigInt,
 									2
@@ -633,7 +625,7 @@
 							<div
 								class="h-14 w-14 animate-spin rounded-full border-4 border-brandAccent/30 border-t-brandAccent"
 							></div>
-							<p class="text-center sm:text-left text-brandAccent/90">
+							<p class="text-center text-brandAccent/90 sm:text-left">
 								Please Check Connected Browser Wallet for Progress
 							</p>
 						</div>
@@ -641,7 +633,7 @@
 
 					{#if transactionHash}
 						<div class="my-4 flex flex-col gap-2">
-							<p class="text-gray-600">Confirmed Hash:</p>
+							<p class="text-white">Confirmed Hash:</p>
 							<a
 								href={`${writableChains[selectedWriteChain].blockExplorerUrl}/tx/${transactionHash}`}
 								target="_blank"
@@ -667,9 +659,8 @@
 						<div class="flex w-full items-start justify-between gap-4">
 							{#if contractVersion === OracleVersion.v1}
 								<div class="flex w-full flex-col gap-1">
-									<label
-										for="quantile-select"
-										class="ml-1 text-xs font-medium text-white">Read Quantile</label
+									<label for="quantile-select" class="ml-1 text-xs font-medium text-white"
+										>Read Quantile</label
 									>
 									<select
 										id="quantile-select"
@@ -705,7 +696,7 @@
 							</div>
 						</div>
 						<button
-							class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/70"
+							class="w-full rounded-full bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/70"
 							on:click={() => readFromOracle(provider)}
 						>
 							Read {selectedReadChain.label} Estimations from {writableChains[selectedWriteChain]
@@ -760,7 +751,9 @@
 												<div>
 													<span>{value}</span>
 													{#if timeElapsed$ && key === 'Timestamp'}
-														<br /><span class="flex" style="justify-content: right">{` (${$timeElapsed$})`}</span>
+														<br /><span class="flex" style="justify-content: right"
+															>{` (${$timeElapsed$})`}</span
+														>
 													{/if}
 												</div>
 											{/if}
@@ -782,7 +775,9 @@
 
 		<br />
 		<div class="flex justify-center">
-			<span class="rounded-full border border-brandAction py-3 px-6 text-sm font-medium text-brandAction hover:bg-brandAction/10 transition-colors">
+			<span
+				class="rounded-full border border-brandAction px-6 py-3 text-sm font-medium text-brandAction transition-colors hover:bg-brandAction/10"
+			>
 				<a href="https://gasnetwork.notion.site/" target="_blank">Documentation</a>
 			</span>
 		</div>
@@ -792,24 +787,44 @@
 <style>
 	:root {
 		--w3o-background-color: #1c1c1c;
-		--w3o-text-color: #ffffff; 
+		--w3o-text-color: #ffffff;
 		--w3o-border-color: #333333;
-		--w3o-action-color: #59FBF5;
+		--w3o-action-color: #59fbf5;
 		--w3o-border-radius: 0.75rem;
 	}
 
 	/* Update select styling */
 	select {
-		@apply bg-brandForeground border-gray-700 text-white;
+		@apply border-gray-700 bg-brandForeground text-white;
 	}
-	
+
 	/* Update pre/code blocks */
 	pre {
-		@apply bg-brandForeground text-gray-300 border border-gray-700;
+		@apply border border-gray-700 bg-brandForeground text-gray-300;
 	}
 
 	/* Add subtle glow effect to main action buttons */
 	button {
 		box-shadow: 0 0 20px rgba(0, 248, 226, 0.1);
+	}
+
+	/* Improve scrollbar styling for the content area */
+	:global(.overflow-x-auto::-webkit-scrollbar) {
+		width: 8px;
+		height: 8px;
+	}
+	
+	:global(.overflow-x-auto::-webkit-scrollbar-track) {
+		background: #1c1c1c;
+		border-radius: 4px;
+	}
+	
+	:global(.overflow-x-auto::-webkit-scrollbar-thumb) {
+		background: #333;
+		border-radius: 4px;
+	}
+	
+	:global(.overflow-x-auto::-webkit-scrollbar-thumb:hover) {
+		background: #444;
 	}
 </style>
