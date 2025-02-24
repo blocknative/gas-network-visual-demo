@@ -135,7 +135,7 @@ export const UNSUPPORTED_CHAIN = {
 }
 
 export const archSchemaMap: Record<string, number> = {
-	btc: 1,
+	utxo: 1,
 	evm: 2,
 	unsupported: 0
 }
