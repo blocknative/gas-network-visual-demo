@@ -489,7 +489,7 @@
 		{#if onboard && !$wallets$?.length}
 			<div class="flex justify-center w-full">
 				<button
-					class="w-full rounded-full bg-brandAction px-8 py-4 font-medium text-xl text-black transition-all hover:bg-brandAction/70 max-w-72"
+					class="w-full rounded-full bg-brandAction px-8 py-4 font-medium text-lg text-black transition-all hover:bg-brandAction/70 max-w-72"
 					on:click={() => onboard.connectWallet()}
 				>
 					Connect Wallet
@@ -564,7 +564,7 @@
 						</div>
 					</div>
 					<button
-						class="w-full bg-brandAction px-6 py-3 font-medium text-black transition-all hover:bg-brandAction/70 rounded-full"
+						class="w-full bg-brandAction px-6 py-3 font-medium text-black transition-all hover:bg-brandAction/70 rounded-lg sm:rounded-full"
 						on:click={() =>
 							handleGasEstimation(
 								provider,
@@ -696,7 +696,7 @@
 							</div>
 						</div>
 						<button
-							class="w-full rounded-full bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/70"
+							class="w-full rounded-lg sm:rounded-full bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/70"
 							on:click={() => readFromOracle(provider)}
 						>
 							Read {selectedReadChain.label} Estimations from {writableChains[selectedWriteChain]
@@ -776,7 +776,7 @@
 		<br />
 		<div class="flex justify-center">
 			<span
-				class="rounded-full border border-brandAction px-6 py-3 text-sm font-medium text-brandAction transition-colors hover:bg-brandAction/10"
+				class="mt-4 rounded-full border border-brandAction px-6 py-3 text-sm font-medium text-brandAction transition-colors hover:bg-brandAction/10"
 			>
 				<a href="https://gasnetwork.notion.site/" target="_blank">Documentation</a>
 			</span>
@@ -796,6 +796,22 @@
 	/* Update select styling */
 	select {
 		@apply border-gray-700 bg-brandForeground text-white;
+		background-position: right 4px center; /* Move chevron 4px from the right */
+	}
+
+	/* If the above doesn't work, this is a more specific approach */
+	select::-ms-expand {
+		margin-right: 4px;
+	}
+
+	/* For webkit browsers */
+	select {
+		-webkit-appearance: none;
+		background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+		background-position: right 4px center;
+		background-repeat: no-repeat;
+		background-size: 1.5em;
+		padding-right: 2.5em;
 	}
 
 	/* Update pre/code blocks */
