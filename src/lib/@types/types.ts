@@ -107,8 +107,9 @@ export enum ReadableChainKey {
 export interface ReadChain {
 	chainId: number
 	label: string
-	arch: 'evm' | 'btc' | 'unsupported'
+	arch: 'evm' | 'utxo' | 'unsupported'
 	v2Supported?: boolean
+	units?: string
 }
 
 export type WriteChain = {
