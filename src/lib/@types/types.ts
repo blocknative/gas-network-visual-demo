@@ -49,87 +49,31 @@ export interface PayloadValues {
 	chainid: bigint
 	payloads: Array<VPayload>
 }
-
-export enum WritableChainKey {
-	// ARBITRUM_SEPOLIA = 'arbitrumSepolia',
-	// DEVNET = 'devnet'
-	SEPOLIA = 'sepolia',
-	OP_SEPOLIA = 'opSepolia',
-	BASE_SEPOLIA = 'baseSepolia',
-	LINEA_SEPOLIA = 'lineaSepolia',
-	LINEA_MAINNET = 'linea',
-	BASE_MAINNET = 'base',
-	OP_MAINNET = 'optimism',
-	MAINNET = 'mainnet',
-	ARBITRUM_ONE = 'arbitrumOne',
-	UNICHAIN_MAINNET = 'unichain'
-}
-
-export enum ReadableChainKey {
-	ARBITRUM = 'arb',
-	AVALANCHE = 'avalanche',
-	BASE = 'base',
-	BLAST = 'blast',
-	CHILIZ = 'chiliz',
-	CRONOS = 'cronos',
-	MAIN = 'main',
-	FANTOM = 'fantom',
-	LINEA = 'linea',
-	LISK = 'lisk',
-	MANTLE = 'mantle',
-	MOONBEAM = 'moonbeam',
-	OPTIMISM = 'op',
-	POLYGON = 'polygon',
-	RONIN = 'ronin',
-	SEI = 'sei',
-	ZKSYNC = 'zksync',
-	UNSUPPORTED_CHAIN = 'unsupportedChain',
-	GNOSIS = 'gnosis',
-	IMMUTABLE = 'immutablezkenv',
-	OPBNB = 'opbnb',
-	SCROLL = 'scroll',
-	ZETACHAIN = 'zetachain',
-	POLYGONZKEVM = 'polygonzkevm',
-	WORLDCHAIN = 'worldchain',
-	ROOTSTOCK = 'rootstock',
-	FRAXTAL = 'fraxtal',
-	ZORA = 'zora',
-	INK = 'ink',
-	LENSSEPOLIA = 'lenssepolia',
-	PALM = 'palm',
-	BOB = 'bob',
-	SNAX = 'snax',
-	TAIKO = 'taiko',
-	METIS = 'metis',
-	MODE = 'mode',
-	BSC = 'bsc'
-}
 export interface ReadChain {
 	chainId: number
 	label: string
 	arch: 'evm' | 'utxo' | 'unsupported'
 	v2Supported?: boolean
 	units?: string
+  icon?: string
 }
 
-export type WriteChain = {
+export type OracleChain = {
 	chainId: number
 	label: string
 	rpcUrl: string
 	blockExplorerUrl: string
-	oracleVersions: OracleVersions[]
+	addressByVersion: Record<number, string>
 	testnet?: boolean
-} & (
-	| { contract: string; v2Contract?: string }
-	| { contract?: string; v2Contract: string }
-	| { contract: string; v2Contract: string }
-)
+	icon?: string
+  arch?: string
+}
 
 export interface LocalSettings {
 	oracleVersion: undefined | number
 	networkType: undefined | WritableNetworkType
 	readChain: undefined | ReadChain
-	writeChain: undefined | WritableChainKey
+	writeChain: undefined | OracleChain
 	quantile: undefined | keyof QuantileMap
 	timeout: undefined | number
 }
