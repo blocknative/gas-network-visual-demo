@@ -18,6 +18,7 @@
 		archSchemaMap,
 		evmTypeSchema,
 		evmV2ContractTypValues,
+		utxoV2ContractTypValues,
 		mainnetV2ContractTypValues,
 		DEFAULT_READ_CHAIN_ID,
 		UNSUPPORTED_CHAIN,
@@ -201,15 +202,22 @@
 		try {
 			v2RawData = {} as Record<number, [string, number, number]>
 			const arch = archSchemaMap[selectedReadChain.arch]
-			const { chainId, label } = selectedReadChain
+			let { chainId, label } = selectedReadChain
 			v2NoDataFoundErrorMsg = null
 			v2Timestamp = null
 
 			let blockNumber
 			let estTimestamp
-			const v2ValuesObject = await (
-				chainId === 1 ? mainnetV2ContractTypValues : evmV2ContractTypValues
-			).reduce(async (accPromise, typ) => {
+
+			let typVal: number[]
+			if (selectedReadChain.arch === 'utxo') {
+				typVal = utxoV2ContractTypValues
+				chainId = 1
+			} else { 
+				typVal = (chainId === 1 ? mainnetV2ContractTypValues : evmV2ContractTypValues)
+			}
+
+			const v2ValuesObject = await typVal.reduce(async (accPromise, typ) => {
 				const acc = await accPromise
 				const contractRespPerType = await gasNetContract.getInTime(
 					arch,

@@ -8,6 +8,7 @@ export const gasNetwork = {
 
 export const LOCAL_SETTING_KEY = 'bn-gas-demo-settings'
 
+export const utxoV2ContractTypValues = [342]
 export const evmV2ContractTypValues = [107, 322]
 export const mainnetV2ContractTypValues = [107, 112, 322]
 
@@ -155,6 +156,11 @@ export const evmTypeSchema: Record<number, { name: string; type: string; descrip
 		name: 'pred_max_priority_fee_per_gas_p90',
 		type: 'number',
 		description: 'P90 Max Priority Fee'
+	},
+	'342': {
+		name: 'pred_gas_fee_p90',
+		type: 'number',
+		description: 'P90 Gas Fee'
 	}
 }
 
