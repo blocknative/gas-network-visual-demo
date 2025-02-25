@@ -109,6 +109,7 @@ export interface ReadChain {
 	label: string
 	arch: 'evm' | 'utxo' | 'unsupported'
 	v2Supported?: boolean
+	units?: string
 }
 
 export type WriteChain = {

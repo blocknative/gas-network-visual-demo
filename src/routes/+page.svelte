@@ -22,7 +22,8 @@
 		mainnetV2ContractTypValues,
 		DEFAULT_READ_CHAIN_ID,
 		UNSUPPORTED_CHAIN,
-		LOCAL_SETTING_KEY
+		LOCAL_SETTING_KEY,
+		getTypValuesByArch
 	} from '../constants'
 	import consumerV2 from '$lib/abis/consumerV2.json'
 	import gasnetV2 from '$lib/abis/gasnetV2.json'
@@ -206,22 +207,14 @@
 			v2NoDataFoundErrorMsg = null
 			v2Timestamp = null
 
-			let blockNumber
-			let estTimestamp
-
-			let typVal: number[]
-			if (selectedReadChain.arch === 'utxo') {
-				typVal = utxoV2ContractTypValues
-				chainId = 1
-			} else { 
-				typVal = (chainId === 1 ? mainnetV2ContractTypValues : evmV2ContractTypValues)
-			}
+			const typVal = getTypValuesByArch(arch, chainId)
+			const evmChain = selectedReadChain.arch === 'evm' ? true : false
 
 			const v2ValuesObject = await typVal.reduce(async (accPromise, typ) => {
 				const acc = await accPromise
 				const contractRespPerType = await gasNetContract.getInTime(
 					arch,
-					chainId,
+					evmChain ? chainId : 1,
 					typ,
 					selectedTimeout
 				)
@@ -231,8 +224,8 @@
 					v2NoDataFoundErrorMsg = `Estimate not available for ${label} at selected recency`
 				}
 
-				blockNumber = height
-				estTimestamp = timestamp
+				const blockNumber = height
+				const estTimestamp = timestamp
 
 				const resDataMap = evmTypeSchema?.[typ]
 				if (!resDataMap) {
@@ -245,7 +238,7 @@
 				v2RawData[typ] = [value, height, timestamp]
 				v2Timestamp = Number(timestamp)
 				return {
-					'Chain ID': chainId,
+					...(chainId > 0 ? { 'Chain ID': chainId } : {}),
 					Timestamp: new Date(Number(estTimestamp)).toLocaleString(undefined, {
 						timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 						dateStyle: 'medium',
@@ -495,9 +488,9 @@
 		</div>
 
 		{#if onboard && !$wallets$?.length}
-			<div class="flex justify-center w-full">
+			<div class="flex w-full justify-center">
 				<button
-					class="w-full rounded-full bg-brandAction px-8 py-4 font-medium text-lg text-black transition-all hover:bg-brandAction/70 max-w-72"
+					class="w-full max-w-72 rounded-full bg-brandAction px-8 py-4 text-lg font-medium text-black transition-all hover:bg-brandAction/70"
 					on:click={() => onboard.connectWallet()}
 				>
 					Connect Wallet
@@ -572,7 +565,7 @@
 						</div>
 					</div>
 					<button
-						class="w-full bg-brandAction px-6 py-3 font-medium text-black transition-all hover:bg-brandAction/70 rounded-lg sm:rounded-full"
+						class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-black transition-all hover:bg-brandAction/70 sm:rounded-full"
 						on:click={() =>
 							handleGasEstimation(
 								provider,
@@ -704,7 +697,7 @@
 							</div>
 						</div>
 						<button
-							class="w-full rounded-lg sm:rounded-full bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/70"
+							class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/70 sm:rounded-full"
 							on:click={() => readFromOracle(provider)}
 						>
 							Read {selectedReadChain.label} Estimations from {writableChains[selectedWriteChain]
@@ -753,8 +746,10 @@
 									{#each Object.entries(v2PublishedGasData) as [key, value]}
 										<div class="flex justify-between gap-4 py-1">
 											<span class="font-medium">{key}:</span>
-											{#if key.includes('Fee')}
+											{#if key.includes('Fee') && selectedReadChain.arch === 'evm'}
 												<span>{typeof value === 'bigint' ? value.toString() : value} gwei</span>
+											{:else if key.includes('Fee') && selectedReadChain.arch === 'utxo'}
+												<span>{typeof value === 'bigint' ? value.toString() : value} sats</span>
 											{:else}
 												<div>
 													<span>{value}</span>
@@ -837,17 +832,17 @@
 		width: 8px;
 		height: 8px;
 	}
-	
+
 	:global(.overflow-x-auto::-webkit-scrollbar-track) {
 		background: #1c1c1c;
 		border-radius: 4px;
 	}
-	
+
 	:global(.overflow-x-auto::-webkit-scrollbar-thumb) {
 		background: #333;
 		border-radius: 4px;
 	}
-	
+
 	:global(.overflow-x-auto::-webkit-scrollbar-thumb:hover) {
 		background: #444;
 	}
