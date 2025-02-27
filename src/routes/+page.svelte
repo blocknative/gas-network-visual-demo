@@ -5,25 +5,21 @@
 	import type { OnboardAPI, WalletState } from '@web3-onboard/core'
 	import {
 		OracleVersion,
-		WritableChainKey,
 		WritableNetworkType,
 		type PayloadValues,
 		type VPayload
 	} from '$lib/@types/types'
 	import { getOnboard } from '$lib/services/web3-onboard'
 	import {
-		writableChains,
 		quantiles,
 		gasNetwork,
 		archSchemaMap,
 		evmTypeSchema,
-		evmV2ContractTypValues,
-		utxoV2ContractTypValues,
-		mainnetV2ContractTypValues,
 		DEFAULT_READ_CHAIN_ID,
 		UNSUPPORTED_CHAIN,
 		LOCAL_SETTING_KEY,
-		getTypValuesByArch
+		defaultOracleTestnetChainId,
+		defaultOracleMainnetChainId
 	} from '../constants'
 	import consumerV2 from '$lib/abis/consumerV2.json'
 	import gasnetV2 from '$lib/abis/gasnetV2.json'
@@ -34,12 +30,13 @@
 		LocalSettings,
 		OracleVersions,
 		QuantileMap,
-		ReadChain
+		ReadChain,
+		OracleChain
 	} from '$lib/@types/types'
 	import Drawer from '$lib/components/Drawer.svelte'
-	import { createEstimationObject } from '$lib/utils'
+	import { createEstimationObject, getOracleByChainId, getTypValuesByArch } from '$lib/utils'
 	import type { Contract } from 'ethers'
-	import { fetchChains } from '$lib/services/api'
+	import { fetchChains, fetchOracleChains } from '$lib/services/api'
 	import gasNetIcon from '$lib/svg/new-gas-net-icon.svg?raw'
 
 	let publishedGasData: {
@@ -69,7 +66,7 @@
 	let readGasDataFromTargetChainTime: string
 
 	let selectedReadChain: ReadChain
-	let selectedWriteChain: WritableChainKey
+	let selectedWriteChain: OracleChain
 	let selectedQuantile: keyof QuantileMap
 	let selectedTimeout: number
 	let contractVersion: number
@@ -85,14 +82,19 @@
 	}
 
 	let readableChains: ReadChain[] | undefined = undefined
+	let writableChains: OracleChain[] | undefined = undefined
 	let onboard: OnboardAPI
 	onMount(async () => {
 		readableChains = await fetchChains()
 		if (!readableChains) {
 			throw new Error('Failed to fetch chains')
 		}
+		writableChains = await fetchOracleChains()
+		if (!writableChains) {
+			throw new Error('Failed to fetch chains')
+		}
 		onboard = await getOnboard()
-		handleLocalStorageSettings(readableChains)
+		handleLocalStorageSettings(readableChains, writableChains)
 	})
 
 	$: if (
@@ -123,13 +125,13 @@
 
 	$: v2TestnetsAvailable =
 		contractVersion === OracleVersion.v2 &&
-		Object.values(writableChains).some((chain) => chain.v2Contract && !chain.testnet)
+		writableChains?.some((chain) => chain.addressByVersion[2] && !chain.testnet)
 
 	$: if (onboard) {
 		wallets$ = onboard.state.select('wallets').pipe(share())
 	}
 
-	function handleLocalStorageSettings(readableChains: ReadChain[]) {
+	function handleLocalStorageSettings(readableChains: ReadChain[], oracleChains: OracleChain[]) {
 		const oldSavedSetting = localStorage.getItem('contractVersion')
 		if (oldSavedSetting) {
 			contractVersion = Number(oldSavedSetting)
@@ -140,7 +142,19 @@
 		const savedSettings = localStorage.getItem(LOCAL_SETTING_KEY)
 		localSettings = JSON.parse(savedSettings ?? '{}')
 		const { oracleVersion, networkType, readChain, writeChain, quantile, timeout } = localSettings
-		selectedWriteChain = writeChain ?? WritableChainKey.LINEA_MAINNET
+		// Check for deprecated Writable/Old Chain Key
+		if (writeChain && typeof writeChain !== 'object') {
+			selectedWriteChain = getOracleByChainId(
+				oracleChains,
+				writeChain ?? defaultOracleMainnetChainId
+			)
+		} else {
+			selectedWriteChain = getOracleByChainId(
+				oracleChains,
+				writeChain?.chainId ?? defaultOracleMainnetChainId
+			)
+		}
+
 		selectedQuantile = quantile ?? 'Q99'
 		selectedTimeout = timeout ?? 3600000
 		writableNetworkType = networkType ?? WritableNetworkType.MAINNET
@@ -266,15 +280,15 @@
 	async function readFromOracle(provider: any) {
 		try {
 			readFromTargetNetErrorMessage = null
-			await onboard.setChain({ chainId: writableChains[selectedWriteChain].chainId })
+			await onboard.setChain({ chainId: selectedWriteChain.chainId })
 
 			const { ethers } = await loadEthers()
 			const ethersProvider = new ethers.BrowserProvider(provider, 'any')
 			const signer = await ethersProvider.getSigner()
 			const contractAddress =
-				contractVersion === OracleVersion.v2 && writableChains[selectedWriteChain].v2Contract
-					? writableChains[selectedWriteChain].v2Contract!
-					: writableChains[selectedWriteChain].contract!
+				contractVersion === OracleVersion.v2 && selectedWriteChain.addressByVersion[2]
+					? selectedWriteChain.addressByVersion[2]!
+					: selectedWriteChain.addressByVersion[1]!
 
 			const gasNetContract = new ethers.Contract(
 				contractAddress,
@@ -320,9 +334,9 @@
 			const ethersProvider = new ethers.BrowserProvider(provider, 'any')
 			const signer = await ethersProvider.getSigner()
 			const contractAddress =
-				contractVersion === OracleVersion.v2 && writableChains[selectedWriteChain].v2Contract
-					? writableChains[selectedWriteChain].v2Contract!
-					: writableChains[selectedWriteChain].contract!
+				contractVersion === OracleVersion.v2 && selectedWriteChain.addressByVersion[2]
+					? selectedWriteChain.addressByVersion[2]!
+					: selectedWriteChain.addressByVersion[1]!
 
 			const consumerContract = new ethers.Contract(
 				contractAddress,
@@ -418,16 +432,17 @@
 	}
 
 	function orderAndFilterChainsAlphabetically() {
-		const chainList = Object.entries(writableChains)
-		return chainList
-			.filter(([_, chain]) => {
+		return writableChains!
+			?.filter((chain) => {
 				const hasRequiredContract =
-					contractVersion === OracleVersion.v2 ? chain.v2Contract : chain.contract
+					contractVersion === OracleVersion.v2
+						? chain.addressByVersion[2]
+						: chain.addressByVersion[1]
 				const matchesTestnetFilter =
 					writableNetworkType === WritableNetworkType.MAINNET ? !chain.testnet : chain.testnet
 				return hasRequiredContract && matchesTestnetFilter
 			})
-			.sort((a, b) => a[1].label.localeCompare(b[1].label))
+			.sort((a, b) => a.label.localeCompare(b.label))
 	}
 
 	function orderAndFilterReadableChainsAlphabetically() {
@@ -438,7 +453,7 @@
 		})
 	}
 
-	let lastSelectChainOfDifferentContractVersion: WritableChainKey | null = null
+	let lastSelectChainOfDifferentContractVersion: OracleChain | null = null
 
 	function updateContractSetting(version: OracleVersions) {
 		contractVersion = version
@@ -447,23 +462,22 @@
 		if (version === OracleVersion.v1) {
 			writableNetworkType = WritableNetworkType.TESTNET
 		}
-		if (!writableChains[selectedWriteChain].oracleVersions.includes(version)) {
+		if (!Object.keys(selectedWriteChain.addressByVersion).includes(version.toString())) {
 			selectedWriteChain =
-				writableNetworkType === WritableNetworkType.MAINNET &&
-				writableChains[selectedWriteChain].testnet
-					? WritableChainKey.LINEA_MAINNET
-					: WritableChainKey.LINEA_SEPOLIA
+				writableNetworkType === WritableNetworkType.MAINNET && selectedWriteChain.testnet
+					? getOracleByChainId(writableChains!, defaultOracleMainnetChainId)
+					: getOracleByChainId(writableChains!, defaultOracleTestnetChainId)
 		}
 	}
 
 	function updateDisplayWritableMainnets() {
+		console.log(lastSelectChainOfDifferentContractVersion)
 		if (!lastSelectChainOfDifferentContractVersion) {
 			lastSelectChainOfDifferentContractVersion = selectedWriteChain
 			selectedWriteChain =
-				writableNetworkType === WritableNetworkType.MAINNET &&
-				writableChains[selectedWriteChain].testnet
-					? WritableChainKey.LINEA_MAINNET
-					: WritableChainKey.LINEA_SEPOLIA
+				writableNetworkType === WritableNetworkType.MAINNET && selectedWriteChain.testnet
+					? getOracleByChainId(writableChains!, defaultOracleMainnetChainId)
+					: getOracleByChainId(writableChains!, defaultOracleTestnetChainId)
 			return
 		}
 		if (lastSelectChainOfDifferentContractVersion) {
@@ -558,8 +572,8 @@
 								bind:value={selectedWriteChain}
 								class="w-full cursor-pointer rounded-lg border px-3 py-3 text-sm text-gray-800 hover:border-brandAction focus:border-brandAction focus:ring-2 focus:ring-brandAction/10"
 							>
-								{#each orderAndFilterChainsAlphabetically() as [key, chain]}
-									<option value={key}>{chain.label}</option>
+								{#each orderAndFilterChainsAlphabetically() as chain}
+									<option value={chain}>{chain.label}</option>
 								{/each}
 							</select>
 						</div>
@@ -567,14 +581,9 @@
 					<button
 						class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-black transition-all hover:bg-brandAction/70 sm:rounded-full"
 						on:click={() =>
-							handleGasEstimation(
-								provider,
-								selectedReadChain.chainId,
-								writableChains[selectedWriteChain].chainId
-							)}
+							handleGasEstimation(provider, selectedReadChain.chainId, selectedWriteChain.chainId)}
 					>
-						Write {selectedReadChain.label} Estimations to {writableChains[selectedWriteChain]
-							.label}
+						Write {selectedReadChain.label} Estimations to {selectedWriteChain.label}
 					</button>
 
 					{#if v2ContractValues}
@@ -636,12 +645,12 @@
 						<div class="my-4 flex flex-col gap-2">
 							<p class="text-white">Confirmed Hash:</p>
 							<a
-								href={`${writableChains[selectedWriteChain].blockExplorerUrl}/tx/${transactionHash}`}
+								href={`${selectedWriteChain.blockExplorerUrl}/tx/${transactionHash}`}
 								target="_blank"
 								rel="noopener noreferrer"
 								class="overflow-hidden text-ellipsis text-blue-500 hover:underline"
 							>
-								{`${writableChains[selectedWriteChain].blockExplorerUrl}/tx/${transactionHash}`}
+								{`${selectedWriteChain.blockExplorerUrl}/tx/${transactionHash}`}
 							</a>
 						</div>
 					{/if}
@@ -700,8 +709,7 @@
 							class="w-full rounded-lg bg-brandAction px-6 py-3 font-medium text-brandBackground transition-colors hover:bg-brandAction/70 sm:rounded-full"
 							on:click={() => readFromOracle(provider)}
 						>
-							Read {selectedReadChain.label} Estimations from {writableChains[selectedWriteChain]
-								.label}
+							Read {selectedReadChain.label} Estimations from {selectedWriteChain.label}
 							{#if contractVersion === OracleVersion.v1}<span
 									>for the {quantiles[selectedQuantile]} Quantile</span
 								>{/if}
@@ -709,7 +717,7 @@
 
 						{#if publishedGasData}
 							<div class="w-full text-left">
-								Data read from {writableChains[selectedWriteChain].label} at: {readGasDataFromTargetChainTime}
+								Data read from {selectedWriteChain.label} at: {readGasDataFromTargetChainTime}
 							</div>
 							<div
 								class="my-2 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200"
@@ -729,7 +737,7 @@
 								</div>
 							{:else}
 								<div class="w-full text-left">
-									Data read from {writableChains[selectedWriteChain].label} at: {readGasDataFromTargetChainTime}
+									Data read from {selectedWriteChain.label} at: {readGasDataFromTargetChainTime}
 								</div>
 								<div
 									class="my-2 flex w-full flex-col gap-2 overflow-hidden rounded-lg border border-gray-200 p-1"
