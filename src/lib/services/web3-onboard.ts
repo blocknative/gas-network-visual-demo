@@ -1,4 +1,4 @@
-import gasNetIcon from '$lib/svg/new-gas-net-icon.svg?raw'
+import gasNetIcon from '$lib/svg/gas-net-icon-v2.svg?raw'
 import type { OnboardAPI } from '@web3-onboard/core'
 
 const infura_key = '80633e48116943128cbab25e402764ab'
