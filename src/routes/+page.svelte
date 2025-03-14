@@ -195,7 +195,9 @@
 				const gasNetContract = new ethers.Contract(gasNetwork.v2Contract, gasnetV2.abi, rpcProvider)
 
 				const { arch } = selectedReadChain
-				const payload = await gasNetContract.getValues(archSchemaMap[arch], chain)
+				let networkId = selectedReadChain.arch === 'evm' ? chain : 1
+
+				const payload = await gasNetContract.getValues(archSchemaMap[arch], networkId)
 
 				return { paramsPayload: parsePayload(payload), rawReadChainData: payload }
 			} else {
