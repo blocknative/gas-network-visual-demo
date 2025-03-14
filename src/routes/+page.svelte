@@ -195,6 +195,9 @@
 				const gasNetContract = new ethers.Contract(gasNetwork.v2Contract, gasnetV2.abi, rpcProvider)
 
 				const { arch } = selectedReadChain
+
+				// This assumes any non-evm chain architectures we support does not have L2s of sub chains with different chain IDs
+				// Will change when we pass in systemID/OracleID per chain
 				let networkId = selectedReadChain.arch === 'evm' ? chain : 1
 
 				const payload = await gasNetContract.getValues(archSchemaMap[arch], networkId)
@@ -230,6 +233,9 @@
 				const acc = await accPromise
 				const contractRespPerType = await gasNetContract.getInTime(
 					arch,
+
+					// This assumes any non-evm chain architectures we support does not have L2s of sub chains with different chain IDs
+					// Will change when we pass in systemID/OracleID per chain
 					evmChain ? chainId : 1,
 					typ,
 					selectedTimeout
