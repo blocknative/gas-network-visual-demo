@@ -99,6 +99,12 @@ export async function getOnboard() {
 					token: 'ETH',
 					label: 'Unichain',
 					rpcUrl: 'https://mainnet.unichain.org'
+				},
+				{
+					id: 1868,
+					token: 'ETH',
+					label: 'Soneium',
+					rpcUrl: 'https://rpc.soneium.org.org'
 				}
 			],
 			connect: {
