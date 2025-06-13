@@ -69,7 +69,7 @@
 	let selectedQuantile: keyof QuantileMap
 	let selectedTimeout: number
 	let contractVersion: number
-	let writableNetworkType: WritableNetworkType = WritableNetworkType.TESTNET
+	let writableNetworkType: WritableNetworkType
 
 	let localSettings: LocalSettings = {
 		oracleVersion: undefined,
