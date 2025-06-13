@@ -42,14 +42,16 @@ export const defaultOracleMainnetChain: OracleChain = {
 export const defaultOracleMainnetChainId = defaultOracleMainnetChain.chainId
 
 export const defaultOracleTestnetChains: OracleChain = {
-	chainId: 59141,
-	label: 'Linea Sepolia',
-	rpcUrl: 'https://linea-sepolia-rpc.publicnode.com',
+	chainId: 11155111,
+	label: 'Ethereum Sepolia',
+	rpcUrl: 'https://sepolia.gateway.tenderly.co',
 	addressByVersion: {
-		1: '0x1a3d7A0bD9585B730e615aE0fD9a2294C33Df1E1',
-		2: '0xb690C4CbDE4747FD614477Ab24c7630C5aAa6Ec5'
+		2: '0xBFa35257A63db764e9B4CD204edb560649553627',
+		1: '0xE4859432d9Af6D40C2D923e3F13D66057F4AEcA0'
 	},
-	blockExplorerUrl: 'https://sepolia.lineascan.build',
+	blockExplorerUrl: 'https://sepolia.etherscan.io',
+	arch: 'evm',
+	icon: 'https://bnc-assets.com/evm/11155111/assets/icon.svg',
 	testnet: true
 }
 export const defaultOracleTestnetChainId = defaultOracleTestnetChains.chainId
@@ -84,4 +86,3 @@ export const evmTypeSchema: Record<number, { name: string; type: string; descrip
 		description: 'P90 Gas Fee'
 	}
 }
-
