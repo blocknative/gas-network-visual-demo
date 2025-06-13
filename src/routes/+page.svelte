@@ -150,7 +150,7 @@
 		} else {
 			selectedWriteChain = getOracleByChainId(
 				oracleChains,
-				writeChain?.chainId === 11155111 || writeChain?.chainId === 84532 ? writeChain : defaultOracleTestnetChainId
+				writeChain?.chainId === 11155111 || writeChain?.chainId === 84532 ? writeChain.chainId : defaultOracleTestnetChainId
 			)
 		}
 
