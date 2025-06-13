@@ -19,6 +19,7 @@
 		UNSUPPORTED_CHAIN,
 		LOCAL_SETTING_KEY,
 		defaultOracleTestnetChainId,
+		defaultOracleMainnetChainId
 	} from '../constants'
 	import consumerV2 from '$lib/abis/consumerV2.json'
 	import gasnetV2 from '$lib/abis/gasnetV2.json'
@@ -105,7 +106,7 @@
 	) {
 		localSettings = {
 			oracleVersion: contractVersion,
-			networkType: WritableNetworkType.TESTNET,
+			networkType: writableNetworkType,
 			readChain: selectedReadChain,
 			writeChain: selectedWriteChain,
 			quantile: selectedQuantile,
@@ -145,18 +146,18 @@
 		if (writeChain && typeof writeChain !== 'object') {
 			selectedWriteChain = getOracleByChainId(
 				oracleChains,
-				writeChain ?? defaultOracleTestnetChainId
+				writeChain ?? defaultOracleMainnetChainId
 			)
 		} else {
 			selectedWriteChain = getOracleByChainId(
 				oracleChains,
-				writeChain?.chainId === 11155111 || writeChain?.chainId === 84532 ? writeChain.chainId : defaultOracleTestnetChainId
+				writeChain?.chainId ?? defaultOracleMainnetChainId
 			)
 		}
 
 		selectedQuantile = quantile ?? 'Q99'
 		selectedTimeout = timeout ?? 3600000
-		writableNetworkType = networkType ?? WritableNetworkType.TESTNET
+		writableNetworkType = networkType ?? WritableNetworkType.MAINNET
 		selectedReadChain = readableChains.find(
 			(c) => c.chainId === (readChain?.chainId ?? DEFAULT_READ_CHAIN_ID)
 		)!
@@ -449,9 +450,9 @@
 					contractVersion === OracleVersion.v2
 						? chain.addressByVersion[2]
 						: chain.addressByVersion[1]
-				const matchesTestnetFilter = chain.testnet
-					// writableNetworkType === WritableNetworkType.TESTNET ? !chain.testnet : chain.testnet
-				return hasRequiredContract && matchesTestnetFilter && (chain.chainId === 11155111 || chain.chainId === 84532)
+				const matchesTestnetFilter =
+					writableNetworkType === WritableNetworkType.MAINNET ? !chain.testnet : chain.testnet
+				return hasRequiredContract && matchesTestnetFilter
 			})
 			.sort((a, b) => a.label.localeCompare(b.label))
 	}
@@ -475,8 +476,8 @@
 		// }
 		if (!Object.keys(selectedWriteChain.addressByVersion).includes(version.toString())) {
 			selectedWriteChain =
-				writableNetworkType === WritableNetworkType.TESTNET && selectedWriteChain.testnet
-					? getOracleByChainId(writableChains!, defaultOracleTestnetChainId)
+				writableNetworkType === WritableNetworkType.MAINNET && selectedWriteChain.testnet
+					? getOracleByChainId(writableChains!, defaultOracleMainnetChainId)
 					: getOracleByChainId(writableChains!, defaultOracleTestnetChainId)
 		}
 	}
@@ -486,8 +487,8 @@
 		if (!lastSelectChainOfDifferentContractVersion) {
 			lastSelectChainOfDifferentContractVersion = selectedWriteChain
 			selectedWriteChain =
-				writableNetworkType === WritableNetworkType.TESTNET && selectedWriteChain.testnet
-					? getOracleByChainId(writableChains!, defaultOracleTestnetChainId)
+				writableNetworkType === WritableNetworkType.MAINNET && selectedWriteChain.testnet
+					? getOracleByChainId(writableChains!, defaultOracleMainnetChainId)
 					: getOracleByChainId(writableChains!, defaultOracleTestnetChainId)
 			return
 		}
@@ -543,7 +544,7 @@
 									<option value={2}>V2 Oracle</option>
 								</select>
 							</div> -->
-							<!-- <div class="mb-4 flex flex-col items-center gap-2">
+							<div class="mb-4 flex flex-col items-center gap-2">
 								<label for="network-type" class="text-sm font-medium text-white">Network Type</label
 								>
 
@@ -557,7 +558,7 @@
 									<option value={WritableNetworkType.TESTNET}>Testnet</option>
 									<option value={WritableNetworkType.MAINNET}>Mainnet</option>
 								</select>
-							</div> -->
+							</div>
 						</div>
 					</div>
 
