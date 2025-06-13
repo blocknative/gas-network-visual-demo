@@ -355,8 +355,7 @@
 
 			let transaction
 			if (contractVersion === OracleVersion.v2) {
-				transaction = await consumerContract.storeValues(v2ContractRawRes,
-				{
+				transaction = await consumerContract.storeValues(v2ContractRawRes, {
 					value: networkFee ?? 0n
 				})
 			} else {
@@ -452,7 +451,11 @@
 						: chain.addressByVersion[1]
 				const matchesTestnetFilter =
 					writableNetworkType === WritableNetworkType.MAINNET ? !chain.testnet : chain.testnet
-				return hasRequiredContract && matchesTestnetFilter
+				const testNetFilter =
+					writableNetworkType === WritableNetworkType.TESTNET
+						? chain.chainId === 11155111 || chain.chainId === 84532
+						: !chain.testnet
+				return hasRequiredContract && matchesTestnetFilter && testNetFilter
 			})
 			.sort((a, b) => a.label.localeCompare(b.label))
 	}
