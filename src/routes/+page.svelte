@@ -19,7 +19,6 @@
 		UNSUPPORTED_CHAIN,
 		LOCAL_SETTING_KEY,
 		defaultOracleTestnetChainId,
-		defaultOracleMainnetChainId
 	} from '../constants'
 	import consumerV2 from '$lib/abis/consumerV2.json'
 	import gasnetV2 from '$lib/abis/gasnetV2.json'
@@ -70,7 +69,7 @@
 	let selectedQuantile: keyof QuantileMap
 	let selectedTimeout: number
 	let contractVersion: number
-	let writableNetworkType: WritableNetworkType
+	let writableNetworkType: WritableNetworkType = WritableNetworkType.TESTNET
 
 	let localSettings: LocalSettings = {
 		oracleVersion: undefined,
@@ -106,7 +105,7 @@
 	) {
 		localSettings = {
 			oracleVersion: contractVersion,
-			networkType: writableNetworkType,
+			networkType: WritableNetworkType.TESTNET,
 			readChain: selectedReadChain,
 			writeChain: selectedWriteChain,
 			quantile: selectedQuantile,
@@ -146,22 +145,22 @@
 		if (writeChain && typeof writeChain !== 'object') {
 			selectedWriteChain = getOracleByChainId(
 				oracleChains,
-				writeChain ?? defaultOracleMainnetChainId
+				writeChain ?? defaultOracleTestnetChainId
 			)
 		} else {
 			selectedWriteChain = getOracleByChainId(
 				oracleChains,
-				writeChain?.chainId ?? defaultOracleMainnetChainId
+				writeChain?.chainId ?? defaultOracleTestnetChainId
 			)
 		}
 
 		selectedQuantile = quantile ?? 'Q99'
 		selectedTimeout = timeout ?? 3600000
-		writableNetworkType = networkType ?? WritableNetworkType.MAINNET
+		writableNetworkType = networkType ?? WritableNetworkType.TESTNET
 		selectedReadChain = readableChains.find(
 			(c) => c.chainId === (readChain?.chainId ?? DEFAULT_READ_CHAIN_ID)
 		)!
-		contractVersion = oracleVersion ?? OracleVersion.v2
+		contractVersion = OracleVersion.v2
 	}
 
 	let ethersModule: typeof import('ethers')
@@ -351,10 +350,14 @@
 				contractVersion === OracleVersion.v2 ? consumerV2.abi : consumer.abi,
 				signer
 			)
+			const networkFee = await consumerContract.getNetworkFee()
 
 			let transaction
 			if (contractVersion === OracleVersion.v2) {
-				transaction = await consumerContract.storeValues(v2ContractRawRes)
+				transaction = await consumerContract.storeValues(v2ContractRawRes,
+				{
+					value: networkFee ?? 0n
+				})
 			} else {
 				transaction = await consumerContract.setEstimation(gasEstimation, transactionSignature)
 			}
@@ -446,9 +449,9 @@
 					contractVersion === OracleVersion.v2
 						? chain.addressByVersion[2]
 						: chain.addressByVersion[1]
-				const matchesTestnetFilter =
-					writableNetworkType === WritableNetworkType.MAINNET ? !chain.testnet : chain.testnet
-				return hasRequiredContract && matchesTestnetFilter
+				const matchesTestnetFilter = chain.testnet
+					// writableNetworkType === WritableNetworkType.TESTNET ? !chain.testnet : chain.testnet
+				return hasRequiredContract && matchesTestnetFilter && (chain.chainId === 11155111 || chain.chainId === 84532)
 			})
 			.sort((a, b) => a.label.localeCompare(b.label))
 	}
@@ -467,13 +470,13 @@
 		contractVersion = version
 		publishedGasData = null
 		v2PublishedGasData = null
-		if (version === OracleVersion.v1) {
-			writableNetworkType = WritableNetworkType.TESTNET
-		}
+		// if (version === OracleVersion.v1) {
+		// 	writableNetworkType = WritableNetworkType.TESTNET
+		// }
 		if (!Object.keys(selectedWriteChain.addressByVersion).includes(version.toString())) {
 			selectedWriteChain =
-				writableNetworkType === WritableNetworkType.MAINNET && selectedWriteChain.testnet
-					? getOracleByChainId(writableChains!, defaultOracleMainnetChainId)
+				writableNetworkType === WritableNetworkType.TESTNET && selectedWriteChain.testnet
+					? getOracleByChainId(writableChains!, defaultOracleTestnetChainId)
 					: getOracleByChainId(writableChains!, defaultOracleTestnetChainId)
 		}
 	}
@@ -483,8 +486,8 @@
 		if (!lastSelectChainOfDifferentContractVersion) {
 			lastSelectChainOfDifferentContractVersion = selectedWriteChain
 			selectedWriteChain =
-				writableNetworkType === WritableNetworkType.MAINNET && selectedWriteChain.testnet
-					? getOracleByChainId(writableChains!, defaultOracleMainnetChainId)
+				writableNetworkType === WritableNetworkType.TESTNET && selectedWriteChain.testnet
+					? getOracleByChainId(writableChains!, defaultOracleTestnetChainId)
 					: getOracleByChainId(writableChains!, defaultOracleTestnetChainId)
 			return
 		}
@@ -525,8 +528,8 @@
 				<div class="flex flex-col gap-2 sm:gap-4">
 					<!-- V2 contract toggle -->
 					<div class="flex items-center justify-between gap-5">
-						<div class="flex w-full justify-between">
-							<div class="mb-4 flex flex-col items-center gap-2">
+						<div class="flex w-full justify-center">
+							<!-- <div class="mb-4 flex flex-col items-center gap-2">
 								<label for="contract-version" class="text-sm font-medium text-white"
 									>Contract Version</label
 								>
@@ -539,8 +542,8 @@
 									<option value={1}>V1 Oracle</option>
 									<option value={2}>V2 Oracle</option>
 								</select>
-							</div>
-							<div class="mb-4 flex flex-col items-center gap-2">
+							</div> -->
+							<!-- <div class="mb-4 flex flex-col items-center gap-2">
 								<label for="network-type" class="text-sm font-medium text-white">Network Type</label
 								>
 
@@ -554,7 +557,7 @@
 									<option value={WritableNetworkType.TESTNET}>Testnet</option>
 									<option value={WritableNetworkType.MAINNET}>Mainnet</option>
 								</select>
-							</div>
+							</div> -->
 						</div>
 					</div>
 
@@ -675,7 +678,7 @@
 
 					<div class="flex w-full flex-col items-center justify-between gap-4">
 						<div class="flex w-full items-start justify-between gap-4">
-							{#if contractVersion === OracleVersion.v1}
+							<!-- {#if contractVersion === OracleVersion.v1}
 								<div class="flex w-full flex-col gap-1">
 									<label for="quantile-select" class="ml-1 text-xs font-medium text-white"
 										>Read Quantile</label
@@ -694,7 +697,7 @@
 										{/each}
 									</select>
 								</div>
-							{/if}
+							{/if} -->
 							<div class="flex w-full flex-col gap-1">
 								<label for="timeout-select" class="ml-1 text-xs font-medium text-white"
 									>Recency</label
@@ -718,9 +721,9 @@
 							on:click={() => readFromOracle(provider)}
 						>
 							Read {selectedReadChain.label} Estimations from {selectedWriteChain.label}
-							{#if contractVersion === OracleVersion.v1}<span
+							<!-- {#if contractVersion === OracleVersion.v1}<span
 									>for the {quantiles[selectedQuantile]} Quantile</span
-								>{/if}
+								>{/if} -->
 						</button>
 
 						{#if publishedGasData}
