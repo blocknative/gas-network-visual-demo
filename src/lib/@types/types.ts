@@ -51,7 +51,7 @@ export interface PayloadValues {
 export interface ReadChain {
 	chainId: number
 	label: string
-	arch: 'evm' | 'utxo' | 'unsupported'
+	arch: 'evm' | 'utxo' | 'svm' | 'unsupported'
 	v2Supported?: boolean
 	units?: string
   icon?: string

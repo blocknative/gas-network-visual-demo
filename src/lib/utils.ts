@@ -2,7 +2,8 @@ import {
 	defaultOracleMainnetChain,
 	evmV2ContractTypValues,
 	mainnetV2ContractTypValues,
-	utxoV2ContractTypValues
+	utxoV2ContractTypValues,
+	svmV2ContractTypValues
 } from '../constants'
 import type { EstimationData, OracleChain } from './@types/types'
 
@@ -58,6 +59,8 @@ export const getTypValuesByArch = (arch: number, chainId?: number): number[] => 
 				return mainnetV2ContractTypValues
 			}
 			return evmV2ContractTypValues
+			case 3:
+				return svmV2ContractTypValues
 		default:
 			return []
 	}

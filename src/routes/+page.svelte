@@ -773,6 +773,8 @@
 												<span>{typeof value === 'bigint' ? value.toString() : value} gwei</span>
 											{:else if key.includes('Fee') && selectedReadChain.arch === 'utxo'}
 												<span>{typeof value === 'bigint' ? value.toString() : value} sats</span>
+											{:else if key.includes('Fee') && selectedReadChain.arch === 'svm'}
+												<span>{typeof value === 'bigint' ? value.toString() : value} µlamports</span>
 											{:else}
 												<div>
 													<span>{value}</span>
