@@ -7,6 +7,7 @@ export const LOCAL_SETTING_KEY = 'bn-gas-demo-settings'
 
 export const utxoV2ContractTypValues = [342]
 export const evmV2ContractTypValues = [107, 322]
+export const svmV2ContractTypValues = [342]
 export const mainnetV2ContractTypValues = [107, 112, 322]
 
 export const gasNetwork = {
@@ -18,6 +19,7 @@ export const gasNetwork = {
 export const archSchemaMap: Record<string, number> = {
 	utxo: 1,
 	evm: 2,
+	svm: 3,
 	unsupported: 0
 }
 
