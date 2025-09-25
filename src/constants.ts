@@ -19,8 +19,8 @@ export const gasNetwork = {
 export const archSchemaMap: Record<string, number> = {
 	utxo: 1,
 	evm: 2,
-	unsupported: 0,
-	svm: 3
+	svm: 3,
+	unsupported: 0
 }
 
 // You can then create the object that implements this interface:
