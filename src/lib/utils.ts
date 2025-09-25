@@ -59,8 +59,8 @@ export const getTypValuesByArch = (arch: number, chainId?: number): number[] => 
 				return mainnetV2ContractTypValues
 			}
 			return evmV2ContractTypValues
-			case 3:
-				return svmV2ContractTypValues
+		case 3:
+			return svmV2ContractTypValues
 		default:
 			return []
 	}
