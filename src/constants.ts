@@ -11,8 +11,7 @@ export const svmV2ContractTypValues = [342]
 export const mainnetV2ContractTypValues = [107, 112, 322]
 
 export const gasNetwork = {
-	//url: 'https://test-redis-serve.devnet.gas.network/',
-	url: 'http://0.0.0.0:8545/',
+	url: 'https://rpc.gas.network',
 	contract: '0xC2F61FAfA65D874725e485f4B52B9B495559F381',
 	v2Contract: '0x4245Cb7c690B650a38E680C9BcfB7814D42BfD32'
 }
